@@ -1,75 +1,202 @@
 # Design (Architecture & Technologies)
 
-Cette section décrit l’architecture cible du projet et les technologies envisagées pour le développement et le déploiement.
+This document describes the target architecture and the main technologies we plan to use for development and deployment.
+Goal: keep the stack **simple, standard, and course-aligned**, while leaving room for optional improvements.
 
 ---
 
-## Architecture (vue d’ensemble)
+## High-Level Architecture
 
-- **Client Web (SPA)** : React
-- **API** : Node.js (TypeScript) — GraphQL
-- **Base de données** : PostgreSQL
-- **Stockage d’images** : S3
-- **Déploiement & infra** : Docker + AWS
-- **Observabilité** : CloudWatch + Sentry / Datadog
+**Core components**
 
----
+- **Web Client (SPA)**: React app running in the browser
+- **API**: Node.js (TypeScript) server exposing a **GraphQL** API
+- **Database**: PostgreSQL for relational data (users, images, comments, reactions, etc.)
+- **Image Storage**: S3 for original uploads and resized variants
+- **Infrastructure/Deployment**: Docker + AWS
+- **Observability**: CloudWatch + optional Sentry/Datadog
 
-## Frontend
+**Typical request flow**
 
-- **Framework** : React + TypeScript
-- **Build tool** : Vite
-- **UI** : shadcn/ui + TailwindCSS
-- **Routing** : React Router
-- **Gestion des données (server state)** : TanStack Query
-- **State UI (client state léger)** : Zustand
-- **Formulaires & validation** : React Hook Form + Zod
+1. The React client calls the GraphQL API
+2. The API reads/writes data in PostgreSQL
+3. Images are uploaded to S3 (direct upload via presigned URLs or via the API)
+4. Image variants are generated and served back to the client via URLs
 
 ---
 
-## Backend
+## Frontend (Web Client)
 
-- **Runtime** : Node.js (TypeScript)
-- **Server HTTP** : Express.js
-- **API** : GraphQL
-- **ORM & DB** : Prisma + PostgreSQL
-- **Authentification** : OAuth (Google/Facebook) + JWT
-- **Logging** : pino
-- **Validation** : Zod
+### Main stack
+
+- **React + TypeScript** — UI framework and type safety
+- **Vite** — fast dev server + build tool
+- **shadcn/ui + TailwindCSS** — UI components + styling
+- **React Router** — client-side routing (`/feed`, `/profile/:id`, etc.)
+
+### Data fetching & types
+
+- **TanStack Query** — server-state caching, retries, invalidation
+- **graphql-request** — lightweight GraphQL HTTP client (fetcher) used in TanStack Query:
+  - executes queries/mutations against `/graphql` with variables and headers (e.g., `Authorization`)
+  - returns response data and surfaces GraphQL errors
+- **GraphQL Code Generator** — generates TypeScript types from the schema and operations (queries/mutations)
+
+### Local UI state & forms
+
+- **Zustand** — lightweight client/UI state (modals, toasts, small preferences)
+- **React Hook Form + Zod** — forms + runtime validation
+
+---
+
+## Backend (API)
+
+### Runtime & HTTP server
+
+- **Node.js + TypeScript** — runtime + language
+- **Express.js** — HTTP server framework
+
+### GraphQL API
+
+- **Endpoint**: `/graphql`
+- **Operations**: profiles, users, images (CRUD), feed, search, comments/reactions/notifications (later deliverables)
+
+### Data layer
+
+- **PostgreSQL**
+- **Prisma** — ORM + migrations
+  - **ORM**: TypeScript-based DB access
+  - **Migrations**: versioned schema changes (tables, columns, indexes)
+
+### Auth (Deliverable 2)
+
+- **OAuth (Google/Facebook) + JWT**
+
+### Logging & validation
+
+- **pino** — structured logging
+- **Zod** — input validation
 
 ---
 
 ## CI/CD
 
-- **CI** : GitHub Actions (Déclenché sur pull_request et push sur main)
+### CI (Continuous Integration)
 
-  - Install
-  - Lint
-  - Tests
-  - Build (frontend and backend)
-  - Build image Docker
+**Tool: GitHub Actions** (runs on `pull_request` and pushes to `main`)
 
-- **CD** : GitHub Actions (Déclenché à chaque merge sur main, déploiement automatique sur AWS)
+- Install dependencies
+- Lint
+- Tests
+- Build (frontend + backend)
+- (Optional) Docker build validation
 
-  - Backend sur Elastic Beanstalk (ou EC2 Docker)
-  - Frontend déployé sur S3 (site statique)
-  - Migrations DB exécutées au déploiement (prisma migrate deploy)
+### CD (Continuous Deployment)
 
----
+**Tool: GitHub Actions** (runs on merge to `main`)
 
-## Déploiement
-
-- **Compute** : Elastic Beanstalk ou EC2 (Docker)
-- **DB** : RDS (PostgreSQL)
-- **Images** : S3
-- **Monitoring** : CloudWatch
-- **Autres** : IaC via CloudFormation ou Terraform
+- Build and deploy backend to **Elastic Beanstalk**
+- Deploy frontend as a static site to **S3**
+- Run DB migrations during deployment (`prisma migrate deploy`)
 
 ---
 
-## Qualité
+## Deployment
 
-- **Lint/format** : ESLint + Prettier
-- **Tests** : Vitest + Testing Library (frontend) ; tests backend à déterminer
-- **Hooks Git (optionnel)** : Husky + lint-staged
-- **Conventions de commits** : Commitlint
+### Deliverable 1 (Dev / early deployment)
+
+- **Local dev**: Docker Compose (web + api + postgres)
+- **Images**: local storage (dev) or S3 (if configured)
+
+### Deliverable 2+ (AWS target)
+
+- **Compute**: Elastic Beanstalk (Docker/Node)
+- **Database**: RDS (PostgreSQL)
+- **Images**: S3
+- **Monitoring**: CloudWatch
+- **Infrastructure as Code (optional)**: CloudFormation or Terraform
+
+---
+
+## Testing Strategy
+
+### Frontend
+
+- **Vitest + Testing Library** — component tests and UI interactions
+
+### Backend
+
+- **Unit tests** — services/utilities (business logic)
+- **Resolver tests** — GraphQL resolvers (with mocks when appropriate)
+- **Integration tests** — API + Postgres for key flows (Docker-based test DB)
+
+---
+
+## Quality, Security & Performance Tooling
+
+### Security (automated)
+
+- **CodeQL** — static analysis security scanning in CI
+- **Dependabot** — dependency update PRs + vulnerability alerts
+
+### Security (dynamic)
+
+- **OWASP ZAP** — DAST scan against a running staging environment
+
+### API protections
+
+- **graphql-depth-limit** — limits GraphQL query depth
+- **express-rate-limit** — request rate limiting
+
+### Performance testing
+
+- **k6** — load testing
+
+### Code quality & consistency
+
+- **ESLint + Prettier**
+- **Husky + lint-staged** (optional)
+- **Commitlint** — Conventional Commits enforcement
+
+---
+
+## Git Workflow & Commit Conventions
+
+### Workflow (Git Flow–inspired)
+
+- `main`: stable / deployable (production)
+- `develop`: integration branch (latest combined work before release)
+- `feature/*`: feature branches (branched from `develop`, merged back into `develop`)
+- `fix/*`: bugfix branches (branched from `develop`, merged back into `develop`)
+- Pull requests required to merge into `develop` (and `main` for releases)
+
+### Conventional Commits (examples)
+
+- `feat(auth): add Google OAuth login`
+- `feat(images): add image upload metadata mutation`
+- `fix(feed): correct sorting by createdAt`
+- `chore(ci): add CodeQL workflow`
+- `docs(readme): update architecture section`
+
+---
+
+## Monorepo Structure (Proposed)
+
+```
+.
+├─ apps/
+│ ├─ web/ # React + Vite
+│ └─ api/ # Node + TS (Express + GraphQL)
+├─ packages/
+│ ├─ shared/ # shared types/utilities (optional)
+│ └─ config/ # shared configs (optional)
+├─ infra/
+│ ├─ docker/ # Dockerfiles and scripts
+│ └─ compose.yml # local dev stack
+├─ .github/workflows/ # CI/CD pipelines
+└─ README.md
+```
+
+## Notes
+
+- Exact infrastructure details may evolve as the course progresses.
