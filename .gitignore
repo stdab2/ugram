@@ -1,0 +1,162 @@
+# =========================
+# OS / System
+# =========================
+.DS_Store
+.DS_Store?
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# =========================
+# IDE / Editor
+# =========================
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+.idea/
+*.iml
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# =========================
+# Node / Package managers
+# =========================
+node_modules/
+**/node_modules/
+
+# Package manager caches / logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.pnpm-store/
+.npm/
+.npmrc.local
+
+# Lockfiles (keep ONE of these in git)
+# If you use npm, keep package-lock.json tracked.
+# Remove the one(s) you don't use.
+# yarn.lock
+# pnpm-lock.yaml
+
+# =========================
+# Builds / Dist
+# =========================
+dist/
+build/
+out/
+coverage/
+**/dist/
+**/build/
+**/out/
+**/coverage/
+
+# Vite
+apps/web/.vite/
+**/.vite/
+
+# Next.js (if ever added)
+.next/
+**/.next/
+
+# Turborepo / Nx (if ever added)
+.turbo/
+**/.turbo/
+.nx/
+**/.nx/
+
+# =========================
+# TypeScript
+# =========================
+*.tsbuildinfo
+
+# =========================
+# Env files / Secrets
+# =========================
+.env
+.env.*
+!.env.example
+!.env.template
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.template
+
+# =========================
+# Logs / Runtime
+# =========================
+logs/
+*.log
+**/logs/
+**/*.log
+
+# =========================
+# Prisma / DB
+# =========================
+# If you use SQLite locally, ignore the db file(s)
+*.db
+*.db-journal
+
+# Migrations should usually be tracked, so do NOT ignore prisma/migrations by default
+
+# =========================
+# Docker
+# =========================
+**/.docker/
+docker-data/
+**/docker-data/
+
+# =========================
+# Local temp / Misc
+# =========================
+.tmp/
+temp/
+tmp/
+.cache/
+**/.cache/
+*.swp
+*.swo
+
+# =========================
+# AWS / Infrastructure generated files
+# =========================
+.elasticbeanstalk/
+**/.elasticbeanstalk/
+# Keep config files if needed
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+
+# Terraform (if ever used)
+.terraform/
+**/.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# =========================
+# Testing
+# =========================
+.vitest/
+**/.vitest/
+.playwright/
+**/.playwright/
+test-results/
+**/test-results/
+
+# =========================
+# Optional: Generated docs
+# =========================
+docs/.vitepress/cache/
+
+*storybook.log
+storybook-static
