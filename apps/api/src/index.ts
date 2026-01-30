@@ -1,17 +1,29 @@
-import express from 'express';
-import http from 'http';
-import cors from 'cors';
 import { ApolloServer } from '@apollo/server';
+import { startStandaloneServer } from '@apollo/server/standalone';
 
+const typeDefs = `#graphql
+  type Query {
+    hello: String
+  }
+`;
+
+const resolvers = {
+  Query: {
+    hello: () => 'Hello from GraphQL!',
+  },
+};
 
 async function startServer() {
-  const app = express();
-  //app.use(cors);
-  const httpServer = http.createServer(app);
+  const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+  });
 
-  const PORT = 4000;
-  await new Promise<void>((resolve) => httpServer.listen({ port: PORT }, resolve));
-  console.log(`Server ready at http://localhost:${PORT}/graphql`);
+  const { url } = await startStandaloneServer(server, {
+    listen: { port: Number(process.env.PORT) || 4000 },
+  });
+
+  console.log(`Server ready at ${url}`);
 }
 
 startServer();

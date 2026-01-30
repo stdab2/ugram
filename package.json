@@ -1,0 +1,46 @@
+{
+	"name": "ugram",
+	"private": true,
+	"workspaces": [
+		"apps/*",
+		"packages/*"
+	],
+	"scripts": {
+		"dev:web": "npm -w apps/web run dev",
+		"dev:api": "npm -w apps/api run dev",
+		"build:web": "npm -w apps/web run build",
+		"build:api": "npm -w apps/api run build",
+		"storybook": "npm -w apps/web run storybook",
+		"build-storybook": "npm -w apps/web run build-storybook",
+		"lint": "eslint .",
+		"lint:fix": "eslint . --fix",
+		"format": "prettier --write .",
+		"format:check": "prettier --check .",
+		"test": "npm -ws run test",
+		"prepare": "husky"
+	},
+	"devDependencies": {
+		"@commitlint/cli": "^20.3.1",
+		"@commitlint/config-conventional": "^20.3.1",
+		"@eslint/js": "^9.39.1",
+		"eslint": "^9.39.1",
+		"eslint-config-prettier": "^10.1.8",
+		"eslint-plugin-prettier": "^5.5.5",
+		"eslint-plugin-react-hooks": "^7.0.1",
+		"eslint-plugin-react-refresh": "^0.4.24",
+		"globals": "^16.5.0",
+		"husky": "^9.1.7",
+		"lint-staged": "^16.2.7",
+		"prettier": "^3.8.1",
+		"typescript-eslint": "^8.46.4"
+	},
+	"lint-staged": {
+		"*.{ts,tsx}": [
+			"eslint --fix",
+			"prettier --write"
+		],
+		"*.{json,md,css,html}": [
+			"prettier --write"
+		]
+	}
+}
