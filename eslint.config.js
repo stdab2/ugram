@@ -34,10 +34,7 @@ export default defineConfig([
 		rules: {
 			...prettierConfig.rules,
 			"prettier/prettier": "error",
-			"react-refresh/only-export-components": [
-				"warn",
-				{ allowConstantExport: true },
-			],
+			"react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
 		},
 	},
 	...storybook.configs["flat/recommended"],
