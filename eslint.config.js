@@ -38,4 +38,10 @@ export default defineConfig([
 		},
 	},
 	...storybook.configs["flat/recommended"],
+	{
+		files: ["**/components/ui/**/*.{ts,tsx}"],
+		rules: {
+			"react-refresh/only-export-components": "off",
+		},
+	},
 ]);
