@@ -1,5 +1,5 @@
-import { ApolloServer } from '@apollo/server';
-import { startStandaloneServer } from '@apollo/server/standalone';
+import { ApolloServer } from "@apollo/server";
+import { startStandaloneServer } from "@apollo/server/standalone";
 
 const typeDefs = `#graphql
   type Query {
@@ -8,22 +8,22 @@ const typeDefs = `#graphql
 `;
 
 const resolvers = {
-  Query: {
-    hello: () => 'Hello from GraphQL!',
-  },
+	Query: {
+		hello: () => "Hello from GraphQL!",
+	},
 };
 
 async function startServer() {
-  const server = new ApolloServer({
-    typeDefs,
-    resolvers,
-  });
+	const server = new ApolloServer({
+		typeDefs,
+		resolvers,
+	});
 
-  const { url } = await startStandaloneServer(server, {
-    listen: { port: Number(process.env.PORT) || 4000 },
-  });
+	const { url } = await startStandaloneServer(server, {
+		listen: { port: Number(process.env.PORT) || 4000 },
+	});
 
-  console.log(`Server ready at ${url}`);
+	console.log(`Server ready at ${url}`);
 }
 
 startServer();
