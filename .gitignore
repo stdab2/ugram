@@ -160,3 +160,6 @@ docs/.vitepress/cache/
 
 *storybook.log
 storybook-static
+
+
+*@/generated/prisma
