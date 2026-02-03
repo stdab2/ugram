@@ -15,6 +15,22 @@
       timeout: 5s
       retries: 10
 
+  deps:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile.dev
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - node_modules:/app/node_modules
+      - pnpm_store:/root/.local/share/pnpm/store
+    command: sh -c "corepack enable && corepack prepare pnpm@9.15.4 --activate && pnpm install --frozen-lockfile --ignore-scripts"
+    environment:
+      HUSKY: "0"
+      PNPM_FETCH_RETRIES: "5"
+      PNPM_FETCH_TIMEOUT: "600000"
+      PNPM_NETWORK_CONCURRENCY: "4"
+
   api:
     build:
       context: .
@@ -22,39 +38,44 @@
     working_dir: /app
     volumes:
       - ./:/app
-      - node_modules_api:/app/node_modules
-    command: sh -c "npm install --include=optional --force && npm install --no-save @esbuild/linux-x64 && npm run dev:api"
+      - node_modules:/app/node_modules
+      - pnpm_store:/root/.local/share/pnpm/store
+    command: sh -c "corepack enable && corepack prepare pnpm@9.15.4 --activate && pnpm --filter api dev"
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/ugram?schema=public
       PORT: "4000"
       NODE_ENV: development
       CHOKIDAR_USEPOLLING: "true"
       HUSKY: "0"
-      NPM_CONFIG_OPTIONAL: "true"
     ports:
       - "4001:4000"
     depends_on:
       db:
         condition: service_healthy
+      deps:
+        condition: service_completed_successfully
 
   web:
     image: node:20-bookworm-slim
     working_dir: /app
     volumes:
       - ./:/app
-      - node_modules_web:/app/node_modules
-    command: sh -c "npm install --include=optional --force && npm install --no-save @esbuild/linux-x64 @rollup/rollup-linux-x64-gnu @swc/core-linux-x64-gnu lightningcss-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu && npm -w apps/web run dev -- --host 0.0.0.0 --port 5173"
+      - node_modules:/app/node_modules
+      - pnpm_store:/root/.local/share/pnpm/store
+    command: sh -c "corepack enable && corepack prepare pnpm@9.15.4 --activate && pnpm --filter web dev"
     environment:
       NODE_ENV: development
       CHOKIDAR_USEPOLLING: "true"
       HUSKY: "0"
-      NPM_CONFIG_OPTIONAL: "true"
     ports:
       - "5173:5173"
     depends_on:
-      - api
+      deps:
+        condition: service_completed_successfully
+      api:
+        condition: service_started
 
 volumes:
   db_data:
-  node_modules_api:
-  node_modules_web:
+  node_modules:
+  pnpm_store:
