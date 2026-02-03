@@ -15,6 +15,7 @@ export default {
 				"images",
 				"feed",
 				"profile",
+				"user",
 				"search",
 				"notifications",
 				// Technical
