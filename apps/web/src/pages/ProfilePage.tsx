@@ -1,3 +1,11 @@
+import { Profile } from "@/components/profile";
+
 export function ProfilePage() {
-	return <h1>Welcome to your profile!</h1>;
+	return (
+		<div className="bg-muted flex min-h-svh flex-col items-center justify-start p-6 md:p-10">
+			<div className="w-full max-w-sm md:max-w-4xl">
+				<Profile />
+			</div>
+		</div>
+	);
 }
