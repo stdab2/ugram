@@ -28,7 +28,7 @@ model Post {
   imageLink      String
 
   authorId       Int
-  author         UserUgram  @relation("UserPosts", fields: [authorId], references: [id])
+  author         UserUgram  @relation("UserPosts", fields: [authorId], references: [id], onDelete: Cascade)
 
   mentionedUsers UserUgram[] @relation("UserMentions")
 
