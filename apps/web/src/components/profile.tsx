@@ -22,13 +22,21 @@ export function Profile({ className, ...props }: React.ComponentProps<"div">) {
 					/>
 					<form className="mt-6 space-y-4">
 						<div className="space-y-2">
-							<Label htmlFor="name">Name</Label>
+							<Label htmlFor="firstname">First Name</Label>
 							<Input
-								id="name"
+								id="firstname"
 								type="text"
-								placeholder="Full Name"
-								defaultValue="John Doe" // TODO: api call
-								maxLength={30}
+								placeholder="First Name"
+								defaultValue="John" // TODO: api call
+								maxLength={20}
+							/>
+							<Label htmlFor="lastname">Last Name</Label>
+							<Input
+								id="lastname"
+								type="text"
+								placeholder="Last Name"
+								defaultValue="Doe" // TODO: api call
+								maxLength={20}
 							/>
 						</div>
 						<div className="space-y-2">
@@ -52,7 +60,7 @@ export function Profile({ className, ...props }: React.ComponentProps<"div">) {
 							/>
 						</div>
 						<div className="flex justify-end mt-4">
-							<Button type="submit">Update Profile</Button> // TODO: api call
+							<Button type="submit">Update Profile</Button> {/* TODO: api call */}
 						</div>
 					</form>
 				</CardContent>
