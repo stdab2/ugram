@@ -36,7 +36,9 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 								<Input id="password" type="password" required />
 							</Field>
 							<Field>
-								<Button type="submit">Login</Button>
+								<Button size="lg" type="submit">
+									Login
+								</Button>
 							</Field>
 							<FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
 								Or continue with
