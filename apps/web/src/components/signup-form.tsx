@@ -45,7 +45,9 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
 								<FieldDescription>Must be at least 8 characters long.</FieldDescription>
 							</Field>
 							<Field>
-								<Button type="submit">Create Account</Button>
+								<Button size="lg" type="submit">
+									Create Account
+								</Button>
 							</Field>
 							<FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
 								Or continue with

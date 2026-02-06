@@ -1,3 +1,8 @@
 export function FeedPage() {
-	return <h1>Feed</h1>;
+	return (
+		<div className="p-8">
+			<h1 className="text-3xl font-bold">Feed</h1>
+			<p className="mt-4 text-muted-foreground">Implement the post feed</p>
+		</div>
+	);
 }
