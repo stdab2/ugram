@@ -11,7 +11,7 @@ export function Settings({ className, ...props }: React.ComponentProps<"div">) {
 		<div className={cn("flex flex-col gap-6", className)} {...props}>
 			<Card className="overflow-hidden pt-2 pb-4 pl-4 pr-4">
 				<CardContent className="p-0">
-					<h1 className="text-2xl font-bold mb-2">Your Profile</h1>
+					<h1 className="text-2xl font-bold mb-2">Settings</h1>
 					<FieldSeparator />
 					<UserDetail
 						className="mt-2"
