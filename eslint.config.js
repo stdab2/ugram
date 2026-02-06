@@ -33,7 +33,7 @@ export default defineConfig([
 		},
 		rules: {
 			...prettierConfig.rules,
-			"prettier/prettier": "error",
+			"prettier/prettier": ["error", { endOfLine: "auto" }],
 			"react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
 		},
 	},

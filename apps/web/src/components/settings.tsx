@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
-export function Profile({ className, ...props }: React.ComponentProps<"div">) {
+export function Settings({ className, ...props }: React.ComponentProps<"div">) {
 	return (
 		<div className={cn("flex flex-col gap-6", className)} {...props}>
 			<Card className="overflow-hidden pt-2 pb-4 pl-4 pr-4">
@@ -15,7 +15,7 @@ export function Profile({ className, ...props }: React.ComponentProps<"div">) {
 					<FieldSeparator />
 					<UserDetail
 						className="mt-2"
-						pictureUrl="/placeholder.svg" // TODO: api call
+						pictureUrl="/avatar.jpg" // TODO: api call
 						username="johnnyd23" // TODO: api call
 						fullname="John Doe" // TODO: api call
 						memberSince={1622505600000} // timestamp in ms // TODO: api call
@@ -59,7 +59,7 @@ export function Profile({ className, ...props }: React.ComponentProps<"div">) {
 								pattern="^\+\d{1,3}\s\d{1,4}-\d{1,4}-\d{4}$" // Format verification
 							/>
 						</div>
-						<div className="flex justify-end mt-4">
+						<div className="flex justify-end mt-8">
 							<Button type="submit">Update Profile</Button> {/* TODO: api call */}
 						</div>
 					</form>

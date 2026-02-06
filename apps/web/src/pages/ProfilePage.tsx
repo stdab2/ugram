@@ -1,11 +1,11 @@
-import { Profile } from "@/components/profile";
+import { useParams } from "react-router-dom";
 
 export function ProfilePage() {
+	const { id } = useParams();
 	return (
-		<div className="bg-muted flex min-h-svh flex-col items-center justify-start p-6 md:p-10">
-			<div className="w-full max-w-sm md:max-w-4xl">
-				<Profile />
-			</div>
+		<div className="p-8">
+			<h1 className="text-3xl font-bold">Profile</h1>
+			<p className="mt-4 text-muted-foreground">Implement user ({id}) profile</p>
 		</div>
 	);
 }
