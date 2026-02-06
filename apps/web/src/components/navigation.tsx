@@ -140,6 +140,7 @@ export function Navigation() {
 							<Link
 								key={item.href}
 								to={item.href}
+								aria-label={item.label}
 								className={cn(
 									"flex items-center justify-center h-16 w-16 rounded-lg hover:bg-accent transition-colors",
 									isActive && "text-primary"
@@ -150,7 +151,10 @@ export function Navigation() {
 						);
 					})}
 					<DropdownMenu>
-						<DropdownMenuTrigger className="flex items-center justify-center h-16 w-16 rounded-lg hover:bg-accent transition-colors relative">
+						<DropdownMenuTrigger
+							aria-label="User menu"
+							className="flex items-center justify-center h-16 w-16 rounded-lg hover:bg-accent transition-colors relative"
+						>
 							<Avatar className="h-9 w-9">
 								<AvatarImage src="/avatar.jpg" />
 								<AvatarFallback>JD</AvatarFallback>
