@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
 
 interface UserDetailProps {
 	pictureUrl: string;
@@ -26,7 +27,7 @@ export function UserDetail({
 	className,
 }: UserDetailProps) {
 	return (
-		<div className={`flex items-center gap-4 ${className}`}>
+		<div className={cn("flex items-center gap-4", className)}>
 			<Avatar className="h-24 w-24 flex-shrink-0">
 				<AvatarImage src={pictureUrl} />
 				<AvatarFallback>JD</AvatarFallback>
