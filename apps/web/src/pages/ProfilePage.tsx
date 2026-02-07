@@ -1,10 +1,10 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
-import { PostPreview } from "@/components/post";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
+import { Card } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import { Separator } from "@/components/ui/Separator";
+import { Button } from "@/components/ui/Button";
+import { PostPreview } from "@/components/Post";
 import { PostModal } from "@/components/PostModal";
 import { mockUserProfile, mockPosts } from "@/lib/mockData";
 import { Mail, Phone, Calendar } from "lucide-react";

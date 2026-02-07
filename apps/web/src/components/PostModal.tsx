@@ -1,14 +1,14 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
+import { Dialog, DialogContent } from "@/components/ui/Dialog";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { Heart, MessageCircle, Send } from "lucide-react";
 import { PostMenu } from "@/components/PostMenu";
 import { DeletePostDialog } from "@/components/DeletePostDialog";
 import { cn } from "@/lib/utils";
 import { mockUserProfile } from "@/lib/mockData";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 interface Comment {
 	id: string;
@@ -42,12 +42,22 @@ interface PostModalProps {
 }
 
 export function PostModal({ open, onOpenChange, post }: PostModalProps) {
+	const navigate = useNavigate();
+
+	// Store post.id with state to detect changes
+	const [prevPostId, setPrevPostId] = useState(post.id);
 	const [newComment, setNewComment] = useState("");
 	const [isLiked, setIsLiked] = useState(post.isLiked || false);
 	const [likesCount, setLikesCount] = useState(post.likes || 0);
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
-	const navigate = useNavigate();
+
+	// Reset like state when post changes
+	if (prevPostId !== post.id) {
+		setPrevPostId(post.id);
+		setIsLiked(post.isLiked || false);
+		setLikesCount(post.likes || 0);
+	}
 
 	const isOwnPost = post.author.username === mockUserProfile.username;
 
@@ -84,10 +94,15 @@ export function PostModal({ open, onOpenChange, post }: PostModalProps) {
 		const parts = descriptionWithoutHashtags.split(/(@\w+)/g);
 		const formattedDescription = parts.map((part, index) => {
 			if (part.startsWith("@")) {
+				const username = part.slice(1);
 				return (
-					<span key={index} className="text-indigo-400 font-medium cursor-pointer hover:underline">
+					<Link
+						key={index}
+						to={`/profile/${username}`}
+						className="text-indigo-400 font-medium hover:underline"
+					>
 						{part}
-					</span>
+					</Link>
 				);
 			}
 			return <span key={index}>{part}</span>;
@@ -109,8 +124,8 @@ export function PostModal({ open, onOpenChange, post }: PostModalProps) {
 	};
 
 	const handleLike = () => {
-		setIsLiked(!isLiked);
-		setLikesCount(isLiked ? likesCount - 1 : likesCount + 1);
+		setIsLiked((prev) => !prev);
+		setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
 	};
 
 	const handleAddComment = (e: React.FormEvent) => {
@@ -191,9 +206,13 @@ export function PostModal({ open, onOpenChange, post }: PostModalProps) {
 										{hashtags.length > 0 && (
 											<p className="text-sm text-indigo-400 mt-1">
 												{hashtags.map((tag, index) => (
-													<span key={index} className="cursor-pointer hover:underline mr-1">
+													<Link
+														key={index}
+														to={`/search?q=${encodeURIComponent(tag)}`}
+														className="hover:underline mr-1"
+													>
 														{tag}
-													</span>
+													</Link>
 												))}
 											</p>
 										)}
@@ -294,8 +313,8 @@ export function PostModal({ open, onOpenChange, post }: PostModalProps) {
 					setIsDeleting(false);
 					setShowDeleteDialog(false);
 					onOpenChange(false);
-					// Refresh or navigate
-					window.location.reload();
+					// Navigate back to feed
+					navigate("/");
 				}}
 			/>
 		</>

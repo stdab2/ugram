@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Textarea } from "@/components/ui/Textarea";
+import { Label } from "@/components/ui/Label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 import { mockUserProfile } from "@/lib/mockData";
 import { Upload, X } from "lucide-react";
 
@@ -68,6 +68,7 @@ export function PostForm({
 									type="button"
 									onClick={() => setImagePreview(null)}
 									className="absolute top-2 right-2 p-2 bg-background/80 hover:bg-background rounded-full"
+									aria-label="Remove image"
 								>
 									<X className="w-4 h-4" />
 								</button>

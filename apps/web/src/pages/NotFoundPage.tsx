@@ -4,9 +4,9 @@ import {
 	EmptyDescription,
 	EmptyHeader,
 	EmptyTitle,
-} from "@/components/ui/empty";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
-import { Kbd } from "@/components/ui/kbd";
+} from "@/components/ui/Empty";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/InputGroup";
+import { Kbd } from "@/components/ui/Kbd";
 import { SearchIcon } from "lucide-react";
 
 export function NotFoundPage() {

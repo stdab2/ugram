@@ -1,5 +1,5 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
+import { Card } from "@/components/ui/Card";
 import { Heart, MessageCircle, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PostModal } from "@/components/PostModal";
@@ -7,7 +7,7 @@ import { PostMenu } from "@/components/PostMenu";
 import { DeletePostDialog } from "@/components/DeletePostDialog";
 import { mockUserProfile } from "@/lib/mockData";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 interface PostProps {
 	id: string;
@@ -73,10 +73,15 @@ export function Post({
 		const parts = descriptionWithoutHashtags.split(/(@\w+)/g);
 		const formattedDescription = parts.map((part, index) => {
 			if (part.startsWith("@")) {
+				const username = part.slice(1);
 				return (
-					<span key={index} className="text-indigo-400 font-medium cursor-pointer hover:underline">
+					<Link
+						key={index}
+						to={`/profile/${username}`}
+						className="text-indigo-400 font-medium hover:underline"
+					>
 						{part}
-					</span>
+					</Link>
 				);
 			}
 			return <span key={index}>{part}</span>;
@@ -177,9 +182,13 @@ export function Post({
 						{hashtags.length > 0 && (
 							<p className="text-sm text-indigo-400 mt-1">
 								{hashtags.map((tag, index) => (
-									<span key={index} className="cursor-pointer hover:underline mr-1">
+									<Link
+										key={index}
+										to={`/search?q=${encodeURIComponent(tag)}`}
+										className="hover:underline mr-1"
+									>
 										{tag}
-									</span>
+									</Link>
 								))}
 							</p>
 						)}
@@ -214,8 +223,8 @@ export function Post({
 					console.log("Deleting post", id);
 					setIsDeleting(false);
 					setShowDeleteDialog(false);
-					// Refresh or navigate
-					window.location.reload();
+					// Navigate back to feed
+					navigate("/");
 				}}
 			/>
 		</>
@@ -224,12 +233,16 @@ export function Post({
 
 export function PostPreview({ imageUrl, className, onClick }: PostPreviewProps) {
 	return (
-		<div onClick={onClick} className={cn("aspect-square overflow-hidden bg-muted", className)}>
+		<button
+			onClick={onClick}
+			className={cn("aspect-square overflow-hidden bg-muted w-full", className)}
+			aria-label="View post"
+		>
 			<img
 				src={imageUrl}
 				alt="Post preview"
-				className="w-full h-full object-cover hover:opacity-90 transition-opacity cursor-pointer"
+				className="w-full h-full object-cover hover:opacity-90 transition-opacity"
 			/>
-		</div>
+		</button>
 	);
 }

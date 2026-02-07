@@ -3,7 +3,7 @@ import {
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/DropdownMenu";
 import { MoreHorizontal, Pencil, Trash2, Flag } from "lucide-react";
 
 interface PostMenuProps {
@@ -16,7 +16,7 @@ interface PostMenuProps {
 export function PostMenu({ isOwnPost, onEdit, onDelete, onReport }: PostMenuProps) {
 	return (
 		<DropdownMenu>
-			<DropdownMenuTrigger>
+			<DropdownMenuTrigger asChild>
 				<button
 					className="p-2 hover:bg-accent rounded-full transition-colors"
 					aria-label="Post options"
