@@ -122,6 +122,7 @@ export function ProfilePage() {
 				{/* Post Modal */}
 				{selectedPost && (
 					<PostModal
+						key={selectedPost.id}
 						open={!!selectedPost}
 						onOpenChange={(open) => !open && setSelectedPost(null)}
 						post={selectedPost}

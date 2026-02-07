@@ -44,20 +44,11 @@ interface PostModalProps {
 export function PostModal({ open, onOpenChange, post }: PostModalProps) {
 	const navigate = useNavigate();
 
-	// Store post.id with state to detect changes
-	const [prevPostId, setPrevPostId] = useState(post.id);
 	const [newComment, setNewComment] = useState("");
 	const [isLiked, setIsLiked] = useState(post.isLiked || false);
 	const [likesCount, setLikesCount] = useState(post.likes || 0);
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
-
-	// Reset like state when post changes
-	if (prevPostId !== post.id) {
-		setPrevPostId(post.id);
-		setIsLiked(post.isLiked || false);
-		setLikesCount(post.likes || 0);
-	}
 
 	const isOwnPost = post.author.username === mockUserProfile.username;
 

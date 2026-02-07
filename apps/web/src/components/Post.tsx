@@ -197,6 +197,7 @@ export function Post({
 			</Card>
 
 			<PostModal
+				key={id}
 				open={isModalOpen}
 				onOpenChange={setIsModalOpen}
 				post={{
