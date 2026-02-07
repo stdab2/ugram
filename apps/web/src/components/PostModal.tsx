@@ -128,7 +128,7 @@ export function PostModal({ open, onOpenChange, post }: PostModalProps) {
 			publishedAt: new Date().toISOString(),
 		};
 
-		setComments([comment, ...comments]);
+		setComments((prevComments) => [comment, ...prevComments]);
 		setNewComment("");
 	};
 
