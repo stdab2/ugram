@@ -10,6 +10,8 @@ const postSchema = fs.readFileSync(path.join(__dirname, "post.graphql"), "utf-8"
 const hashtagSchema = fs.readFileSync(path.join(__dirname, "hashtag.graphql"), "utf-8");
 
 export const typeDefs = `#graphql
+  scalar DateTime
+
   type Query {
     hello: String
   }

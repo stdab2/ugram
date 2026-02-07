@@ -1,12 +1,14 @@
 type Post {
   id: Int!
-  description: String
-  imageLink: String!
+  description: String!
+  imageUrl: String!
   authorId: Int!
-  createdAt: String!
+  author: UserUgram!
+  createdAt: DateTime!
 }
 
 extend type Query {
   post(id: Int!): Post
-  posts: [Post!]!
+  posts(limit: Int, offset: Int): [Post!]!
+  postsByAuthor(authorId: Int!, limit: Int, offset: Int): [Post!]!
 }

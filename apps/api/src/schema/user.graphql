@@ -4,6 +4,8 @@ type UserUgram {
   email: String!
   firstName: String!
   lastName: String!
+  phoneNumber: String!
+  picture: String
 }
 
 extend type Query {

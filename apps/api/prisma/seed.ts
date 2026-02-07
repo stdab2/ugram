@@ -29,7 +29,7 @@ const userData: Prisma.UserUgramCreateInput[] = [
 			create: [
 				{
 					description: "My first post on Ugram",
-					imageLink: "images/post/post_1.png",
+					imageUrl: "images/post/post_1.png",
 					hashtags: {
 						connect: [{ name: "#ugram" }],
 					},
@@ -49,7 +49,7 @@ const userData: Prisma.UserUgramCreateInput[] = [
 			create: [
 				{
 					description: "My first post on Ugram",
-					imageLink: "images/post/post_2.png",
+					imageUrl: "images/post/post_2.png",
 					mentionedUsers: {
 						connect: [{ email: "jane.doe@example.com" }],
 					},
@@ -59,7 +59,7 @@ const userData: Prisma.UserUgramCreateInput[] = [
 				},
 				{
 					description: "My second post on Ugram",
-					imageLink: "images/post/post_3.png",
+					imageUrl: "images/post/post_3.png",
 					mentionedUsers: {
 						connect: [{ email: "jane.doe@example.com" }],
 					},

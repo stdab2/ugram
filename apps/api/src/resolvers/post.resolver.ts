@@ -16,8 +16,25 @@ export const postResolvers = {
         where: { id: args.id },
       });
     },
-    posts: async () => {
-      return prisma.post.findMany();
+    posts: async (_: any, args: { limit?: number; offset?: number }) => {
+      return prisma.post.findMany({
+        take: args.limit,
+        skip: args.offset,
+      });
+    },
+    postsByAuthor: async (_: any, args: { authorId: number; limit?: number; offset?: number }) => {
+      return prisma.post.findMany({
+        where: { authorId: args.authorId },
+        take: args.limit,
+        skip: args.offset,
+      });
+    },
+  },
+  Post: {
+    author: async (parent: any) => {
+      return prisma.userUgram.findUnique({
+        where: { id: parent.authorId },
+      });
     },
   },
   Mutation: {},
