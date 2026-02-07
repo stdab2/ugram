@@ -4,18 +4,8 @@ import http from "http";
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@as-integrations/express5";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
-
-const typeDefs = `#graphql
-  type Query {
-    hello: String
-  }
-`;
-
-const resolvers = {
-	Query: {
-		hello: () => "Hello from GraphQL!",
-	},
-};
+import { typeDefs } from "./schema/index.js";
+import { resolvers } from "./resolvers/index.js";
 
 async function startServer() {
 	const app: Express = express();
