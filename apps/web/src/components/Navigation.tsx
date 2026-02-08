@@ -9,15 +9,15 @@ import {
 	LogOut,
 	User,
 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
+} from "@/components/ui/DropdownMenu";
+import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
 
 const navItems = [

@@ -46,11 +46,26 @@ function Button({
 	variant = "default",
 	size = "default",
 	asChild = false,
+	render,
 	...props
 }: React.ComponentProps<"button"> &
 	VariantProps<typeof buttonVariants> & {
 		asChild?: boolean;
+		render?: React.ReactElement;
 	}) {
+	const computedClassName = cn(buttonVariants({ variant, size, className }));
+
+	if (render) {
+		const renderProps = (render.props || {}) as React.HTMLAttributes<HTMLElement>;
+		return React.cloneElement(render, {
+			...renderProps,
+			"data-slot": "button",
+			"data-variant": variant,
+			"data-size": size,
+			className: cn(computedClassName, renderProps.className),
+			...props,
+		} as React.HTMLAttributes<HTMLElement>);
+	}
 	const Comp = asChild ? Slot : "button";
 
 	return (
@@ -58,7 +73,7 @@ function Button({
 			data-slot="button"
 			data-variant={variant}
 			data-size={size}
-			className={cn(buttonVariants({ variant, size, className }))}
+			className={computedClassName}
 			{...props}
 		/>
 	);
