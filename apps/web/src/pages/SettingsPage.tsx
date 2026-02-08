@@ -1,8 +1,11 @@
+import { Settings } from "@/components/settings";
+
 export function SettingsPage() {
 	return (
-		<div className="p-8">
-			<h1 className="text-3xl font-bold">Settings</h1>
-			<p className="mt-4 text-muted-foreground">Implement settings</p>
+		<div className="flex min-h-svh flex-col items-center justify-start p-6 md:p-10">
+			<div className="w-full md:max-w-4xl">
+				<Settings />
+			</div>
 		</div>
 	);
 }

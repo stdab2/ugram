@@ -1,7 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 import NavigationLayout from "@/layouts/NavigationLayout";
 import EmptyLayout from "@/layouts/EmptyLayout";
-
 import { FeedPage } from "@/pages/FeedPage";
 import { ProfilePage } from "@/pages/ProfilePage";
 import { LoginPage } from "@/pages/LoginPage";
