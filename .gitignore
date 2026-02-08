@@ -161,5 +161,8 @@ docs/.vitepress/cache/
 *storybook.log
 storybook-static
 
-
-*@/generated/prisma
+# =========================
+# Prisma generated files
+# =========================
+generated/
+**/generated/

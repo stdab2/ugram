@@ -23,9 +23,9 @@ model UserUgram {
 
 model Post {
   id             Int       @id @default(autoincrement())
-  createdAt      DateTime
-  description    String?
-  imageLink      String
+  createdAt      DateTime  @default(now())
+  description    String
+  imageUrl       String
 
   authorId       Int
   author         UserUgram  @relation("UserPosts", fields: [authorId], references: [id], onDelete: Cascade)
