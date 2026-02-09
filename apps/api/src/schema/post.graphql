@@ -5,6 +5,8 @@ type Post {
   authorId: Int!
   author: UserUgram!
   createdAt: DateTime!
+  hashtags: [Hashtag!]
+  mentionedUsers:[UserUgram!]
 }
 
 extend type Query {
@@ -12,3 +14,16 @@ extend type Query {
   posts(limit: Int, offset: Int): [Post!]!
   postsByAuthor(authorId: Int!, limit: Int, offset: Int): [Post!]!
 }
+
+input CreatePostInput {
+  description: String!
+  imageUrl: String!
+  authorId: Int!
+  hashtags: [String!]
+  mentionedUsers: [Int!]
+}
+
+extend type Mutation {
+  createPost(data: CreatePostInput!): Post!
+}
+

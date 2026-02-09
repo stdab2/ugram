@@ -1,5 +1,6 @@
 import { PrismaClient } from "../../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { validateUsersExist } from "../../Validators/validateUsersExist";
 
 const adapter = new PrismaPg({
 	connectionString: process.env.DATABASE_URL,
@@ -37,5 +38,56 @@ export const postResolvers = {
       });
     },
   },
-  Mutation: {},
+  Mutation: {
+  createPost: async (_: any, { data }: any) => {
+    const { description, imageUrl, authorId, hashtags, mentionedUsers } = data;
+    
+    if (mentionedUsers && mentionedUsers.length > 0) {
+      await validateUsersExist(mentionedUsers);
+    }
+
+    const tags  = hashtags.map((t: string) => t.toLowerCase())
+    
+    try {
+
+    if (tags.length) {
+      await prisma.hashtag.createMany({
+        data: tags.map((name: string) => ({ name })),
+        skipDuplicates: true,
+      });
+    }
+    
+    const hashtagRows:{id: number}[] = tags.length
+    ? await prisma.hashtag.findMany({
+      where: { name: { in: tags } },
+      select: { id: true },
+    })
+    : [];    
+
+   
+    const post = await prisma.post.create({
+      data: {
+        description,
+        imageUrl,
+        authorId,
+        hashtags: {
+          connect: hashtagRows.map((h) => ({ id: h.id })),
+        },
+        mentionedUsers: {
+          connect: mentionedUsers.map((id: number) => ({ id })),
+        },        
+      },
+       include: {
+      hashtags: true,
+      mentionedUsers: true,
+      author: true,
+      },
+    });
+
+    return post;
+    } catch (e) {
+      throw e;
+}
+  },
+}
 };
