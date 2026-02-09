@@ -18,9 +18,7 @@
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"test": "npm -ws run test",
-		"prepare": "husky",
-		"codegen": "pnpm --filter ./apps/web exec graphql-codegen --config codegen.ts",
-		"codegen:watch": "pnpm --filter ./apps/web exec graphql-codegen --config codegen.ts --watch"
+		"prepare": "husky"
 	},
 	"devDependencies": {
 		"@commitlint/cli": "^20.3.1",
