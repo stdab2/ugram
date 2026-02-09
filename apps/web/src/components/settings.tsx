@@ -1,12 +1,74 @@
 import { cn } from "@/lib/utils";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/Card";
 import { UserDetail } from "@/components/user-detail";
-import { FieldSeparator } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import { FieldSeparator } from "@/components/ui/Field";
+import { Input } from "@/components/ui/Input";
+import { Label } from "@/components/ui/Label";
+import { Button } from "@/components/ui/Button";
+import { useUserQuery, useUpdateUserMutation } from "@/generated/graphql";
+import { useState, useEffect } from "react";
+
+const USER_ID = 1; //TODO: Mettre vrai ID
 
 export function Settings({ className, ...props }: React.ComponentProps<"div">) {
+	const { data, loading, error } = useUserQuery({
+		variables: { id: USER_ID },
+	});
+
+	const [updateUser] = useUpdateUserMutation();
+
+	const [firstName, setFirstName] = useState("");
+	const [lastName, setLastName] = useState("");
+	const [email, setEmail] = useState("");
+	const [phoneNumber, setPhoneNumber] = useState("");
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [isAddingPhone, setIsAddingPhone] = useState(false);
+
+	useEffect(() => {
+		if (data?.user) {
+			setFirstName(data.user.firstName);
+			setLastName(data.user.lastName);
+			setEmail(data.user.email);
+			setPhoneNumber(data.user.phoneNumber);
+			if (data.user.phoneNumber) {
+				setIsAddingPhone(true);
+			}
+		}
+	}, [data]);
+
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+		setIsSubmitting(true);
+
+		try {
+			await updateUser({
+				variables: {
+					id: USER_ID,
+					firstName,
+					lastName,
+					email,
+					phoneNumber,
+				},
+			});
+
+			if (!phoneNumber) {
+				setIsAddingPhone(false);
+			}
+
+			console.log("Profile updated");
+		} catch (err) {
+			console.error("Failed to update:", err);
+		} finally {
+			setIsSubmitting(false);
+		}
+	};
+
+	if (loading) return <p>Loading...</p>;
+
+	if (error) return <p>{error.message}</p>;
+
+	const user = data?.user;
+
 	return (
 		<div className={cn("flex flex-col gap-6", className)} {...props}>
 			<Card className="overflow-hidden pt-2 pb-4 pl-4 pr-4 bg-muted">
@@ -15,19 +77,20 @@ export function Settings({ className, ...props }: React.ComponentProps<"div">) {
 					<FieldSeparator />
 					<UserDetail
 						className="mt-2"
-						pictureUrl="/avatar.jpg" // TODO: api call
-						username="johnnyd23" // TODO: api call
-						fullname="John Doe" // TODO: api call
-						memberSince={1622505600000} // timestamp in ms // TODO: api call
+						pictureUrl={user?.picture ?? ""}
+						username={user?.userName ?? ""}
+						fullname={`${user?.firstName} ${user?.lastName}`}
+						memberSince={user?.createdAt ?? ""}
 					/>
-					<form className="mt-6 space-y-4">
+					<form className="mt-6 space-y-4" onSubmit={handleSubmit}>
 						<div className="space-y-2">
 							<Label htmlFor="firstname">First Name</Label>
 							<Input
 								id="firstname"
 								type="text"
 								placeholder="First Name"
-								defaultValue="John" // TODO: api call
+								value={firstName}
+								onChange={(e) => setFirstName(e.target.value)}
 								maxLength={20}
 							/>
 							<Label htmlFor="lastname">Last Name</Label>
@@ -35,7 +98,8 @@ export function Settings({ className, ...props }: React.ComponentProps<"div">) {
 								id="lastname"
 								type="text"
 								placeholder="Last Name"
-								defaultValue="Doe" // TODO: api call
+								value={lastName}
+								onChange={(e) => setLastName(e.target.value)}
 								maxLength={20}
 							/>
 						</div>
@@ -45,22 +109,36 @@ export function Settings({ className, ...props }: React.ComponentProps<"div">) {
 								id="email"
 								type="email"
 								placeholder="email@example.com"
-								defaultValue="johnnyd@email.com" // TODO: api call
-								pattern="[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$" // Format verification
+								value={email}
+								onChange={(e) => setEmail(e.target.value)}
+								pattern="[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$"
 							/>
 						</div>
 						<div className="space-y-2">
 							<Label htmlFor="telephone">Phone Number</Label>
-							<Input
-								id="telephone"
-								type="tel"
-								placeholder="e.g. +1 123-456-7890"
-								defaultValue="+1 555-123-4567" // TODO: api call
-								pattern="^\+\d{1,3}\s\d{1,4}-\d{1,4}-\d{4}$" // Format verification
-							/>
+							{!phoneNumber && !isAddingPhone ? (
+								<Button
+									type="button"
+									variant="outline"
+									onClick={() => setIsAddingPhone(true)}
+								>
+									Add Phone Number
+								</Button>
+							) : (
+								<Input
+									id="telephone"
+									type="tel"
+									placeholder="e.g. +11234567890"
+									value={phoneNumber}
+									onChange={(e) => setPhoneNumber(e.target.value)}
+									pattern="^\+?[1-9][0-9]{7,14}$"
+								/>
+							)}
 						</div>
 						<div className="flex justify-end mt-8">
-							<Button type="submit">Update Profile</Button> {/* TODO: api call */}
+							<Button type="submit" disabled={isSubmitting}>
+								{isSubmitting ? "Updating..." : "Update Profile"}
+							</Button>
 						</div>
 					</form>
 				</CardContent>

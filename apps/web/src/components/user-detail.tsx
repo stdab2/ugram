@@ -1,11 +1,11 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 import { cn } from "@/lib/utils";
 
 interface UserDetailProps {
 	pictureUrl: string;
 	username: string;
 	fullname: string;
-	memberSince: number;
+	memberSince: string;
 	className?: string;
 }
 
@@ -36,7 +36,7 @@ export function UserDetail({
 				<p className="font-bold text-lg">{username}</p>
 				<p className="text-gray-500 text-sm">{fullname}</p>
 				<p className="text-gray-400 text-xs mt-1">
-					Member since {timestampToDateString(memberSince)}
+					Member since {timestampToDateString(+memberSince)}
 				</p>
 			</div>
 		</div>

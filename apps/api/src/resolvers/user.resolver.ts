@@ -34,5 +34,17 @@ export const userResolvers = {
         },
       });
     },
+    updateUser: async (_: any, args: any) => {
+      const { id, ...updateData } = args;
+      
+      const data = Object.fromEntries(
+        Object.entries(updateData).filter(([_, value]) => value !== undefined)
+      );
+      
+      return prisma.userUgram.update({
+        where: { id },
+        data,
+      });
+    },
   },
 };
