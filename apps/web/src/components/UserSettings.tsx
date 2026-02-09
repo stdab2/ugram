@@ -1,19 +1,19 @@
 import { cn } from "@/lib/utils";
-import { Card, CardContent } from "@/components/ui/card";
-import { UserDetail } from "@/components/user-detail";
-import { FieldSeparator } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/Card";
+import { UserDetails } from "@/components/UserDetails";
+import { FieldSeparator } from "@/components/ui/Field";
+import { Input } from "@/components/ui/Input";
+import { Label } from "@/components/ui/Label";
+import { Button } from "@/components/ui/Button";
 
-export function Settings({ className, ...props }: React.ComponentProps<"div">) {
+export function UserSettings({ className, ...props }: React.ComponentProps<"div">) {
 	return (
 		<div className={cn("flex flex-col gap-6", className)} {...props}>
 			<Card className="overflow-hidden pt-2 pb-4 pl-4 pr-4 bg-muted">
 				<CardContent className="p-0">
 					<h1 className="text-2xl font-bold mb-2">Settings</h1>
 					<FieldSeparator />
-					<UserDetail
+					<UserDetails
 						className="mt-2"
 						pictureUrl="/avatar.jpg" // TODO: api call
 						username="johnnyd23" // TODO: api call

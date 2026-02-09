@@ -1,7 +1,7 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 import { cn } from "@/lib/utils";
 
-interface UserDetailProps {
+interface UserDetailsProps {
 	pictureUrl: string;
 	username: string;
 	fullname: string;
@@ -19,13 +19,13 @@ function timestampToDateString(timestamp: number): string {
 	});
 }
 
-export function UserDetail({
+export function UserDetails({
 	pictureUrl,
 	username,
 	fullname,
 	memberSince,
 	className,
-}: UserDetailProps) {
+}: UserDetailsProps) {
 	return (
 		<div className={cn("flex items-center gap-4", className)}>
 			<Avatar className="h-24 w-24 flex-shrink-0">
