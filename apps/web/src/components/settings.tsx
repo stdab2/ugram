@@ -54,8 +54,6 @@ export function Settings({ className, ...props }: React.ComponentProps<"div">) {
 			if (!phoneNumber) {
 				setIsAddingPhone(false);
 			}
-
-			console.log("Profile updated");
 		} catch (err) {
 			console.error("Failed to update:", err);
 		} finally {
