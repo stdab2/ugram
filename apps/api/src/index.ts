@@ -1,9 +1,11 @@
 import express, { Express } from "express";
 import cors from "cors";
 import http from "http";
+import path from "node:path";
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@as-integrations/express5";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
+import graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.mjs";
 import { typeDefs } from "./schema/index.js";
 import { resolvers } from "./resolvers/index.js";
 
@@ -18,12 +20,14 @@ async function startServer() {
 		plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
 	});
 
-	// Start Apollo server
-	await server.start();
-
-	// Basic middleware
 	app.use(cors());
+	app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+
+	app.use("/graphql", graphqlUploadExpress({ maxFileSize: 10_000_000, maxFiles: 1 }));
+	// Start Apollo server
+	// Basic middleware
 	app.use(express.json());
+	await server.start();
 
 	// Mount GraphQL endpoint
 	app.use("/graphql", expressMiddleware(server));
