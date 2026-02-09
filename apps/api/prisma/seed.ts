@@ -11,61 +11,124 @@ const prisma = new PrismaClient({
 });
 
 const hashtags: Prisma.HashtagCreateInput[] = [
-	{ name: "#firstpost" },
+	{ name: "#sunset" },
+	{ name: "#beach" },
+	{ name: "#photography" },
+	{ name: "#travel" },
+	{ name: "#adventure" },
+	{ name: "#lifestyle" },
+	{ name: "#mood" },
 	{ name: "#summer" },
-	{ name: "#ugram" },
+	{ name: "#memories" },
+	{ name: "#coffee" },
+	{ name: "#morning" },
+	{ name: "#mountains" },
+	{ name: "#hiking" },
+	{ name: "#food" },
+	{ name: "#cooking" },
+	{ name: "#pasta" },
+	{ name: "#italian" },
+	{ name: "#citylife" },
+	{ name: "#urban" },
+	{ name: "#nightphotography" },
 ];
 
 const userData: Prisma.UserUgramCreateInput[] = [
 	{
-		userName: "jane_doe",
-		password: "ytrewq",
-		email: "jane.doe@example.com",
-		phoneNumber: "+15145551111",
-		firstName: "Jane",
+		userName: "john_doe",
+		password: "qwerty",
+		email: "john.doe@example.com",
+		phoneNumber: "+15145550001",
+		firstName: "John",
 		lastName: "Doe",
-		picture: "images/profile/jane_doe.png",
+		picture: "images/profile/1.jpg",
 		posts: {
 			create: [
 				{
-					description: "My first post on Ugram",
-					imageUrl: "images/post/post_1.png",
-					hashtags: {
-						connect: [{ name: "#ugram" }],
-					},
+					description: "Beautiful sunset at the beach 🌅 @jane_smith #sunset #beach #photography",
+					imageUrl: "images/post/1.jpg",
+				},
+				{
+					description: "New adventure begins! #travel #adventure",
+					imageUrl: "images/post/6.jpg",
+				},
+				{
+					description: "Good vibes only ✨ #lifestyle #mood",
+					imageUrl: "images/post/7.jpg",
+				},
+				{
+					description: "Throwback to summer days 🌞 #summer #memories",
+					imageUrl: "images/post/8.jpg",
 				},
 			],
 		},
 	},
 	{
-		userName: "john_doe",
+		userName: "jane_smith",
 		password: "qwerty",
-		email: "john.doe@example.com",
-		phoneNumber: "+15145550000",
-		firstName: "John",
-		lastName: "Doe",
-		picture: "images/profile/john_doe.png",
+		email: "jane.smith@example.com",
+		phoneNumber: "+15145550002",
+		firstName: "Jane",
+		lastName: "Smith",
+		picture: "images/profile/2.jpg",
 		posts: {
 			create: [
 				{
-					description: "My first post on Ugram",
-					imageUrl: "images/post/post_2.png",
-					mentionedUsers: {
-						connect: [{ email: "jane.doe@example.com" }],
-					},
-					hashtags: {
-						connect: [{ name: "#firstpost" }, { name: "#summer" }],
-					},
+					description: "Morning coffee vibes ☕️ #coffee #morning #lifestyle",
+					imageUrl: "images/post/2.jpg",
 				},
+			],
+		},
+	},
+	{
+		userName: "travel_explorer",
+		password: "qwerty",
+		email: "travel.explorer@example.com",
+		phoneNumber: "+15145550003",
+		firstName: "John",
+		lastName: "Doe",
+		picture: "images/profile/3.jpg",
+		posts: {
+			create: [
 				{
-					description: "My second post on Ugram",
-					imageUrl: "images/post/post_3.png",
-					mentionedUsers: {
-						connect: [{ email: "jane.doe@example.com" }],
-					},
-					hashtags: {
-						connect: [{ name: "#ugram" }],
-					},
+					description:
+						"Mountain views from the top 🏔️ Amazing hiking experience with @john_doe #travel #mountains #adventure #hiking",
+					imageUrl: "images/post/3.jpg",
+				},
+			],
+		},
+	},
+	{
+		userName: "foodie_lover",
+		password: "qwerty",
+		email: "foodie.lover@example.com",
+		phoneNumber: "+15145550004",
+		firstName: "John",
+		lastName: "Doe",
+		picture: "images/profile/4.jpg",
+		posts: {
+			create: [
+				{
+					description: "Homemade pasta night 🍝 Recipe in bio! #food #cooking #pasta #italian",
+					imageUrl: "images/post/4.jpg",
+				},
+			],
+		},
+	},
+	{
+		userName: "urban_photographer",
+		password: "qwerty",
+		email: "urban.photographer@example.com",
+		phoneNumber: "+15145550005",
+		firstName: "John",
+		lastName: "Doe",
+		picture: "images/profile/5.jpg",
+		posts: {
+			create: [
+				{
+					description:
+						"City lights and night vibes 🌃 #citylife #photography #urban #nightphotography",
+					imageUrl: "images/post/5.jpg",
 				},
 			],
 		},

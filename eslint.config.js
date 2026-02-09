@@ -30,7 +30,8 @@ export default defineConfig([
 				project: [
 					"./apps/api/tsconfig.json",
 					"./apps/api/tsconfig.prisma.json",
-					"./apps/web/tsconfig.json"
+					"./apps/web/tsconfig.app.json",
+					"./apps/web/tsconfig.node.json",
 				],
 				tsconfigRootDir: import.meta.dirname,
 			},
@@ -48,4 +49,13 @@ export default defineConfig([
 			"react-refresh/only-export-components": "off",
 		},
 	},
+  {
+    files: ["./apps/web/src/generated/**/*.{ts,tsx}"],
+    rules: {
+      "react-refresh/only-export-components": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/ban-ts-comment": "off",
+      "@typescript-eslint/no-unused-vars": "off"
+    }
+  }
 ]);
