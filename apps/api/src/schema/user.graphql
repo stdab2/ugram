@@ -6,11 +6,12 @@ type UserUgram {
   lastName: String!
   phoneNumber: String!
   picture: String
+  posts: [Post!]
 }
 
 extend type Query {
   user(id: Int!): UserUgram
-  users: [UserUgram!]!
+  users(limit: Int, offset: Int): [UserUgram!]!
 }
 
 extend type Mutation {

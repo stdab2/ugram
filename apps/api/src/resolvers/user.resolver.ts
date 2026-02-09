@@ -1,4 +1,4 @@
-import { PrismaClient } from "../../generated/prisma/client.js";
+import { PrismaClient, UserUgram } from "../../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 const adapter = new PrismaPg({
@@ -16,8 +16,18 @@ export const userResolvers = {
         where: { id: args.id },
       });
     },
-    users: async () => {
-      return prisma.userUgram.findMany();
+    users: async (_: any, args: { limit?: number; offset?: number }) => {
+      return prisma.userUgram.findMany({
+        take: args.limit,
+        skip: args.offset,
+      });
+    },
+  },
+  UserUgram: {
+    posts: async (parent: UserUgram) => {
+      return prisma.post.findMany({
+        where: { authorId: parent.id },
+      });
     },
   },
   Mutation: {
