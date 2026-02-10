@@ -1,24 +1,22 @@
 import { PrismaClient } from "../generated/prisma/client.js";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { GraphQLError } from 'graphql';
+import { GraphQLError } from "graphql";
 
-const adapter = new PrismaPg({
-	connectionString: process.env.DATABASE_URL,
-});
+export async function validateUsersExist(userIds: number[], prisma: PrismaClient) {
+	const uniqueUserIds = Array.from(new Set(userIds));
+	const users = await prisma.userUgram.findMany({
+		where: { id: { in: uniqueUserIds } },
+		select: { id: true },
+	});
 
-const prisma = new PrismaClient({
-	adapter,
-});
+	const foundIds = new Set(users.map((user: { id: number }) => user.id));
+	const missingUserIds = uniqueUserIds.filter((id) => !foundIds.has(id));
 
-export async function validateUsersExist(userIds: number[]) {
-  const users = await prisma.userUgram.findMany({
-    where: { id: { in: userIds } },
-    select: { id: true },
-  });
-
-  if (users.length !== userIds.length) {
-    throw new GraphQLError("One or more users do not exist", {
-      extensions: { code: "BAD_USER_INPUT" },
-    });
-  }
+	if (missingUserIds.length > 0) {
+		throw new GraphQLError("One or more users do not exist", {
+			extensions: {
+				code: "BAD_USER_INPUT",
+				missingUserIds,
+			},
+		});
+	}
 }

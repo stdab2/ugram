@@ -59,7 +59,7 @@ export const postResolvers = {
 			const { description, image, authorId, hashtags, mentionedUsers } = data;
 
 			if (mentionedUsers && mentionedUsers.length > 0) {
-				await validateUsersExist(mentionedUsers);
+				await validateUsersExist(mentionedUsers, prisma);
 			}
 
 			if (!image) {
