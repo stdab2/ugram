@@ -69,8 +69,12 @@ export const postResolvers = {
 			const imageUrl = await saveUploadedImage(image);
 			let hashtagRows: { id: number }[] = [];
 
-			if (hashtags) {
-				const tags = hashtags.map((t: string) => t.toLowerCase());
+			if (hashtags?.length) {
+				const tags = Array.from(
+					new Set(
+						hashtags.map((t: string) => t.toLowerCase().trim()).filter((t: string) => t.length > 0)
+					)
+				);
 				if (tags.length) {
 					await prisma.hashtag.createMany({
 						data: tags.map((name: string) => ({ name })),
