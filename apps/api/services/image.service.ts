@@ -8,7 +8,8 @@ export async function saveUploadedImage(
 		filename: string;
 		mimetype: string;
 		createReadStream: () => NodeJS.ReadableStream;
-	}>
+	}>,
+	subfolder: string = ""
 ): Promise<string> {
 	const { filename, mimetype, createReadStream } = await upload;
 
@@ -23,7 +24,9 @@ export async function saveUploadedImage(
 		throw new Error(`Unsupported file extension: ${extension}`);
 	}
 
-	const uploadsDir = path.join(process.cwd(), "uploads");
+	const uploadsDir = subfolder
+		? path.join(process.cwd(), "uploads", subfolder)
+		: path.join(process.cwd(), "uploads");
 	fs.mkdirSync(uploadsDir, { recursive: true });
 
 	const storedName = `${crypto.randomUUID()}${extension}`;
@@ -31,5 +34,5 @@ export async function saveUploadedImage(
 
 	await pipeline(createReadStream(), fs.createWriteStream(filePath));
 
-	return `/uploads/${storedName}`;
+	return subfolder ? `/uploads/${subfolder}/${storedName}` : `/uploads/${storedName}`;
 }

@@ -1,6 +1,6 @@
 import { PrismaClient } from "../../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { validateUsersExist } from "../../Validators/validateUsersExist.js";
+import { validateUsersExist } from "../../validators/validateUser.js";
 import { saveUploadedImage } from "../../services/image.service.js";
 import type { FileUpload } from "graphql-upload";
 import { Post } from "../../generated/prisma/client.js";
@@ -66,7 +66,7 @@ export const postResolvers = {
 				throw new Error("Image upload is required.");
 			}
 
-			const imageUrl = await saveUploadedImage(image);
+			const imageUrl = await saveUploadedImage(image, "post");
 			let hashtagRows: { id: number }[] = [];
 
 			if (hashtags) {

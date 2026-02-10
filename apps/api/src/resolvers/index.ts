@@ -10,7 +10,6 @@ export const resolvers = {
 	Upload: GraphQLUpload,
 
 	Query: {
-		hello: () => "Hello from GraphQL!",
 		...userResolvers.Query,
 		...postResolvers.Query,
 		...hashtagResolvers.Query,
@@ -24,5 +23,9 @@ export const resolvers = {
 
 	Post: {
 		...postResolvers.Post,
+	},
+
+	UserUgram: {
+		...userResolvers.UserUgram,
 	},
 };
