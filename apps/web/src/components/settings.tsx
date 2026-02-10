@@ -68,9 +68,7 @@ export function Settings({ className, ...props }: React.ComponentProps<"div">) {
 				setIsAddingPhone(false);
 			}
 
-			// Show success message
 			setShowSuccess(true);
-			// Auto-hide after 3 seconds
 			setTimeout(() => setShowSuccess(false), 3000);
 		} catch (err) {
 			if (err instanceof z.ZodError) {
@@ -118,6 +116,7 @@ export function Settings({ className, ...props }: React.ComponentProps<"div">) {
 							<Input
 								id="firstname"
 								type="text"
+								autoComplete="given-name"
 								placeholder="First Name"
 								value={firstName}
 								onChange={(e) => setFirstName(e.target.value)}
@@ -129,6 +128,7 @@ export function Settings({ className, ...props }: React.ComponentProps<"div">) {
 							<Input
 								id="lastname"
 								type="text"
+								autoComplete="family-name"
 								placeholder="Last Name"
 								value={lastName}
 								onChange={(e) => setLastName(e.target.value)}
@@ -142,6 +142,7 @@ export function Settings({ className, ...props }: React.ComponentProps<"div">) {
 							<Input
 								id="email"
 								type="email"
+								autoComplete="email"
 								placeholder="email@example.com"
 								value={email}
 								onChange={(e) => setEmail(e.target.value)}
@@ -153,6 +154,7 @@ export function Settings({ className, ...props }: React.ComponentProps<"div">) {
 							<Label htmlFor="telephone">Phone Number</Label>
 							{!phoneNumber && !isAddingPhone ? (
 								<Button
+									id="telephone"
 									type="button"
 									variant="outline"
 									onClick={() => setIsAddingPhone(true)}
