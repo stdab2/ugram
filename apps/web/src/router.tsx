@@ -24,7 +24,7 @@ export const router = createBrowserRouter([
 			{ path: "/messages", element: <MessagesPage /> },
 			{ path: "/notifications", element: <NotificationsPage /> },
 			{ path: "/settings", element: <SettingsPage /> },
-			{ path: "/profile/:id", element: <ProfilePage /> },
+			{ path: "/profile/:username", element: <ProfilePage /> },
 		],
 	},
 	{

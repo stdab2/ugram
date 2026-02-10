@@ -5,10 +5,14 @@ import { Input } from "@/components/ui/Input";
 import { Heart, MessageCircle, Send } from "lucide-react";
 import { PostMenu } from "@/components/PostMenu";
 import { DeletePostDialog } from "@/components/DeletePostDialog";
-import { cn } from "@/lib/utils";
-import { mockUserProfile } from "@/lib/mockData";
+import { cn, getImageUrl } from "@/lib/utils";
+import { formatDescription, formatDate } from "@/lib/postUtils";
+import { CURRENT_USERNAME } from "@/lib/constants";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import type { PostsQuery, PostsByAuthorQuery } from "@/generated/graphql";
+
+type PostData = PostsQuery["posts"][0] | PostsByAuthorQuery["postsByAuthor"][0];
 
 interface Comment {
 	id: string;
@@ -24,33 +28,32 @@ interface Comment {
 interface PostModalProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
-	post: {
-		id: string;
-		author: {
-			username: string;
-			avatarUrl?: string;
-			avatarFallback: string;
-		};
-		imageUrl: string;
-		aspectRatio?: "square" | "portrait" | "landscape";
-		publishedAt: string;
-		description?: string;
-		likes?: number;
-		comments?: number;
-		isLiked?: boolean;
-	};
+	post: PostData;
+	aspectRatio?: "square" | "portrait" | "landscape";
+	likes?: number;
+	comments?: number;
+	isLiked?: boolean;
 }
 
-export function PostModal({ open, onOpenChange, post }: PostModalProps) {
+export function PostModal({
+	open,
+	onOpenChange,
+	post,
+	likes = 0,
+	isLiked: initialIsLiked = false,
+}: PostModalProps) {
 	const navigate = useNavigate();
 
 	const [newComment, setNewComment] = useState("");
-	const [isLiked, setIsLiked] = useState(post.isLiked || false);
-	const [likesCount, setLikesCount] = useState(post.likes || 0);
+	const [isLiked, setIsLiked] = useState(initialIsLiked);
+	const [likesCount, setLikesCount] = useState(likes);
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
 
-	const isOwnPost = post.author.username === mockUserProfile.username;
+	// Extract author info for convenience
+	const author = post.author;
+	const avatarFallback = author.firstName[0] + author.lastName[0];
+	const isOwnPost = author.userName === CURRENT_USERNAME;
 
 	// Mock comments - use lazy initialization to avoid calling Date.now() during render
 	const [comments, setComments] = useState<Comment[]>(() => [
@@ -75,44 +78,6 @@ export function PostModal({ open, onOpenChange, post }: PostModalProps) {
 			publishedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
 		},
 	]);
-
-	const formatDescription = (text?: string) => {
-		if (!text) return { description: null, hashtags: [] };
-
-		const hashtagMatches = text.match(/#\w+/g) || [];
-		const descriptionWithoutHashtags = text.replace(/#\w+/g, "").trim();
-
-		const parts = descriptionWithoutHashtags.split(/(@\w+)/g);
-		const formattedDescription = parts.map((part, index) => {
-			if (part.startsWith("@")) {
-				const username = part.slice(1);
-				return (
-					<Link
-						key={index}
-						to={`/profile/${username}`}
-						className="text-indigo-400 font-medium hover:underline"
-					>
-						{part}
-					</Link>
-				);
-			}
-			return <span key={index}>{part}</span>;
-		});
-
-		return { description: formattedDescription, hashtags: hashtagMatches };
-	};
-
-	const formatDate = (dateString: string) => {
-		const date = new Date(dateString);
-		const now = new Date();
-		const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-		if (diffInSeconds < 60) return `${diffInSeconds}s`;
-		if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m`;
-		if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h`;
-		if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d`;
-		return date.toLocaleDateString();
-	};
 
 	const handleLike = () => {
 		setIsLiked((prev) => !prev);
@@ -151,8 +116,8 @@ export function PostModal({ open, onOpenChange, post }: PostModalProps) {
 						{/* Left side - Image */}
 						<div className="bg-black flex items-center justify-center">
 							<img
-								src={post.imageUrl}
-								alt={`Post by ${post.author.username}`}
+								src={getImageUrl(post.imageUrl)}
+								alt={`Post by ${author.userName}`}
 								className="w-full h-full object-contain"
 							/>
 						</div>
@@ -163,12 +128,12 @@ export function PostModal({ open, onOpenChange, post }: PostModalProps) {
 							<div className="flex items-center justify-between gap-3 p-4 border-b flex-shrink-0">
 								<div className="flex items-center gap-3">
 									<Avatar className="h-10 w-10">
-										<AvatarImage src={post.author.avatarUrl} />
-										<AvatarFallback>{post.author.avatarFallback}</AvatarFallback>
+										<AvatarImage src={getImageUrl(author.picture)} />
+										<AvatarFallback>{avatarFallback}</AvatarFallback>
 									</Avatar>
 									<div>
-										<p className="font-semibold text-sm">{post.author.username}</p>
-										<p className="text-xs text-muted-foreground">{formatDate(post.publishedAt)}</p>
+										<p className="font-semibold text-sm">{author.userName}</p>
+										<p className="text-xs text-muted-foreground">{formatDate(post.createdAt)}</p>
 									</div>
 								</div>
 								<PostMenu
@@ -186,12 +151,12 @@ export function PostModal({ open, onOpenChange, post }: PostModalProps) {
 							<div className="p-4 border-b flex-shrink-0">
 								<div className="flex gap-3">
 									<Avatar className="h-8 w-8 flex-shrink-0">
-										<AvatarImage src={post.author.avatarUrl} />
-										<AvatarFallback>{post.author.avatarFallback}</AvatarFallback>
+										<AvatarImage src={getImageUrl(author.picture)} />
+										<AvatarFallback>{avatarFallback}</AvatarFallback>
 									</Avatar>
 									<div className="flex-1">
 										<p className="text-sm">
-											<span className="font-semibold mr-2">{post.author.username}</span>
+											<span className="font-semibold mr-2">{author.userName}</span>
 											{formattedDescription}
 										</p>
 										{hashtags.length > 0 && (

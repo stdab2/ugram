@@ -16,16 +16,8 @@ export function FeedPage() {
 				{data?.posts.map((post) => (
 					<Post
 						key={post.id}
-						id={post.id.toString()}
-						author={{
-							username: post.author.userName,
-							avatarUrl: post.author.picture?.toString() || undefined,
-							avatarFallback: post.author.firstName[0] + post.author.lastName[0],
-						}}
-						imageUrl={post.imageUrl}
+						post={post}
 						aspectRatio={"square"}
-						publishedAt={post.createdAt?.toString() || ""}
-						description={post.description}
 						likes={100} // Replace with actual like count from API
 						comments={20} // Replace with actual comment count from API
 						isLiked={false} // Replace with actual like status from API

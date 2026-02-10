@@ -4,10 +4,12 @@ import { SearchFilters } from "@/components/SearchFilters";
 import { RecentSearchItem } from "@/components/RecentSearchItem";
 import { UserSearchResult } from "@/components/UserSearchResult";
 import { PostGrid } from "@/components/PostGrid";
+import { PostModal } from "@/components/PostModal";
 import { Button } from "@/components/ui/Button";
 import type { RecentSearch, SearchType } from "@/types/search";
 import { Loader2 } from "lucide-react";
 import { useUsersQuery, usePostsQuery } from "@/generated/graphql";
+import type { PostsQuery } from "@/generated/graphql";
 
 // Mock data for recent searches (localStorage à implémenter plus tard)
 const mockRecentSearches: RecentSearch[] = [
@@ -27,6 +29,7 @@ export function SearchPage() {
 	const [activeFilter, setActiveFilter] = useState<SearchType>("all");
 	const [recentSearches, setRecentSearches] = useState<RecentSearch[]>(mockRecentSearches);
 	const [visibleUsersCount, setVisibleUsersCount] = useState(10);
+	const [selectedPost, setSelectedPost] = useState<PostsQuery["posts"][0] | null>(null);
 
 	const allUsers = usersData?.users || [];
 	const allPosts = postsData?.posts || [];
@@ -47,6 +50,19 @@ export function SearchPage() {
 
 	const handleRecentSearchClick = (query: string) => {
 		setSearchQuery(query);
+	};
+
+	const handlePostClick = (post: {
+		id: string | number;
+		imageUrl: string;
+		likes?: number;
+		comments?: number;
+	}) => {
+		// Find the full post data from allPosts
+		const fullPost = allPosts.find((p) => p.id === post.id);
+		if (fullPost) {
+			setSelectedPost(fullPost);
+		}
 	};
 
 	// Filtrer les résultats en fonction de la recherche
@@ -112,7 +128,7 @@ export function SearchPage() {
 						{(activeFilter === "all" || activeFilter === "users") && (
 							<div className="mb-6">
 								<div className="px-4 py-3">
-									<h2 className="font-semibold">Suggested Users</h2>
+									<h2 className="font-semibold">Users</h2>
 								</div>
 								<div className="flex flex-col gap-4 px-4">
 									{users.map((user) => (
@@ -137,12 +153,9 @@ export function SearchPage() {
 						{(activeFilter === "all" || activeFilter === "posts") && (
 							<div>
 								<div className="px-4 py-3">
-									<h2 className="font-semibold">Suggested Posts</h2>
+									<h2 className="font-semibold">Posts</h2>
 								</div>
-								<PostGrid
-									posts={allPosts}
-									onPostClick={(postId) => console.log("Open post", postId)}
-								/>
+								<PostGrid posts={allPosts} onPostClick={handlePostClick} />
 							</div>
 						)}
 					</>
@@ -171,15 +184,21 @@ export function SearchPage() {
 								<div className="px-4 py-3">
 									<h2 className="font-semibold">Posts</h2>
 								</div>
-								<PostGrid
-									posts={allPosts}
-									onPostClick={(postId) => console.log("Open post", postId)}
-								/>
+								<PostGrid posts={allPosts} onPostClick={handlePostClick} />
 							</div>
 						)}
 					</>
 				)}
 			</div>
+
+			{/* Post Modal */}
+			{selectedPost && (
+				<PostModal
+					open={!!selectedPost}
+					onOpenChange={(open) => !open && setSelectedPost(null)}
+					post={selectedPost}
+				/>
+			)}
 		</div>
 	);
 }

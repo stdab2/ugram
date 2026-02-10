@@ -2,6 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 import { Card } from "@/components/ui/Card";
 import type { UserUgram } from "@/generated/graphql";
 import { Link } from "react-router-dom";
+import { getImageUrl } from "@/lib/utils";
 
 interface UserSearchResultProps {
 	user: UserUgram;
@@ -18,7 +19,7 @@ export function UserSearchResult({ user }: UserSearchResultProps) {
 					{/* User Info */}
 					<div className="flex items-center gap-4 md:flex-1">
 						<Avatar className="h-12 w-12">
-							<AvatarImage src={user.picture || undefined} />
+							<AvatarImage src={getImageUrl(user.picture)} />
 							<AvatarFallback>{avatarFallback}</AvatarFallback>
 						</Avatar>
 						<div className="flex-1 min-w-0">

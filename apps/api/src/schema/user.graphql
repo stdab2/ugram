@@ -1,26 +1,27 @@
 type UserUgram {
-  id: Int!
-  userName: String!
-  email: String!
-  firstName: String!
-  lastName: String!
-  phoneNumber: String!
-  picture: String
+	id: Int!
+	userName: String!
+	email: String!
+	firstName: String!
+	lastName: String!
+	phoneNumber: String!
+	picture: String
 }
 
 extend type Query {
-  user(id: Int!): UserUgram
-  users: [UserUgram!]!
+	user(id: Int!): UserUgram
+	userByUserName(userName: String!): UserUgram
+	users: [UserUgram!]!
 }
 
 extend type Mutation {
-  createUser(
-    userName: String!
-    email: String!
-    password: String!
-    firstName: String!
-    lastName: String!
-    phoneNumber: String!
-    picture: String
-  ): UserUgram!
+	createUser(
+		userName: String!
+		email: String!
+		password: String!
+		firstName: String!
+		lastName: String!
+		phoneNumber: String!
+		picture: String
+	): UserUgram!
 }

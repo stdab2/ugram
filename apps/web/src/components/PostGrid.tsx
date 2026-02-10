@@ -1,21 +1,25 @@
-import type { PostsQuery } from "@/generated/graphql";
-import { PostPreviewWithStats } from "@/components/Post";
+import { PostPreview } from "@/components/PostPreview";
 
 interface PostGridProps {
-	posts: PostsQuery["posts"];
-	onPostClick: (postId: string) => void;
+	posts: Array<{
+		id: string | number;
+		imageUrl: string;
+		likes?: number;
+		comments?: number;
+	}>;
+	onPostClick: (post: PostGridProps["posts"][0]) => void;
 }
 
 export function PostGrid({ posts, onPostClick }: PostGridProps) {
 	return (
 		<div className="grid grid-cols-3 gap-1">
 			{posts.map((post) => (
-				<PostPreviewWithStats
+				<PostPreview
 					key={post.id}
 					imageUrl={post.imageUrl}
-					likes={0}
-					comments={0}
-					onClick={() => onPostClick(post.id.toString())}
+					likes={post.likes || 0}
+					comments={post.comments || 0}
+					onClick={() => onPostClick(post)}
 				/>
 			))}
 		</div>
