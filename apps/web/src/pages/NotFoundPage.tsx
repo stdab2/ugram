@@ -5,34 +5,37 @@ import {
 	EmptyHeader,
 	EmptyTitle,
 } from "@/components/ui/Empty";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/InputGroup";
-import { Kbd } from "@/components/ui/Kbd";
-import { SearchIcon } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { Home, Search, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export function NotFoundPage() {
+	const navigate = useNavigate();
+
 	return (
 		<div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-4">
 			<Empty>
 				<EmptyHeader>
-					<EmptyTitle>404 - Not Found</EmptyTitle>
+					<EmptyTitle>404 - Page Not Found</EmptyTitle>
 					<EmptyDescription>
-						The page you&apos;re looking for doesn&apos;t exist. Try searching for what you need
-						below.
+						The page you&apos;re looking for doesn&apos;t exist or has been moved.
 					</EmptyDescription>
 				</EmptyHeader>
 				<EmptyContent>
-					<InputGroup className="sm:w-3/4">
-						<InputGroupInput placeholder="Try searching for pages..." />
-						<InputGroupAddon>
-							<SearchIcon />
-						</InputGroupAddon>
-						<InputGroupAddon align="inline-end">
-							<Kbd>/</Kbd>
-						</InputGroupAddon>
-					</InputGroup>
-					<EmptyDescription>
-						Need help? <a href="#">Contact support</a>
-					</EmptyDescription>
+					<div className="flex flex-col sm:flex-row gap-3 justify-center">
+						<Button onClick={() => navigate("/")} variant="default">
+							<Home className="mr-2 h-4 w-4" />
+							Go to Home
+						</Button>
+						<Button onClick={() => navigate("/search")} variant="outline">
+							<Search className="mr-2 h-4 w-4" />
+							Search
+						</Button>
+						<Button onClick={() => navigate("/profile/john_doe")} variant="outline">
+							<User className="mr-2 h-4 w-4" />
+							My Profile
+						</Button>
+					</div>
 				</EmptyContent>
 			</Empty>
 		</div>

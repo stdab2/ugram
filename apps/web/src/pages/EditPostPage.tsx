@@ -1,10 +1,18 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { PostForm } from "@/components/PostForm";
 import { usePostQuery } from "@/generated/graphql";
-import { Loader2 } from "lucide-react";
+import { EditPostSkeleton } from "@/components/EditPostSkeleton";
+import {
+	Empty,
+	EmptyContent,
+	EmptyDescription,
+	EmptyHeader,
+	EmptyTitle,
+} from "@/components/ui/Empty";
 import { Button } from "@/components/ui/Button";
 import { getImageUrl } from "@/lib/utils";
 import { CURRENT_USERNAME } from "@/lib/constants";
+import { AlertCircle, Lock } from "lucide-react";
 
 export function EditPostPage() {
 	const { id } = useParams();
@@ -42,22 +50,23 @@ export function EditPostPage() {
 
 	// Handle loading state
 	if (loading) {
-		return (
-			<div className="w-full min-h-screen bg-background pb-20 md:pb-0 flex items-center justify-center">
-				<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-			</div>
-		);
+		return <EditPostSkeleton />;
 	}
 
 	// Handle error state
 	if (error) {
 		return (
-			<div className="w-full min-h-screen bg-background pb-20 md:pb-0 flex items-center justify-center">
-				<div className="text-center space-y-2">
-					<p className="text-xl font-semibold">Error loading post</p>
-					<p className="text-muted-foreground">{error.message}</p>
-					<Button onClick={() => navigate("/")}>Go back to feed</Button>
-				</div>
+			<div className="w-full min-h-screen bg-background pb-20 md:pb-0 flex items-center justify-center p-4">
+				<Empty>
+					<EmptyHeader>
+						<AlertCircle className="h-12 w-12 mb-4 text-muted-foreground" />
+						<EmptyTitle>Error Loading Post</EmptyTitle>
+						<EmptyDescription>{error.message}</EmptyDescription>
+					</EmptyHeader>
+					<EmptyContent>
+						<Button onClick={() => navigate("/")}>Go back to feed</Button>
+					</EmptyContent>
+				</Empty>
 			</div>
 		);
 	}
@@ -65,11 +74,19 @@ export function EditPostPage() {
 	// Handle post not found
 	if (!post) {
 		return (
-			<div className="w-full min-h-screen bg-background pb-20 md:pb-0 flex items-center justify-center">
-				<div className="text-center space-y-2">
-					<p className="text-xl font-semibold">Post not found</p>
-					<Button onClick={() => navigate("/")}>Go back to feed</Button>
-				</div>
+			<div className="w-full min-h-screen bg-background pb-20 md:pb-0 flex items-center justify-center p-4">
+				<Empty>
+					<EmptyHeader>
+						<AlertCircle className="h-12 w-12 mb-4 text-muted-foreground" />
+						<EmptyTitle>Post Not Found</EmptyTitle>
+						<EmptyDescription>
+							The post you&apos;re trying to edit doesn&apos;t exist.
+						</EmptyDescription>
+					</EmptyHeader>
+					<EmptyContent>
+						<Button onClick={() => navigate("/")}>Go back to feed</Button>
+					</EmptyContent>
+				</Empty>
 			</div>
 		);
 	}
@@ -77,12 +94,17 @@ export function EditPostPage() {
 	// Check if user owns this post
 	if (post.author.userName !== CURRENT_USERNAME) {
 		return (
-			<div className="w-full min-h-screen bg-background pb-20 md:pb-0 flex items-center justify-center">
-				<div className="text-center space-y-2">
-					<p className="text-xl font-semibold">Access denied</p>
-					<p className="text-muted-foreground">You can only edit your own posts</p>
-					<Button onClick={() => navigate("/")}>Go back to feed</Button>
-				</div>
+			<div className="w-full min-h-screen bg-background pb-20 md:pb-0 flex items-center justify-center p-4">
+				<Empty>
+					<EmptyHeader>
+						<Lock className="h-12 w-12 mb-4 text-muted-foreground" />
+						<EmptyTitle>Access Denied</EmptyTitle>
+						<EmptyDescription>You can only edit your own posts</EmptyDescription>
+					</EmptyHeader>
+					<EmptyContent>
+						<Button onClick={() => navigate("/")}>Go back to feed</Button>
+					</EmptyContent>
+				</Empty>
 			</div>
 		);
 	}

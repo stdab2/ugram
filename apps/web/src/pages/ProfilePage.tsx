@@ -6,8 +6,16 @@ import { Separator } from "@/components/ui/Separator";
 import { Button } from "@/components/ui/Button";
 import { PostGrid } from "@/components/PostGrid";
 import { PostModal } from "@/components/PostModal";
+import { ProfileSkeleton } from "@/components/ProfileSkeleton";
+import {
+	Empty,
+	EmptyContent,
+	EmptyDescription,
+	EmptyHeader,
+	EmptyTitle,
+} from "@/components/ui/Empty";
 import { useUserByUserNameQuery, usePostsByAuthorQuery } from "@/generated/graphql";
-import { Mail, Phone, Calendar, Loader2 } from "lucide-react";
+import { Mail, Phone, Calendar, UserX, AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { CURRENT_USERNAME } from "@/lib/constants";
 import { getImageUrl } from "@/lib/utils";
@@ -46,24 +54,25 @@ export function ProfilePage() {
 
 	// Handle loading state
 	if (userLoading || postsLoading) {
-		return (
-			<div className="w-full min-h-screen bg-background flex items-center justify-center">
-				<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-			</div>
-		);
+		return <ProfileSkeleton />;
 	}
 
 	// Handle error state
 	if (userError || postsError) {
 		return (
-			<div className="w-full min-h-screen bg-background flex items-center justify-center">
-				<div className="text-center space-y-2">
-					<p className="text-xl font-semibold">Error loading profile</p>
-					<p className="text-muted-foreground">
-						{userError?.message || postsError?.message || "Something went wrong"}
-					</p>
-					<Button onClick={() => navigate("/")}>Go back to feed</Button>
-				</div>
+			<div className="w-full min-h-screen bg-background flex items-center justify-center p-4">
+				<Empty>
+					<EmptyHeader>
+						<AlertCircle className="h-12 w-12 mb-4 text-muted-foreground" />
+						<EmptyTitle>Error Loading Profile</EmptyTitle>
+						<EmptyDescription>
+							{userError?.message || postsError?.message || "Something went wrong"}
+						</EmptyDescription>
+					</EmptyHeader>
+					<EmptyContent>
+						<Button onClick={() => navigate("/")}>Go back to feed</Button>
+					</EmptyContent>
+				</Empty>
 			</div>
 		);
 	}
@@ -71,11 +80,19 @@ export function ProfilePage() {
 	// Handle user not found
 	if (!userData?.userByUserName) {
 		return (
-			<div className="w-full min-h-screen bg-background flex items-center justify-center">
-				<div className="text-center space-y-2">
-					<p className="text-xl font-semibold">User not found</p>
-					<Button onClick={() => navigate("/")}>Go back to feed</Button>
-				</div>
+			<div className="w-full min-h-screen bg-background flex items-center justify-center p-4">
+				<Empty>
+					<EmptyHeader>
+						<UserX className="h-12 w-12 mb-4 text-muted-foreground" />
+						<EmptyTitle>User Not Found</EmptyTitle>
+						<EmptyDescription>
+							The user you&apos;re looking for doesn&apos;t exist or has been removed.
+						</EmptyDescription>
+					</EmptyHeader>
+					<EmptyContent>
+						<Button onClick={() => navigate("/")}>Go back to feed</Button>
+					</EmptyContent>
+				</Empty>
 			</div>
 		);
 	}

@@ -5,9 +5,17 @@ import { RecentSearchItem } from "@/components/RecentSearchItem";
 import { UserSearchResult } from "@/components/UserSearchResult";
 import { PostGrid } from "@/components/PostGrid";
 import { PostModal } from "@/components/PostModal";
+import { SearchSkeleton } from "@/components/SearchSkeleton";
+import {
+	Empty,
+	EmptyContent,
+	EmptyDescription,
+	EmptyHeader,
+	EmptyTitle,
+} from "@/components/ui/Empty";
 import { Button } from "@/components/ui/Button";
 import type { RecentSearch, SearchType } from "@/types/search";
-import { Loader2 } from "lucide-react";
+import { AlertCircle, RefreshCcw } from "lucide-react";
 import { useUsersQuery, usePostsQuery } from "@/generated/graphql";
 import type { PostsQuery } from "@/generated/graphql";
 
@@ -20,8 +28,18 @@ const mockRecentSearches: RecentSearch[] = [
 
 export function SearchPage() {
 	// Fetch users and posts from GraphQL API
-	const { data: usersData, loading: usersLoading } = useUsersQuery();
-	const { data: postsData, loading: postsLoading } = usePostsQuery({
+	const {
+		data: usersData,
+		loading: usersLoading,
+		error: usersError,
+		refetch: refetchUsers,
+	} = useUsersQuery();
+	const {
+		data: postsData,
+		loading: postsLoading,
+		error: postsError,
+		refetch: refetchPosts,
+	} = usePostsQuery({
 		variables: { limit: 30, offset: 0 },
 	});
 
@@ -39,6 +57,41 @@ export function SearchPage() {
 
 	const isSearching = searchQuery.trim().length > 0;
 	const isLoading = usersLoading || postsLoading;
+	const hasError = usersError || postsError;
+
+	// Loading state
+	if (isLoading) {
+		return <SearchSkeleton />;
+	}
+
+	// Error state
+	if (hasError) {
+		return (
+			<div className="max-w-[630px] mx-auto pb-20 flex items-center justify-center min-h-[60vh]">
+				<Empty>
+					<EmptyHeader>
+						<AlertCircle className="h-12 w-12 mb-4 text-muted-foreground" />
+						<EmptyTitle>Unable to Load Search</EmptyTitle>
+						<EmptyDescription>
+							{usersError?.message || postsError?.message || "Something went wrong"}
+						</EmptyDescription>
+					</EmptyHeader>
+					<EmptyContent>
+						<Button
+							onClick={() => {
+								refetchUsers();
+								refetchPosts();
+							}}
+							variant="default"
+						>
+							<RefreshCcw className="mr-2 h-4 w-4" />
+							Try Again
+						</Button>
+					</EmptyContent>
+				</Empty>
+			</div>
+		);
+	}
 
 	const handleLoadMoreUsers = () => {
 		setVisibleUsersCount((prev) => prev + 10);
@@ -91,11 +144,7 @@ export function SearchPage() {
 
 			{/* Content */}
 			<div className="mt-2">
-				{isLoading ? (
-					<div className="flex justify-center items-center py-20">
-						<Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-					</div>
-				) : !isSearching ? (
+				{!isSearching ? (
 					<>
 						{/* Recent Searches - Only show when filter is "all" */}
 						{recentSearches.length > 0 && activeFilter === "all" && (
