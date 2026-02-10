@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/Label";
 import { Button } from "@/components/ui/Button";
 import { useUserQuery, useUpdateUserMutation } from "@/generated/graphql";
 import { useState, useEffect } from "react";
+import { z } from "zod";
+import { settingsSchema, type SettingsFormData } from "@/lib/settingsSchema";
 
 const USER_ID = 1; //TODO: Mettre vrai ID
 
@@ -23,6 +25,8 @@ export function Settings({ className, ...props }: React.ComponentProps<"div">) {
 	const [phoneNumber, setPhoneNumber] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [isAddingPhone, setIsAddingPhone] = useState(false);
+	const [errors, setErrors] = useState<Partial<Record<keyof SettingsFormData, string>>>({});
+	const [showSuccess, setShowSuccess] = useState(false);
 
 	useEffect(() => {
 		if (data?.user) {
@@ -38,24 +42,52 @@ export function Settings({ className, ...props }: React.ComponentProps<"div">) {
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
+		setErrors({});
+		setShowSuccess(false);
 		setIsSubmitting(true);
 
 		try {
+			const validatedData = settingsSchema.parse({
+				firstName,
+				lastName,
+				email,
+				phoneNumber,
+			});
+
 			await updateUser({
 				variables: {
 					id: USER_ID,
-					firstName,
-					lastName,
-					email,
-					phoneNumber,
+					firstName: validatedData.firstName,
+					lastName: validatedData.lastName,
+					email: validatedData.email,
+					phoneNumber: validatedData.phoneNumber,
 				},
 			});
 
 			if (!phoneNumber) {
 				setIsAddingPhone(false);
 			}
+
+			// Show success message
+			setShowSuccess(true);
+			// Auto-hide after 3 seconds
+			setTimeout(() => setShowSuccess(false), 3000);
 		} catch (err) {
-			console.error("Failed to update:", err);
+			if (err instanceof z.ZodError) {
+				const fieldErrors: Partial<Record<keyof SettingsFormData, string>> = {};
+
+				err.issues.forEach((error) => {
+					const fieldName = error.path[0] as keyof SettingsFormData;
+
+					if (fieldName) {
+						fieldErrors[fieldName] = error.message;
+					}
+				});
+
+				setErrors(fieldErrors);
+			} else {
+				console.error("Failed to update:", err);
+			}
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -90,7 +122,9 @@ export function Settings({ className, ...props }: React.ComponentProps<"div">) {
 								value={firstName}
 								onChange={(e) => setFirstName(e.target.value)}
 								maxLength={20}
+								className={errors.firstName ? "border-red-500" : ""}
 							/>
+							{errors.firstName && <p className="text-sm text-red-500">{errors.firstName}</p>}
 							<Label htmlFor="lastname">Last Name</Label>
 							<Input
 								id="lastname"
@@ -99,7 +133,9 @@ export function Settings({ className, ...props }: React.ComponentProps<"div">) {
 								value={lastName}
 								onChange={(e) => setLastName(e.target.value)}
 								maxLength={20}
+								className={errors.lastName ? "border-red-500" : ""}
 							/>
+							{errors.lastName && <p className="text-sm text-red-500">{errors.lastName}</p>}
 						</div>
 						<div className="space-y-2">
 							<Label htmlFor="email">Email</Label>
@@ -109,8 +145,9 @@ export function Settings({ className, ...props }: React.ComponentProps<"div">) {
 								placeholder="email@example.com"
 								value={email}
 								onChange={(e) => setEmail(e.target.value)}
-								pattern="[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$"
+								className={errors.email ? "border-red-500" : ""}
 							/>
+							{errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
 						</div>
 						<div className="space-y-2">
 							<Label htmlFor="telephone">Phone Number</Label>
@@ -123,14 +160,17 @@ export function Settings({ className, ...props }: React.ComponentProps<"div">) {
 									Add Phone Number
 								</Button>
 							) : (
-								<Input
-									id="telephone"
-									type="tel"
-									placeholder="e.g. +11234567890"
-									value={phoneNumber}
-									onChange={(e) => setPhoneNumber(e.target.value)}
-									pattern="^\+?[1-9][0-9]{7,14}$"
-								/>
+								<>
+									<Input
+										id="telephone"
+										type="tel"
+										placeholder="e.g. +11234567890"
+										value={phoneNumber}
+										onChange={(e) => setPhoneNumber(e.target.value)}
+										className={errors.phoneNumber ? "border-red-500" : ""}
+									/>
+									{errors.phoneNumber && <p className="text-sm text-red-500">{errors.phoneNumber}</p>}
+								</>
 							)}
 						</div>
 						<div className="flex justify-end mt-8">
@@ -138,6 +178,11 @@ export function Settings({ className, ...props }: React.ComponentProps<"div">) {
 								{isSubmitting ? "Updating..." : "Update Profile"}
 							</Button>
 						</div>
+						{showSuccess && (
+							<div className="flex justify-center mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded w-full">
+								Profile updated successfully!
+							</div>
+						)}
 					</form>
 				</CardContent>
 			</Card>
