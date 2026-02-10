@@ -247,3 +247,45 @@ export function PostPreview({ imageUrl, className, onClick }: PostPreviewProps) 
 		</button>
 	);
 }
+
+interface PostPreviewWithStatsProps {
+	imageUrl: string;
+	likes?: number;
+	comments?: number;
+	className?: string;
+	onClick?: () => void;
+}
+
+export function PostPreviewWithStats({
+	imageUrl,
+	likes = 0,
+	comments = 0,
+	className,
+	onClick,
+}: PostPreviewWithStatsProps) {
+	const [isHovered, setIsHovered] = useState(false);
+
+	return (
+		<button
+			className={cn("aspect-square overflow-hidden bg-muted relative group w-full", className)}
+			onClick={onClick}
+			onMouseEnter={() => setIsHovered(true)}
+			onMouseLeave={() => setIsHovered(false)}
+			aria-label="View post"
+		>
+			<img src={imageUrl} alt="Post preview" className="w-full h-full object-cover" />
+			{isHovered && (
+				<div className="absolute inset-0 bg-black/40 flex items-center justify-center gap-6 text-white">
+					<div className="flex items-center gap-2">
+						<Heart className="w-6 h-6 fill-white" />
+						<span className="font-semibold">{likes}</span>
+					</div>
+					<div className="flex items-center gap-2">
+						<MessageCircle className="w-6 h-6 fill-white" />
+						<span className="font-semibold">{comments}</span>
+					</div>
+				</div>
+			)}
+		</button>
+	);
+}
