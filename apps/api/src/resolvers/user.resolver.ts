@@ -14,7 +14,7 @@ import {
 	validateNonEmptyString,
 	validatePhoneNumber,
 	validateUserExists,
-} from "../../validators/validateUser.js";
+} from "../../Validators/validateUser.js";
 import { saveUploadedImage } from "../../services/image.service.js";
 
 const adapter = new PrismaPg({
