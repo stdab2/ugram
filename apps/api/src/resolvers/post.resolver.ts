@@ -59,7 +59,7 @@ export const postResolvers = {
 			const { description, image, authorId, hashtags, mentionedUsers } = data;
 
 			if (mentionedUsers && mentionedUsers.length > 0) {
-				await validateUsersExist(mentionedUsers);
+				await validateUsersExist(mentionedUsers, prisma);
 			}
 
 			if (!image) {
@@ -69,8 +69,12 @@ export const postResolvers = {
 			const imageUrl = await saveUploadedImage(image, "post");
 			let hashtagRows: { id: number }[] = [];
 
-			if (hashtags) {
-				const tags = hashtags.map((t: string) => t.toLowerCase());
+			if (hashtags?.length) {
+				const tags = Array.from(
+					new Set(
+						hashtags.map((t: string) => t.toLowerCase().trim()).filter((t: string) => t.length > 0)
+					)
+				);
 				if (tags.length) {
 					await prisma.hashtag.createMany({
 						data: tags.map((name: string) => ({ name })),

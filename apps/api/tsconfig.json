@@ -14,6 +14,6 @@
 
 		"types": ["node"]
 	},
-	"include": ["src/**/*", "prisma/**/*", "generated/**/*", "services", "*.ts", "*.ts"],
+	"include": ["src/**/*", "prisma/**/*", "generated/**/*", "services", "*.ts", "Validators/**/*"],
 	"exclude": ["node_modules", "dist"]
 }
