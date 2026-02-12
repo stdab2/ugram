@@ -24,7 +24,6 @@ extend type Mutation {
     lastName: String!
     phoneNumber: String!
     picture: Upload
-    createdAt: String!
   ): UserUgram!
   
   updateUser(
