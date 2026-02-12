@@ -23,7 +23,7 @@ extend type Mutation {
     firstName: String!
     lastName: String!
     phoneNumber: String!
-    picture: String
+    picture: Upload
     createdAt: String!
   ): UserUgram!
   
