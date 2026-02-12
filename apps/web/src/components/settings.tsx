@@ -24,7 +24,6 @@ export function Settings({ className, ...props }: React.ComponentProps<"div">) {
 	const [email, setEmail] = useState("");
 	const [phoneNumber, setPhoneNumber] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [isAddingPhone, setIsAddingPhone] = useState(false);
 	const [errors, setErrors] = useState<Partial<Record<keyof SettingsFormData, string>>>({});
 	const [showSuccess, setShowSuccess] = useState(false);
 
@@ -34,9 +33,6 @@ export function Settings({ className, ...props }: React.ComponentProps<"div">) {
 			setLastName(data.user.lastName);
 			setEmail(data.user.email);
 			setPhoneNumber(data.user.phoneNumber);
-			if (data.user.phoneNumber) {
-				setIsAddingPhone(true);
-			}
 		}
 	}, [data]);
 
@@ -63,10 +59,6 @@ export function Settings({ className, ...props }: React.ComponentProps<"div">) {
 					phoneNumber: validatedData.phoneNumber,
 				},
 			});
-
-			if (!phoneNumber) {
-				setIsAddingPhone(false);
-			}
 
 			setShowSuccess(true);
 			setTimeout(() => setShowSuccess(false), 3000);
@@ -152,28 +144,15 @@ export function Settings({ className, ...props }: React.ComponentProps<"div">) {
 						</div>
 						<div className="space-y-2">
 							<Label htmlFor="telephone">Phone Number</Label>
-							{!phoneNumber && !isAddingPhone ? (
-								<Button
-									id="telephone"
-									type="button"
-									variant="outline"
-									onClick={() => setIsAddingPhone(true)}
-								>
-									Add Phone Number
-								</Button>
-							) : (
-								<>
-									<Input
-										id="telephone"
-										type="tel"
-										placeholder="e.g. +12223334444"
-										value={phoneNumber}
-										onChange={(e) => setPhoneNumber(e.target.value)}
-										className={errors.phoneNumber ? "border-red-500" : ""}
-									/>
-									{errors.phoneNumber && <p className="text-sm text-red-500">{errors.phoneNumber}</p>}
-								</>
-							)}
+							<Input
+								id="telephone"
+								type="tel"
+								placeholder="e.g. +12223334444"
+								value={phoneNumber}
+								onChange={(e) => setPhoneNumber(e.target.value)}
+								className={errors.phoneNumber ? "border-red-500" : ""}
+							/>
+							{errors.phoneNumber && <p className="text-sm text-red-500">{errors.phoneNumber}</p>}
 						</div>
 						<div className="flex justify-end mt-8">
 							<Button type="submit" disabled={isSubmitting}>
