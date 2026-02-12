@@ -166,7 +166,7 @@ export function Settings({ className, ...props }: React.ComponentProps<"div">) {
 									<Input
 										id="telephone"
 										type="tel"
-										placeholder="e.g. +11234567890"
+										placeholder="e.g. +12223334444"
 										value={phoneNumber}
 										onChange={(e) => setPhoneNumber(e.target.value)}
 										className={errors.phoneNumber ? "border-red-500" : ""}
