@@ -45,24 +45,37 @@ const userData: Prisma.UserUgramCreateInput[] = [
 		posts: {
 			create: [
 				{
-					description: "Beautiful sunset at the beach 🌅 @jane_smith #sunset #beach #photography",
+					description: "Beautiful sunset at the beach 🌅 #sunset #beach #photography",
 					imageUrl: "images/post/1.jpg",
+					hashtags: {
+						connect: [{ name: "#sunset" }, { name: "#beach" }, { name: "#photography" }],
+					},
 				},
 				{
 					description: "New adventure begins! #travel #adventure",
 					imageUrl: "images/post/6.jpg",
+					hashtags: {
+						connect: [{ name: "#travel" }, { name: "#adventure" }],
+					},
 				},
 				{
 					description: "Good vibes only ✨ #lifestyle #mood",
 					imageUrl: "images/post/7.jpg",
+					hashtags: {
+						connect: [{ name: "#lifestyle" }, { name: "#mood" }],
+					},
 				},
 				{
 					description: "Throwback to summer days 🌞 #summer #memories",
 					imageUrl: "images/post/8.jpg",
+					hashtags: {
+						connect: [{ name: "#summer" }, { name: "#memories" }],
+					},
 				},
 			],
 		},
 	},
+
 	{
 		userName: "jane_smith",
 		password: "qwerty",
@@ -74,19 +87,27 @@ const userData: Prisma.UserUgramCreateInput[] = [
 		posts: {
 			create: [
 				{
-					description: "Morning coffee vibes ☕️ #coffee #morning #lifestyle",
+					description:
+						"Morning coffee vibes ☕️ Thanks @john_doe for the recommendation! #coffee #morning #lifestyle",
 					imageUrl: "images/post/2.jpg",
+					hashtags: {
+						connect: [{ name: "#coffee" }, { name: "#morning" }, { name: "#lifestyle" }],
+					},
+					mentionedUsers: {
+						connect: [{ email: "john.doe@example.com" }],
+					},
 				},
 			],
 		},
 	},
+
 	{
 		userName: "travel_explorer",
 		password: "qwerty",
 		email: "travel.explorer@example.com",
 		phoneNumber: "+15145550003",
-		firstName: "John",
-		lastName: "Doe",
+		firstName: "Alex",
+		lastName: "Rivers",
 		picture: "images/profile/3.jpg",
 		posts: {
 			create: [
@@ -94,41 +115,77 @@ const userData: Prisma.UserUgramCreateInput[] = [
 					description:
 						"Mountain views from the top 🏔️ Amazing hiking experience with @john_doe #travel #mountains #adventure #hiking",
 					imageUrl: "images/post/3.jpg",
+					hashtags: {
+						connect: [
+							{ name: "#travel" },
+							{ name: "#mountains" },
+							{ name: "#adventure" },
+							{ name: "#hiking" },
+						],
+					},
+					mentionedUsers: {
+						connect: [{ email: "john.doe@example.com" }],
+					},
 				},
 			],
 		},
 	},
+
 	{
 		userName: "foodie_lover",
 		password: "qwerty",
 		email: "foodie.lover@example.com",
 		phoneNumber: "+15145550004",
-		firstName: "John",
-		lastName: "Doe",
+		firstName: "Maria",
+		lastName: "Garcia",
 		picture: "images/profile/4.jpg",
 		posts: {
 			create: [
 				{
-					description: "Homemade pasta night 🍝 Recipe in bio! #food #cooking #pasta #italian",
+					description:
+						"Homemade pasta night 🍝 Recipe in bio! Cooking with @john_doe and @jane_smith #food #cooking #pasta #italian",
 					imageUrl: "images/post/4.jpg",
+					hashtags: {
+						connect: [
+							{ name: "#food" },
+							{ name: "#cooking" },
+							{ name: "#pasta" },
+							{ name: "#italian" },
+						],
+					},
+					mentionedUsers: {
+						connect: [{ email: "john.doe@example.com" }, { email: "jane.smith@example.com" }],
+					},
 				},
 			],
 		},
 	},
+
 	{
 		userName: "urban_photographer",
 		password: "qwerty",
 		email: "urban.photographer@example.com",
 		phoneNumber: "+15145550005",
-		firstName: "John",
-		lastName: "Doe",
+		firstName: "David",
+		lastName: "Chen",
 		picture: "images/profile/5.jpg",
 		posts: {
 			create: [
 				{
 					description:
-						"City lights and night vibes 🌃 #citylife #photography #urban #nightphotography",
+						"City lights and night vibes 🌃 Shot with @jane_smith #citylife #photography #urban #nightphotography",
 					imageUrl: "images/post/5.jpg",
+					hashtags: {
+						connect: [
+							{ name: "#citylife" },
+							{ name: "#photography" },
+							{ name: "#urban" },
+							{ name: "#nightphotography" },
+						],
+					},
+					mentionedUsers: {
+						connect: [{ email: "jane.smith@example.com" }],
+					},
 				},
 			],
 		},

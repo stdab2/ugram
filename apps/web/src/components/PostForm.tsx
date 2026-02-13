@@ -12,7 +12,7 @@ import { getImageUrl } from "@/lib/utils";
 interface PostFormProps {
 	initialImage?: string;
 	initialDescription?: string;
-	onSubmit: (data: { imagePreview: string | null; description: string }) => Promise<void>;
+	onSubmit: (description: string) => void;
 	submitButtonText: string;
 	onCancel: () => void;
 	allowImageChange?: boolean;
@@ -56,7 +56,7 @@ export function PostForm({
 		setIsSaving(true);
 
 		try {
-			await onSubmit({ imagePreview, description });
+			onSubmit(description);
 		} finally {
 			setIsSaving(false);
 		}
@@ -181,7 +181,12 @@ export function PostForm({
 							<Button
 								size="lg"
 								type="submit"
-								disabled={isSaving || !imagePreview || !description.trim()}
+								disabled={
+									isSaving ||
+									!imagePreview ||
+									!description.trim() ||
+									description.trim() == initialDescription.trim()
+								}
 								className="flex-1 p-5"
 							>
 								{isSaving ? "Saving..." : submitButtonText}

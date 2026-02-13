@@ -12,3 +12,8 @@ extend type Query {
   posts(limit: Int, offset: Int): [Post!]!
   postsByAuthor(authorId: Int!, limit: Int, offset: Int): [Post!]!
 }
+
+extend type Mutation {
+  deletePost(id: Int!): Post!
+  updatePost(id: Int!, description: String!): Post!
+}

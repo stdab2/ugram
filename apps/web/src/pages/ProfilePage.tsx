@@ -14,11 +14,16 @@ import {
 	EmptyHeader,
 	EmptyTitle,
 } from "@/components/ui/Empty";
-import { useUserByUserNameQuery, usePostsByAuthorQuery } from "@/generated/graphql";
+import {
+	useUserByUserNameQuery,
+	usePostsByAuthorQuery,
+	useDeletePostMutation,
+} from "@/generated/graphql";
 import { Mail, Phone, Calendar, UserX, AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { CURRENT_USERNAME } from "@/lib/constants";
 import { getImageUrl } from "@/lib/utils";
+import { toast } from "react-toastify";
 
 export function ProfilePage() {
 	const { username } = useParams();
@@ -51,6 +56,24 @@ export function ProfilePage() {
 
 	type PostType = NonNullable<typeof postsData>["postsByAuthor"][0];
 	const [selectedPost, setSelectedPost] = useState<PostType | null>(null);
+
+	const [deletePost] = useDeletePostMutation({
+		update(cache, { data }) {
+			if (!data?.deletePost) return;
+
+			cache.evict({ id: cache.identify({ __typename: "Post", id: data.deletePost.id }) });
+			cache.gc();
+		},
+	});
+
+	const handlePostDeletion = (postId: number) => {
+		deletePost({ variables: { id: postId } });
+		setSelectedPost(null);
+		toast.success("Your post has been successfully deleted !");
+	};
+
+	// Use postsData directly - no userPosts state needed!
+	const userPosts = postsData?.postsByAuthor || [];
 
 	// Handle loading state
 	if (userLoading || postsLoading) {
@@ -98,7 +121,6 @@ export function ProfilePage() {
 	}
 
 	const user = userData.userByUserName;
-	const userPosts = postsData?.postsByAuthor || [];
 	const avatarFallback = user.firstName[0] + user.lastName[0];
 
 	return (
@@ -195,6 +217,7 @@ export function ProfilePage() {
 						open={!!selectedPost}
 						onOpenChange={(open) => !open && setSelectedPost(null)}
 						post={selectedPost}
+						onPostDeletion={handlePostDeletion}
 					/>
 				)}
 			</div>
