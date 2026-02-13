@@ -20,14 +20,18 @@ export function EditPostPage() {
 	const { id } = useParams();
 	const navigate = useNavigate();
 
+	// Parse and validate the id
+	const parsedId = parseInt(id || "0");
+	const isValidId = Number.isFinite(parsedId) && parsedId > 0;
+
 	// Fetch post data
 	const {
 		data: postData,
 		loading,
 		error,
 	} = usePostQuery({
-		variables: { id: parseInt(id || "0") },
-		skip: !id,
+		variables: { id: parsedId },
+		skip: !isValidId,
 	});
 
 	const post = postData?.post;

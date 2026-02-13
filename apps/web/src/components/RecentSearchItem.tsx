@@ -17,8 +17,9 @@ export function RecentSearchItem({ search, onClick, onDelete }: RecentSearchItem
 	const Icon = icons[search.type];
 
 	return (
-		<div
-			className="flex items-center gap-3 px-4 py-3 hover:bg-muted/50 cursor-pointer group"
+		<button
+			type="button"
+			className="flex items-center gap-3 px-4 py-3 hover:bg-muted/50 cursor-pointer group w-full text-left"
 			onClick={onClick}
 		>
 			<div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
@@ -28,14 +29,16 @@ export function RecentSearchItem({ search, onClick, onDelete }: RecentSearchItem
 				<p className="text-sm font-medium truncate">{search.query}</p>
 			</div>
 			<button
+				type="button"
 				onClick={(e) => {
 					e.stopPropagation();
 					onDelete();
 				}}
+				aria-label={`Delete search for ${search.query}`}
 				className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground transition-opacity"
 			>
 				<X className="w-4 h-4" />
 			</button>
-		</div>
+		</button>
 	);
 }
