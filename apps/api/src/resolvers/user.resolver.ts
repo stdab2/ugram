@@ -1,10 +1,6 @@
 import { PrismaClient, UserUgram, Prisma } from "../../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
-import {
-	CreateUserInput,
-	UpdateUserInput,
-	QueryUsersInput,
-} from "../types/user.types.js";
+import { CreateUserInput, UpdateUserInput, QueryUsersInput } from "../types/user.types.js";
 import {
 	UserValidationError,
 	validateEmail,
@@ -26,6 +22,13 @@ const prisma = new PrismaClient({
 });
 
 /**
+ * Type guard for Prisma errors
+ */
+function isPrismaError(error: unknown): error is { code: string; meta?: { target?: string[] } } {
+	return typeof error === "object" && error !== null && "code" in error;
+}
+
+/**
  * User Resolvers
  * Handles all user-related GraphQL queries and mutations
  */
@@ -40,6 +43,13 @@ export const userResolvers = {
 			validateUserId(args.id);
 			return prisma.userUgram.findUnique({
 				where: { id: args.id },
+			});
+		},
+
+		userByUserName: async (_: void, args: { userName: string }) => {
+			validateUserName(args.userName);
+			return prisma.userUgram.findUnique({
+				where: { userName: args.userName },
 			});
 		},
 
@@ -103,9 +113,9 @@ export const userResolvers = {
 						picture: pictureUrl,
 					},
 				});
-			} catch (error: any) {
+			} catch (error: unknown) {
 				// P2002: Unique constraint violation (duplicate email, username, etc.)
-				if (error.code === "P2002") {
+				if (isPrismaError(error) && error.code === "P2002") {
 					const field = error.meta?.target?.[0] || "field";
 					throw new UserValidationError(`User with this ${field} already exists`);
 				}
@@ -171,9 +181,9 @@ export const userResolvers = {
 					where: { id: args.id },
 					data,
 				});
-			} catch (error: any) {
+			} catch (error: unknown) {
 				// P2002: Unique constraint violation (duplicate email, username, etc.)
-				if (error.code === "P2002") {
+				if (isPrismaError(error) && error.code === "P2002") {
 					const field = error.meta?.target?.[0] || "field";
 					throw new UserValidationError(`User with this ${field} already exists`);
 				}

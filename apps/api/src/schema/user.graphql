@@ -11,8 +11,9 @@ type UserUgram {
 }
 
 extend type Query {
-  user(id: Int!): UserUgram
-  users(limit: Int, offset: Int): [UserUgram!]!
+	user(id: Int!): UserUgram
+	userByUserName(userName: String!): UserUgram
+	users: [UserUgram!]!
 }
 
 extend type Mutation {

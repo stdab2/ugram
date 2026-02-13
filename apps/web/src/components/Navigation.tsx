@@ -9,6 +9,7 @@ import {
 	LogOut,
 	User,
 } from "lucide-react";
+import { CURRENT_USERNAME } from "@/lib/constants";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 import {
 	DropdownMenu,
@@ -18,7 +19,8 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/DropdownMenu";
 import { Badge } from "@/components/ui/Badge";
-import { cn } from "@/lib/utils";
+import { cn, getImageUrl } from "@/lib/utils";
+import { useUserByUserNameQuery } from "@/generated/graphql";
 
 const navItems = [
 	{ icon: Home, label: "Home", href: "/" },
@@ -31,6 +33,15 @@ export function Navigation() {
 	const location = useLocation();
 	const navigate = useNavigate();
 	const pathname = location.pathname;
+
+	// Fetch current user data
+	const { data: userData } = useUserByUserNameQuery({
+		variables: { userName: CURRENT_USERNAME },
+	});
+
+	const user = userData?.userByUserName;
+	const avatarFallback = user ? user.firstName[0] + user.lastName[0] : "JD";
+	const avatarUrl = getImageUrl(user?.picture);
 
 	return (
 		<>
@@ -88,15 +99,16 @@ export function Navigation() {
 						</Link>
 
 						<Link
-							to="/profile/me"
+							to={`/profile/${CURRENT_USERNAME}`}
 							className={cn(
 								"flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors",
-								pathname === "/profile/me" && "bg-accent text-accent-foreground font-medium"
+								pathname === `/profile/${CURRENT_USERNAME}` &&
+									"bg-accent text-accent-foreground font-medium"
 							)}
 						>
 							<Avatar className="h-8 w-8 flex-shrink-0">
-								<AvatarImage src="/avatar.jpg" />
-								<AvatarFallback>JD</AvatarFallback>
+								<AvatarImage src={avatarUrl} />
+								<AvatarFallback>{avatarFallback}</AvatarFallback>
 							</Avatar>
 							<span className="whitespace-nowrap opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">
 								Profile
@@ -156,8 +168,8 @@ export function Navigation() {
 							className="flex items-center justify-center h-16 w-16 rounded-lg hover:bg-accent transition-colors relative"
 						>
 							<Avatar className="h-9 w-9">
-								<AvatarImage src="/avatar.jpg" />
-								<AvatarFallback>JD</AvatarFallback>
+								<AvatarImage src={avatarUrl} />
+								<AvatarFallback>{avatarFallback}</AvatarFallback>
 							</Avatar>
 							<Badge
 								variant="destructive"
@@ -174,7 +186,7 @@ export function Navigation() {
 									3
 								</Badge>
 							</DropdownMenuItem>
-							<DropdownMenuItem onClick={() => navigate("/profile/me")}>
+							<DropdownMenuItem onClick={() => navigate(`/profile/${CURRENT_USERNAME}`)}>
 								<User className="mr-2 h-4 w-4" />
 								Profile
 							</DropdownMenuItem>

@@ -1,25 +1,21 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 import { Card } from "@/components/ui/Card";
 import { Heart, MessageCircle, Send } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, getImageUrl } from "@/lib/utils";
+import { formatDescription, formatDate } from "@/lib/postUtils";
 import { PostModal } from "@/components/PostModal";
 import { PostMenu } from "@/components/PostMenu";
 import { DeletePostDialog } from "@/components/DeletePostDialog";
-import { mockUserProfile } from "@/lib/mockData";
+import { CURRENT_USERNAME } from "@/lib/constants";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import type { PostsQuery } from "@/generated/graphql";
+
+type PostData = PostsQuery["posts"][0];
 
 interface PostProps {
-	id: string;
-	author: {
-		username: string;
-		avatarUrl?: string;
-		avatarFallback: string;
-	};
-	imageUrl: string;
+	post: PostData;
 	aspectRatio?: "square" | "portrait" | "landscape"; // 1:1, 4:5, 1.91:1
-	publishedAt: string;
-	description?: string;
 	likes?: number;
 	comments?: number;
 	isLiked?: boolean;
@@ -28,19 +24,9 @@ interface PostProps {
 	onShare?: () => void;
 }
 
-interface PostPreviewProps {
-	imageUrl: string;
-	className?: string;
-	onClick?: () => void;
-}
-
 export function Post({
-	id,
-	author,
-	imageUrl,
+	post,
 	aspectRatio = "square",
-	publishedAt,
-	description,
 	likes = 0,
 	comments = 0,
 	isLiked = false,
@@ -53,56 +39,15 @@ export function Post({
 	const [isDeleting, setIsDeleting] = useState(false);
 	const navigate = useNavigate();
 
-	const isOwnPost = author.username === mockUserProfile.username;
+	const avatarFallback = post.author.firstName[0] + post.author.lastName[0];
+	const isOwnPost = post.author.userName === CURRENT_USERNAME;
 	const aspectRatioClasses = {
 		square: "aspect-square",
 		portrait: "aspect-[4/5]",
 		landscape: "aspect-[1.91/1]",
 	};
 
-	const formatDescription = (text?: string) => {
-		if (!text) return { description: null, hashtags: [] };
-
-		// Extract hashtags
-		const hashtagMatches = text.match(/#\w+/g) || [];
-
-		// Remove hashtags from description
-		const descriptionWithoutHashtags = text.replace(/#\w+/g, "").trim();
-
-		// Format description with mentions
-		const parts = descriptionWithoutHashtags.split(/(@\w+)/g);
-		const formattedDescription = parts.map((part, index) => {
-			if (part.startsWith("@")) {
-				const username = part.slice(1);
-				return (
-					<Link
-						key={index}
-						to={`/profile/${username}`}
-						className="text-indigo-400 font-medium hover:underline"
-					>
-						{part}
-					</Link>
-				);
-			}
-			return <span key={index}>{part}</span>;
-		});
-
-		return { description: formattedDescription, hashtags: hashtagMatches };
-	};
-
-	const formatDate = (dateString: string) => {
-		const date = new Date(dateString);
-		const now = new Date();
-		const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-		if (diffInSeconds < 60) return `${diffInSeconds}s`;
-		if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m`;
-		if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h`;
-		if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d`;
-		return date.toLocaleDateString();
-	};
-
-	const { description: formattedDescription, hashtags } = formatDescription(description);
+	const { description: formattedDescription, hashtags } = formatDescription(post.description);
 
 	return (
 		<>
@@ -111,28 +56,28 @@ export function Post({
 				<div className="flex items-center justify-between gap-3 p-3">
 					<div className="flex items-center gap-3">
 						<Avatar className="h-8 w-8">
-							<AvatarImage src={author.avatarUrl} />
-							<AvatarFallback>{author.avatarFallback}</AvatarFallback>
+							<AvatarImage src={getImageUrl(post.author.picture)} />
+							<AvatarFallback>{avatarFallback}</AvatarFallback>
 						</Avatar>
 						<div className="flex items-center gap-2">
-							<span className="text-sm font-semibold">{author.username}</span>
+							<span className="text-sm font-semibold">{post.author.userName}</span>
 							<span className="text-muted-foreground text-sm">•</span>
-							<span className="text-muted-foreground text-sm">{formatDate(publishedAt)}</span>
+							<span className="text-muted-foreground text-sm">{formatDate(post.createdAt)}</span>
 						</div>
 					</div>
 					<PostMenu
 						isOwnPost={isOwnPost}
-						onEdit={() => navigate(`/post/${id}/edit`)}
+						onEdit={() => navigate(`/post/${post.id}/edit`)}
 						onDelete={() => setShowDeleteDialog(true)}
-						onReport={() => console.log("Report post", id)}
+						onReport={() => console.log("Report post", post.id)}
 					/>
 				</div>
 
 				{/* Image */}
 				<div className={cn("w-full overflow-hidden bg-muted", aspectRatioClasses[aspectRatio])}>
 					<img
-						src={imageUrl}
-						alt={`Post by ${author.username}`}
+						src={getImageUrl(post.imageUrl)}
+						alt={`Post by ${post.author.userName}`}
 						className="w-full h-full object-cover"
 					/>
 				</div>
@@ -173,10 +118,10 @@ export function Post({
 				</div>
 
 				{/* Description */}
-				{description && (
+				{post.description && (
 					<div className="px-3 pb-3">
 						<p className="text-sm">
-							<span className="font-semibold mr-2">{author.username}</span>
+							<span className="font-semibold mr-2">{post.author.userName}</span>
 							{formattedDescription}
 						</p>
 						{hashtags.length > 0 && (
@@ -197,20 +142,14 @@ export function Post({
 			</Card>
 
 			<PostModal
-				key={id}
+				key={post.id}
 				open={isModalOpen}
 				onOpenChange={setIsModalOpen}
-				post={{
-					id,
-					author,
-					imageUrl,
-					aspectRatio,
-					publishedAt,
-					description,
-					likes,
-					comments,
-					isLiked,
-				}}
+				post={post}
+				aspectRatio={aspectRatio}
+				likes={likes}
+				comments={comments}
+				isLiked={isLiked}
 			/>
 
 			<DeletePostDialog
@@ -221,7 +160,7 @@ export function Post({
 					setIsDeleting(true);
 					// Simulate API call
 					await new Promise((resolve) => setTimeout(resolve, 1000));
-					console.log("Deleting post", id);
+					console.log("Deleting post", post.id);
 					setIsDeleting(false);
 					setShowDeleteDialog(false);
 					// Navigate back to feed
@@ -229,21 +168,5 @@ export function Post({
 				}}
 			/>
 		</>
-	);
-}
-
-export function PostPreview({ imageUrl, className, onClick }: PostPreviewProps) {
-	return (
-		<button
-			onClick={onClick}
-			className={cn("aspect-square overflow-hidden bg-muted w-full", className)}
-			aria-label="View post"
-		>
-			<img
-				src={imageUrl}
-				alt="Post preview"
-				className="w-full h-full object-cover hover:opacity-90 transition-opacity"
-			/>
-		</button>
 	);
 }

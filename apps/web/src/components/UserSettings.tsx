@@ -95,7 +95,7 @@ export function Settings({ className, ...props }: React.ComponentProps<"div">) {
 				<CardContent className="p-0">
 					<h1 className="text-2xl font-bold mb-2">Settings</h1>
 					<FieldSeparator />
-					<UserDetail
+					<UserDetails
 						className="mt-2"
 						pictureUrl={user?.picture ?? ""}
 						username={user?.userName ?? ""}
