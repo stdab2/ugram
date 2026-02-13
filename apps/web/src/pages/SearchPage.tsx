@@ -98,7 +98,7 @@ export function SearchPage() {
 	};
 
 	const handleDeleteRecentSearch = (id: string) => {
-		setRecentSearches(recentSearches.filter((search) => search.id !== id));
+		setRecentSearches((prev) => prev.filter((search) => search.id !== id));
 	};
 
 	const handleRecentSearchClick = (query: string) => {
