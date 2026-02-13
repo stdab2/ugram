@@ -4,5 +4,12 @@ query PostsByAuthor($authorId: Int!, $limit: Int, $offset: Int) {
 		description
 		imageUrl
 		createdAt
+		author {
+			id
+			userName
+			firstName
+			lastName
+			picture
+		}
 	}
 }

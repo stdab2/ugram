@@ -79,7 +79,7 @@ export const validatePhoneNumber = (phoneNumber: string): void => {
 		return; // Phone number is optional
 	}
 	// Basic phone validation: at least 7 digits, allows common separators
-	const phoneRegex = /^[\d\s\-\+\(\)]{7,}$/;
+	const phoneRegex = /^[\d\s\-+()]{7,}$/;
 	if (!phoneRegex.test(phoneNumber)) {
 		throw new UserValidationError("Invalid phone number format");
 	}

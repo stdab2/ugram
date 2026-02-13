@@ -4,8 +4,10 @@ import { Button } from "@/components/ui/Button";
 import { Textarea } from "@/components/ui/Textarea";
 import { Label } from "@/components/ui/Label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
-import { mockUserProfile } from "@/lib/mockData";
-import { Upload, X } from "lucide-react";
+import { useUserByUserNameQuery } from "@/generated/graphql";
+import { CURRENT_USERNAME } from "@/lib/constants";
+import { Upload, X, Loader2 } from "lucide-react";
+import { getImageUrl } from "@/lib/utils";
 
 interface PostFormProps {
 	initialImage?: string;
@@ -27,6 +29,13 @@ export function PostForm({
 	const [imagePreview, setImagePreview] = useState<string | null>(initialImage || null);
 	const [description, setDescription] = useState(initialDescription);
 	const [isSaving, setIsSaving] = useState(false);
+
+	// Fetch current user data
+	const { data: userData, loading: userLoading } = useUserByUserNameQuery({
+		variables: { userName: CURRENT_USERNAME },
+	});
+
+	const user = userData?.userByUserName;
 
 	// Extract hashtags from description
 	const hashtags = description.match(/#\w+/g) || [];
@@ -100,16 +109,30 @@ export function PostForm({
 					<div className="space-y-6">
 						{/* User info */}
 						<div className="flex items-center gap-3 pb-4 border-b">
-							<Avatar className="h-10 w-10">
-								<AvatarImage src={mockUserProfile.avatarUrl} />
-								<AvatarFallback>{mockUserProfile.avatarFallback}</AvatarFallback>
-							</Avatar>
-							<div>
-								<p className="font-semibold text-sm">{mockUserProfile.username}</p>
-								<p className="text-xs text-muted-foreground">
-									{mockUserProfile.firstName} {mockUserProfile.lastName}
-								</p>
-							</div>
+							{userLoading ? (
+								<div className="flex items-center gap-3">
+									<Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
+									<span className="text-sm text-muted-foreground">Loading user info...</span>
+								</div>
+							) : user ? (
+								<>
+									<Avatar className="h-10 w-10">
+										<AvatarImage src={getImageUrl(user.picture)} />
+										<AvatarFallback>
+											{user.firstName[0]}
+											{user.lastName[0]}
+										</AvatarFallback>
+									</Avatar>
+									<div>
+										<p className="font-semibold text-sm">{user.userName}</p>
+										<p className="text-xs text-muted-foreground">
+											{user.firstName} {user.lastName}
+										</p>
+									</div>
+								</>
+							) : (
+								<span className="text-sm text-muted-foreground">User not found</span>
+							)}
 						</div>
 
 						{/* Description */}
