@@ -5,6 +5,7 @@
 
 import { PrismaClient } from "../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { BadRequestError, NotFoundError } from "./errors.js";
 
 const adapter = new PrismaPg({
 	connectionString: process.env.DATABASE_URL,
@@ -14,33 +15,26 @@ const prisma = new PrismaClient({
 	adapter,
 });
 
-export class UserValidationError extends Error {
-	constructor(message: string) {
-		super(message);
-		this.name = "UserValidationError";
-	}
-}
-
 /**
  * Validate user ID
  * @param id - User ID to validate
- * @throws {UserValidationError} If invalid
+ * @throws {BadRequestError} If invalid
  */
 export const validateUserId = (id: number): void => {
 	if (!id || id <= 0) {
-		throw new UserValidationError("Invalid user ID");
+		throw new BadRequestError("Invalid user ID");
 	}
 };
 
 /**
  * Validate email format
  * @param email - Email to validate
- * @throws {UserValidationError} If invalid
+ * @throws {BadRequestError} If invalid
  */
 export const validateEmail = (email: string): void => {
 	const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 	if (!emailRegex.test(email)) {
-		throw new UserValidationError("Invalid email format");
+		throw new BadRequestError("Invalid email format");
 	}
 };
 
@@ -48,11 +42,11 @@ export const validateEmail = (email: string): void => {
  * Validate username
  * Must be 3-20 characters
  * @param userName - Username to validate
- * @throws {UserValidationError} If invalid
+ * @throws {BadRequestError} If invalid
  */
 export const validateUserName = (userName: string): void => {
 	if (userName.length < 3 || userName.length > 20) {
-		throw new UserValidationError("Username must be between 3-20 characters");
+		throw new BadRequestError("Username must be between 3-20 characters");
 	}
 };
 
@@ -60,24 +54,24 @@ export const validateUserName = (userName: string): void => {
  * Validate password
  * Must be at least 6 characters
  * @param password - Password to validate
- * @throws {UserValidationError} If invalid
+ * @throws {BadRequestError} If invalid
  */
 export const validatePassword = (password: string): void => {
 	if (password.length < 6) {
-		throw new UserValidationError("Password must be at least 6 characters");
+		throw new BadRequestError("Password must be at least 6 characters");
 	}
 };
 
 /**
  * Validate phone number format
  * @param phoneNumber - Phone number to validate
- * @throws {UserValidationError} If invalid
+ * @throws {BadRequestError} If invalid
  */
 export const validatePhoneNumber = (phoneNumber: string): void => {
 	// e.g. +12223334444
 	const phoneRegex = /^\+?[1-9][0-9]{7,14}$/;
 	if (!phoneRegex.test(phoneNumber)) {
-		throw new UserValidationError("Invalid phone number format");
+		throw new BadRequestError("Invalid phone number format");
 	}
 };
 
@@ -85,32 +79,32 @@ export const validatePhoneNumber = (phoneNumber: string): void => {
  * Validate non-empty string
  * @param value - String value to validate
  * @param fieldName - Name of the field being validated (for error message)
- * @throws {UserValidationError} If invalid
+ * @throws {BadRequestError} If invalid
  */
 export const validateNonEmptyString = (value: string, fieldName: string = "Value"): void => {
 	if (!value || value.trim().length === 0) {
-		throw new UserValidationError(`${fieldName} cannot be empty`);
+		throw new BadRequestError(`${fieldName} cannot be empty`);
 	}
 };
 
 /**
  * Validate user exists in database
  * @param userId - User ID to check
- * @throws {UserValidationError} If user not found
+ * @throws {NotFoundError} If user not found
  */
 export const validateUserExists = async (userId: number): Promise<void> => {
 	const user = await prisma.userUgram.findUnique({
 		where: { id: userId },
 	});
 	if (!user) {
-		throw new UserValidationError(`User with ID ${userId} not found`);
+		throw new NotFoundError(`User with ID ${userId} not found`);
 	}
 };
 
 /**
  * Validate multiple users exist in database
  * @param userIds - Array of user IDs to check
- * @throws {UserValidationError} If any user not found
+ * @throws {NotFoundError} If any user not found
  */
 export const validateUsersExist = async (userIds: number[]): Promise<void> => {
 	const users = await prisma.userUgram.findMany({
@@ -119,6 +113,6 @@ export const validateUsersExist = async (userIds: number[]): Promise<void> => {
 	});
 
 	if (users.length !== userIds.length) {
-		throw new UserValidationError("One or more users do not exist");
+		throw new NotFoundError("One or more users do not exist");
 	}
 };
