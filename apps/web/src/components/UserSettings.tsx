@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/Card";
-import { UserDetail } from "@/components/user-detail";
+import { UserDetails } from "@/components/UserDetails";
 import { FieldSeparator } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
@@ -12,7 +12,7 @@ import { settingsSchema, type SettingsFormData } from "@/lib/settingsSchema";
 
 const USER_ID = 1; //TODO: Mettre vrai ID
 
-export function Settings({ className, ...props }: React.ComponentProps<"div">) {
+export function UserSettings({ className, ...props }: React.ComponentProps<"div">) {
 	const { data, loading, error } = useUserQuery({
 		variables: { id: USER_ID },
 	});
