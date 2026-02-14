@@ -163,10 +163,8 @@ export const userResolvers = {
 			}
 
 			if (args.phoneNumber !== undefined) {
-				if (args.phoneNumber) {
-					validatePhoneNumber(args.phoneNumber);
-					data.phoneNumber = args.phoneNumber;
-				}
+				validatePhoneNumber(args.phoneNumber);
+				data.phoneNumber = args.phoneNumber;
 			}
 
 			if (args.picture !== undefined) {

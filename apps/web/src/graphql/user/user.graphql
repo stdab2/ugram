@@ -7,5 +7,6 @@ query User($id: Int!) {
 		lastName
 		phoneNumber
 		picture
+        createdAt
 	}
 }
