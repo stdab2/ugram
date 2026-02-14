@@ -86,7 +86,7 @@ export function Post({
 				<div className="flex items-center gap-4 p-3">
 					<button
 						onClick={onLike}
-						className="flex items-center gap-2 hover:text-muted-foreground transition-colors"
+						className="flex items-center gap-2 hover:text-muted-foreground transition-all duration-200 hover:scale-110"
 						aria-label="Like"
 					>
 						<Heart
@@ -100,7 +100,7 @@ export function Post({
 							setIsModalOpen(true);
 							onComment?.();
 						}}
-						className="flex items-center gap-2 hover:text-muted-foreground transition-colors"
+						className="flex items-center gap-2 hover:text-muted-foreground transition-all duration-200 hover:scale-110"
 						aria-label="Comment"
 					>
 						<MessageCircle className="w-6 h-6" strokeWidth={2} />
@@ -110,7 +110,7 @@ export function Post({
 					</button>
 					<button
 						onClick={onShare}
-						className="hover:text-muted-foreground transition-colors"
+						className="hover:text-muted-foreground transition-all duration-200 hover:scale-110"
 						aria-label="Share"
 					>
 						<Send className="w-6 h-6" strokeWidth={2} />
@@ -130,7 +130,7 @@ export function Post({
 									<Link
 										key={index}
 										to={`/search?q=${encodeURIComponent(tag)}`}
-										className="hover:underline mr-1"
+										className="hover:underline mr-1 transition-all duration-200 hover:brightness-125"
 									>
 										{tag}
 									</Link>
