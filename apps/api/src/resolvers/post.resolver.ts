@@ -55,11 +55,11 @@ export const postResolvers = {
 		},
 	},
 	Mutation: {
-    createPost: async (_: unknown, { data }: CreatePostArgs) => {
+		createPost: async (_: unknown, { data }: CreatePostArgs) => {
 			const { description, image, authorId, hashtags, mentionedUsers } = data;
 
 			if (mentionedUsers && mentionedUsers.length > 0) {
-				await validateUsersExist(mentionedUsers, prisma);
+				await validateUsersExist(mentionedUsers);
 			}
 
 			if (!image) {
@@ -111,7 +111,7 @@ export const postResolvers = {
 
 			return post;
 		},
-    deletePost: async (_: unknown, args: { id: number }) => {
+		deletePost: async (_: unknown, args: { id: number }) => {
 			try {
 				return await prisma.post.delete({
 					where: { id: args.id },
