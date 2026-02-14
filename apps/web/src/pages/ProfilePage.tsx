@@ -66,10 +66,15 @@ export function ProfilePage() {
 		},
 	});
 
-	const handlePostDeletion = (postId: number) => {
-		deletePost({ variables: { id: postId } });
-		setSelectedPost(null);
-		toast.success("Your post has been successfully deleted !");
+	const handlePostDeletion = async (postId: number) => {
+		try {
+			await deletePost({ variables: { id: postId } });
+			setSelectedPost(null);
+			toast.success("Your post has been successfully deleted !");
+		} catch (error) {
+			console.error("Failed to delete post:", error);
+			toast.error("Failed to delete your post. Please try again.");
+		}
 	};
 
 	// Use postsData directly - no userPosts state needed!

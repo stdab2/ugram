@@ -127,7 +127,9 @@ export const postResolvers = {
 					where: { id: args.id },
 				});
 
-				if (!post) return;
+				if (!post) {
+					throw new Error(`Post with id ${args.id} not found`);
+				}
 
 				const postHashtags = getPostHashtags(args.description);
 				const postMentions = getPostMentions(args.description);

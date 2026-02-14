@@ -95,10 +95,15 @@ export function EditPostPage() {
 		);
 	}
 
-	const handlePostUpdate = (description: string) => {
-		updatePost({ variables: { id: post.id, description: description } });
-		navigate(-1);
-		toast.success("Your post has been successfully updated !");
+	const handlePostUpdate = async (description: string) => {
+		try {
+			await updatePost({ variables: { id: post.id, description } });
+			navigate(-1);
+			toast.success("Your post has been successfully updated !");
+		} catch (error) {
+			console.error("Failed to update post:", error);
+			toast.error("Failed to update your post. Please try again.");
+		}
 	};
 
 	// Check if user owns this post

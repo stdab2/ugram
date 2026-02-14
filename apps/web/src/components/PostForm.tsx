@@ -51,7 +51,7 @@ export function PostForm({
 		}
 	};
 
-	const handleSubmit = async (e: React.FormEvent) => {
+	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 		setIsSaving(true);
 
@@ -185,7 +185,7 @@ export function PostForm({
 									isSaving ||
 									!imagePreview ||
 									!description.trim() ||
-									description.trim() == initialDescription.trim()
+									description.trim() === initialDescription.trim()
 								}
 								className="flex-1 p-5"
 							>
