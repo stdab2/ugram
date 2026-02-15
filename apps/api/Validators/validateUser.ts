@@ -74,12 +74,8 @@ export const validatePassword = (password: string): void => {
  * @throws {UserValidationError} If invalid
  */
 export const validatePhoneNumber = (phoneNumber: string): void => {
-	// Allow optional phone numbers (empty/undefined handled elsewhere)
-	if (!phoneNumber || phoneNumber.trim() === "") {
-		return; // Phone number is optional
-	}
-	// Basic phone validation: at least 7 digits, allows common separators
-	const phoneRegex = /^[\d\s\-+()]{7,}$/;
+	// e.g. +12223334444
+	const phoneRegex = /^\+?[1-9][0-9]{7,14}$/;
 	if (!phoneRegex.test(phoneNumber)) {
 		throw new UserValidationError("Invalid phone number format");
 	}

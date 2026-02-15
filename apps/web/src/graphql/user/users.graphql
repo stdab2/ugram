@@ -7,5 +7,6 @@ query Users {
 		lastName
 		phoneNumber
 		picture
+		createdAt
 	}
 }
