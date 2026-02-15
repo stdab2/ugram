@@ -6,7 +6,7 @@
 import { GraphQLError } from "graphql";
 
 /**
- * Base class for all validation errors
+ * Base class for all API errors (validation, not found, conflict, internal, etc.)
  * Extends GraphQLError for seamless Apollo Server integration
  */
 export class ValidationError extends GraphQLError {
