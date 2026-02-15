@@ -65,7 +65,9 @@ export function PostForm({
 		e.preventDefault();
 		setIsSaving(true);
 		setErrorMessage(null);
-		const mentionedUsernames = (description.match(/@\w+/g) || []).map((u) => u.slice(1));
+		const mentionedUsernames = Array.from(
+			new Set((description.match(/@\w+/g) || []).map((u) => u.slice(1)))
+		);
 
 		let mentionedUsers: number[] = [];
 
