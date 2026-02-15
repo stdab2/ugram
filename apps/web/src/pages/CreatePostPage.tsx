@@ -13,8 +13,6 @@ export function CreatePostPage() {
 		image: File | null;
 		mentionedUsers: number[] | null;
 	}) => {
-		// Simulate API call
-		// await new Promise((resolve) => setTimeout(resolve, 1000));
 		if (!data.imagePreview) return;
 
 		const hashtags = (data.description.match(/#\w+/g) || []).map((t) =>
@@ -32,13 +30,6 @@ export function CreatePostPage() {
 				},
 			},
 		});
-
-		console.log("Creating post", {
-			description: data.description,
-			hashtags: data.description.match(/#\w+/g) || [],
-			imagePreview: data.imagePreview,
-		});
-
 		navigate("/");
 	};
 
