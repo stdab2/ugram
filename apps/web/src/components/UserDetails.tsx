@@ -5,7 +5,7 @@ interface UserDetailsProps {
 	pictureUrl: string;
 	username: string;
 	fullname: string;
-	memberSince: number;
+	memberSince: string;
 	className?: string;
 }
 
@@ -36,7 +36,7 @@ export function UserDetails({
 				<p className="font-bold text-lg">{username}</p>
 				<p className="text-gray-500 text-sm">{fullname}</p>
 				<p className="text-gray-400 text-xs mt-1">
-					Member since {timestampToDateString(memberSince)}
+					Member since {timestampToDateString(+memberSince)}
 				</p>
 			</div>
 		</div>

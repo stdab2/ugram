@@ -22,7 +22,7 @@ import type { PostsQuery } from "@/generated/graphql";
 // Mock data for recent searches (localStorage à implémenter plus tard)
 const mockRecentSearches: RecentSearch[] = [
 	{ id: "1", query: "nature", type: "hashtag", timestamp: new Date() },
-	{ id: "2", query: "johndoe", type: "user", timestamp: new Date() },
+	{ id: "2", query: "john_doe", type: "user", timestamp: new Date() },
 	{ id: "3", query: "sunset", type: "general", timestamp: new Date() },
 ];
 

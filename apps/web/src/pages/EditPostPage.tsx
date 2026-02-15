@@ -136,7 +136,7 @@ export function EditPostPage() {
 				<PostForm
 					initialImage={getImageUrl(post.imageUrl)}
 					initialDescription={post.description}
-					onSubmit={handlePostUpdate}
+					onPostEdit={handlePostUpdate}
 					submitButtonText="Save changes"
 					onCancel={handleCancel}
 					allowImageChange={false}
