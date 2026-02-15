@@ -67,13 +67,13 @@ export function PostForm({
 		setErrorMessage(null);
 		const mentionedUsernames = (description.match(/@\w+/g) || []).map((u) => u.slice(1));
 
-		const mentionnedUsersVerified = await fetchUsersByUserNames({
+		const mentionedUsersVerified = await fetchUsersByUserNames({
 			variables: { userNames: mentionedUsernames },
 		});
 
-		if (mentionnedUsersVerified.data?.usersByUserNames.missingUserNames.length) {
+		if (mentionedUsersVerified.data?.usersByUserNames.missingUserNames.length) {
 			setErrorMessage(
-				`The following mentioned users were not found: ${mentionnedUsersVerified.data.usersByUserNames.missingUserNames.join(
+				`The following mentioned users were not found: ${mentionedUsersVerified.data.usersByUserNames.missingUserNames.join(
 					", "
 				)}`
 			);
@@ -82,7 +82,7 @@ export function PostForm({
 		}
 
 		const mentionedUsers =
-			mentionnedUsersVerified.data?.usersByUserNames.users.map((u) => u.id) || [];
+			mentionedUsersVerified.data?.usersByUserNames.users.map((u) => u.id) || [];
 
 		try {
 			await onSubmit({ imagePreview, description, image, mentionedUsers });
