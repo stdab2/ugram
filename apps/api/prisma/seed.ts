@@ -41,24 +41,24 @@ const userData: Prisma.UserUgramCreateInput[] = [
 		phoneNumber: "+15145550001",
 		firstName: "John",
 		lastName: "Doe",
-		picture: "images/profile/1.jpg",
+		picture: "uploads/profile/1.jpg",
 		posts: {
 			create: [
 				{
 					description: "Beautiful sunset at the beach 🌅 @jane_smith #sunset #beach #photography",
-					imageUrl: "images/post/1.jpg",
+					imageUrl: "uploads/post/1.jpg",
 				},
 				{
 					description: "New adventure begins! #travel #adventure",
-					imageUrl: "images/post/6.jpg",
+					imageUrl: "uploads/post/6.jpg",
 				},
 				{
 					description: "Good vibes only ✨ #lifestyle #mood",
-					imageUrl: "images/post/7.jpg",
+					imageUrl: "uploads/post/7.jpg",
 				},
 				{
 					description: "Throwback to summer days 🌞 #summer #memories",
-					imageUrl: "images/post/8.jpg",
+					imageUrl: "uploads/post/8.jpg",
 				},
 			],
 		},
@@ -70,12 +70,12 @@ const userData: Prisma.UserUgramCreateInput[] = [
 		phoneNumber: "+15145550002",
 		firstName: "Jane",
 		lastName: "Smith",
-		picture: "images/profile/2.jpg",
+		picture: "uploads/profile/2.jpg",
 		posts: {
 			create: [
 				{
 					description: "Morning coffee vibes ☕️ #coffee #morning #lifestyle",
-					imageUrl: "images/post/2.jpg",
+					imageUrl: "uploads/post/2.jpg",
 				},
 			],
 		},
@@ -87,13 +87,13 @@ const userData: Prisma.UserUgramCreateInput[] = [
 		phoneNumber: "+15145550003",
 		firstName: "John",
 		lastName: "Doe",
-		picture: "images/profile/3.jpg",
+		picture: "uploads/profile/3.jpg",
 		posts: {
 			create: [
 				{
 					description:
 						"Mountain views from the top 🏔️ Amazing hiking experience with @john_doe #travel #mountains #adventure #hiking",
-					imageUrl: "images/post/3.jpg",
+					imageUrl: "uploads/post/3.jpg",
 				},
 			],
 		},
@@ -105,12 +105,12 @@ const userData: Prisma.UserUgramCreateInput[] = [
 		phoneNumber: "+15145550004",
 		firstName: "John",
 		lastName: "Doe",
-		picture: "images/profile/4.jpg",
+		picture: "uploads/profile/4.jpg",
 		posts: {
 			create: [
 				{
 					description: "Homemade pasta night 🍝 Recipe in bio! #food #cooking #pasta #italian",
-					imageUrl: "images/post/4.jpg",
+					imageUrl: "uploads/post/4.jpg",
 				},
 			],
 		},
@@ -122,13 +122,13 @@ const userData: Prisma.UserUgramCreateInput[] = [
 		phoneNumber: "+15145550005",
 		firstName: "John",
 		lastName: "Doe",
-		picture: "images/profile/5.jpg",
+		picture: "uploads/profile/5.jpg",
 		posts: {
 			create: [
 				{
 					description:
 						"City lights and night vibes 🌃 #citylife #photography #urban #nightphotography",
-					imageUrl: "images/post/5.jpg",
+					imageUrl: "uploads/post/5.jpg",
 				},
 			],
 		},
