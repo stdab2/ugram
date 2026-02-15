@@ -9,11 +9,13 @@ import { CURRENT_USERNAME } from "@/lib/constants";
 import { Upload, X, Loader2 } from "lucide-react";
 import { getImageUrl } from "@/lib/utils";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/Alert";
+import { toast } from "react-toastify";
 
 interface PostFormProps {
 	initialImage?: string;
 	initialDescription?: string;
-	onSubmit: (data: {
+	onPostEdit?: (description: string) => void;
+	onSubmit?: (data: {
 		imagePreview: string | null;
 		description: string;
 		image: File | null;
@@ -27,6 +29,7 @@ interface PostFormProps {
 export function PostForm({
 	initialImage,
 	initialDescription = "",
+	onPostEdit,
 	onSubmit,
 	submitButtonText,
 	onCancel,
@@ -78,11 +81,8 @@ export function PostForm({
 				});
 
 				if (mentionedUsersVerified.data?.usersByUserNames.missingUserNames.length) {
-					setErrorMessage(
-						`The following mentioned users were not found: ${mentionedUsersVerified.data.usersByUserNames.missingUserNames.join(
-							", "
-						)}`
-					);
+					const errorMessage = `The following mentioned users were not found: ${mentionedUsersVerified.data.usersByUserNames.missingUserNames.join(", ")}`;
+					toast.error(errorMessage);
 					setIsSaving(false);
 					return;
 				}
@@ -91,16 +91,22 @@ export function PostForm({
 			}
 		} catch (err) {
 			console.error("Error verifying mentioned users:", err);
+			toast.error("Failed to verify mentioned users. Please try again.");
 			setErrorMessage("Failed to verify mentioned users. Please try again.");
 			setIsSaving(false);
 			return;
 		}
 
 		try {
-			await onSubmit({ imagePreview, description, image, mentionedUsers });
+			if (onSubmit) {
+				onSubmit({ imagePreview, description, image, mentionedUsers });
+			}
+			if (onPostEdit) {
+				onPostEdit(description);
+			}
 		} catch (err) {
 			console.error("Error submitting PostForm:", err);
-			setErrorMessage("Failed to submit post. Please try again.");
+			setErrorMessage("Failed to submit changes. Please try again.");
 			return;
 		} finally {
 			setIsSaving(false);
@@ -232,7 +238,12 @@ export function PostForm({
 							<Button
 								size="lg"
 								type="submit"
-								disabled={isSaving || !imagePreview || !description.trim()}
+								disabled={
+									isSaving ||
+									!imagePreview ||
+									!description.trim() ||
+									description.trim() === initialDescription.trim()
+								}
 								className="flex-1 p-5"
 							>
 								{isSaving ? "Saving..." : submitButtonText}

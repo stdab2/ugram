@@ -111,5 +111,62 @@ export const postResolvers = {
 
 			return post;
 		},
+		deletePost: async (_: unknown, args: { id: number }) => {
+			try {
+				return await prisma.post.delete({
+					where: { id: args.id },
+				});
+			} catch (e: unknown) {
+				const errorMessage = e instanceof Error ? e.message : "Unknown error";
+				throw Error(`Could not delete post ${errorMessage}`);
+			}
+		},
+		updatePost: async (_: unknown, args: { id: number; description: string }) => {
+			try {
+				const post = await prisma.post.findUnique({
+					where: { id: args.id },
+				});
+
+				if (!post) {
+					throw new Error(`Post with id ${args.id} not found`);
+				}
+
+				const postHashtags = getPostHashtags(args.description);
+				const postMentions = getPostMentions(args.description);
+				const existingUsers = await prisma.userUgram.findMany({
+					where: { userName: { in: postMentions } },
+				});
+				const existingUserPostMentions = existingUsers.map((existingUser) => existingUser.userName);
+
+				return await prisma.post.update({
+					where: { id: args.id },
+					data: {
+						description: args.description,
+						hashtags: {
+							set: [],
+							connectOrCreate: postHashtags.map((name) => ({
+								where: { name },
+								create: { name },
+							})),
+						},
+						mentionedUsers: {
+							set: [],
+							connect: existingUserPostMentions.map((userName) => ({ userName })),
+						},
+					},
+				});
+			} catch (e: unknown) {
+				const errorMessage = e instanceof Error ? e.message : "Unknown error";
+				throw Error(`Could not update post ${errorMessage}`);
+			}
+		},
 	},
 };
+
+function getPostHashtags(description: string): string[] {
+	return description.match(/#\w+/g) || [];
+}
+
+function getPostMentions(description: string): string[] {
+	return description.match(/@\w+/g)?.map((mention) => mention.slice(1)) || [];
+}

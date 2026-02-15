@@ -22,6 +22,7 @@ interface PostProps {
 	onLike?: () => void;
 	onComment?: () => void;
 	onShare?: () => void;
+	onPostDeletion: (postId: number) => void;
 }
 
 export function Post({
@@ -33,6 +34,7 @@ export function Post({
 	onLike,
 	onComment,
 	onShare,
+	onPostDeletion,
 }: PostProps) {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -48,6 +50,13 @@ export function Post({
 	};
 
 	const { description: formattedDescription, hashtags } = formatDescription(post.description);
+
+	function handlePostDeletion(postId: number) {
+		setIsDeleting(true);
+		onPostDeletion(postId);
+		setIsDeleting(false);
+		setShowDeleteDialog(false);
+	}
 
 	return (
 		<>
@@ -150,22 +159,14 @@ export function Post({
 				likes={likes}
 				comments={comments}
 				isLiked={isLiked}
+				onPostDeletion={() => handlePostDeletion(post.id)}
 			/>
 
 			<DeletePostDialog
 				open={showDeleteDialog}
 				onOpenChange={setShowDeleteDialog}
 				isDeleting={isDeleting}
-				onConfirm={async () => {
-					setIsDeleting(true);
-					// Simulate API call
-					await new Promise((resolve) => setTimeout(resolve, 1000));
-					console.log("Deleting post", post.id);
-					setIsDeleting(false);
-					setShowDeleteDialog(false);
-					// Navigate back to feed
-					navigate("/");
-				}}
+				onConfirm={() => handlePostDeletion(post.id)}
 			/>
 		</>
 	);

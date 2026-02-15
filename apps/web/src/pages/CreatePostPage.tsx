@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { PostForm } from "@/components/PostForm";
 import { CURRENT_USER_ID } from "@/lib/constants";
 import { useCreatePostMutation } from "../generated/graphql";
+import { toast } from "react-toastify";
 
 export function CreatePostPage() {
 	const navigate = useNavigate();
@@ -31,8 +32,10 @@ export function CreatePostPage() {
 					},
 				},
 			});
+			toast.success("Your post has been created!");
 		} catch (error) {
 			console.error("Error creating post:", error);
+			toast.error("Something went wrong. Please try again!");
 		}
 
 		navigate("/");
