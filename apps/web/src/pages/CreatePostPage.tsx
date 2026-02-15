@@ -13,7 +13,7 @@ export function CreatePostPage() {
 		image: File | null;
 		mentionedUsers: number[] | null;
 	}) => {
-		if (!data.imagePreview) return;
+		if (!data.imagePreview || !data.image) return;
 
 		const hashtags = (data.description.match(/#\w+/g) || []).map((t) =>
 			t.replace("#", "").toLowerCase()
