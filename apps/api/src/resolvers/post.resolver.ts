@@ -126,8 +126,8 @@ export const postResolvers = {
 			}
 		},
 		deletePost: async (_: unknown, args: { id: number }) => {
+			validatePostId(args.id);
 			try {
-				validatePostId(args.id);
 				return await prisma.post.delete({
 					where: { id: args.id },
 				});
@@ -140,8 +140,6 @@ export const postResolvers = {
 			validateNonEmptyString(args.description, "Post description");
 
 			try {
-				validatePostId(args.id);
-
 				const postHashtags = getPostHashtags(args.description);
 				const postMentions = getPostMentions(args.description);
 				const existingUsers = await prisma.userUgram.findMany({
