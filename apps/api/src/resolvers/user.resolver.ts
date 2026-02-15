@@ -53,6 +53,19 @@ export const userResolvers = {
 			});
 		},
 
+		usersByUserNames: async (_: void, args: { userNames: string[] }) => {
+			const requested = Array.from(new Set(args.userNames.map((u) => u.trim()).filter(Boolean)));
+
+			const users = await prisma.userUgram.findMany({
+				where: { userName: { in: requested } },
+			});
+
+			const found = new Set(users.map((u) => u.userName));
+			const missingUserNames = requested.filter((u) => !found.has(u));
+
+			return { users, missingUserNames };
+		},
+
 		/**
 		 * Get multiple users with pagination
 		 * @param limit - Max number of users to return

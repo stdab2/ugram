@@ -15,6 +15,15 @@ extend type Query {
 	users: [UserUgram!]!
 }
 
+type UsersByUserNamesResult {
+  users: [UserUgram!]!
+  missingUserNames: [String!]!
+}
+
+extend type Query {
+  usersByUserNames(userNames: [String!]!): UsersByUserNamesResult!
+}
+
 extend type Mutation {
 	createUser(
 		userName: String!

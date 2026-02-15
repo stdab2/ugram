@@ -1,12 +1,37 @@
 import { useNavigate } from "react-router-dom";
 import { PostForm } from "@/components/PostForm";
+import { CURRENT_USER_ID } from "@/lib/constants";
+import { useCreatePostMutation } from "../generated/graphql";
 
 export function CreatePostPage() {
 	const navigate = useNavigate();
+	const [createPost] = useCreatePostMutation();
 
-	const handleSubmit = async (data: { imagePreview: string | null; description: string }) => {
+	const handleSubmit = async (data: {
+		imagePreview: string | null;
+		description: string;
+		image: File | null;
+		mentionedUsers: number[] | null;
+	}) => {
 		// Simulate API call
-		await new Promise((resolve) => setTimeout(resolve, 1000));
+		// await new Promise((resolve) => setTimeout(resolve, 1000));
+		if (!data.imagePreview) return;
+
+		const hashtags = (data.description.match(/#\w+/g) || []).map((t) =>
+			t.replace("#", "").toLowerCase()
+		);
+
+		await createPost({
+			variables: {
+				data: {
+					description: data.description,
+					image: data.image,
+					authorId: CURRENT_USER_ID,
+					hashtags,
+					mentionedUsers: data.mentionedUsers,
+				},
+			},
+		});
 
 		console.log("Creating post", {
 			description: data.description,
