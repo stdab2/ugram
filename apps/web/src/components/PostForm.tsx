@@ -69,26 +69,37 @@ export function PostForm({
 
 		let mentionedUsers: number[] = [];
 
-		if (mentionedUsernames.length > 0) {
-			const mentionedUsersVerified = await fetchUsersByUserNames({
-				variables: { userNames: mentionedUsernames },
-			});
+		try {
+			if (mentionedUsernames.length > 0) {
+				const mentionedUsersVerified = await fetchUsersByUserNames({
+					variables: { userNames: mentionedUsernames },
+				});
 
-			if (mentionedUsersVerified.data?.usersByUserNames.missingUserNames.length) {
-				setErrorMessage(
-					`The following mentioned users were not found: ${mentionedUsersVerified.data.usersByUserNames.missingUserNames.join(
-						", "
-					)}`
-				);
-				setIsSaving(false);
-				return;
+				if (mentionedUsersVerified.data?.usersByUserNames.missingUserNames.length) {
+					setErrorMessage(
+						`The following mentioned users were not found: ${mentionedUsersVerified.data.usersByUserNames.missingUserNames.join(
+							", "
+						)}`
+					);
+					setIsSaving(false);
+					return;
+				}
+
+				mentionedUsers = mentionedUsersVerified.data?.usersByUserNames.users.map((u) => u.id) || [];
 			}
-
-			mentionedUsers = mentionedUsersVerified.data?.usersByUserNames.users.map((u) => u.id) || [];
+		} catch (err) {
+			console.error("Error verifying mentioned users:", err);
+			setErrorMessage("Failed to verify mentioned users. Please try again.");
+			setIsSaving(false);
+			return;
 		}
 
 		try {
 			await onSubmit({ imagePreview, description, image, mentionedUsers });
+		} catch (err) {
+			console.error("Error submitting PostForm:", err);
+			setErrorMessage("Failed to submit post. Please try again.");
+			return;
 		} finally {
 			setIsSaving(false);
 		}
