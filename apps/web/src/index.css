@@ -184,8 +184,42 @@ body {
 @layer base {
 	* {
 		@apply border-border outline-ring/50;
+		cursor: none !important;
+		-webkit-user-select: text;
+		user-select: text;
 	}
 	body {
 		@apply bg-background text-foreground;
+	}
+	button,
+	a,
+	[role="button"],
+	input[type="button"],
+	input[type="submit"],
+	img {
+		-webkit-user-select: none;
+		user-select: none;
+	}
+}
+
+/* Custom cursor styles */
+*::selection {
+	background-color: oklch(0.511 0.262 276.966 / 0.4);
+	color: oklch(var(--foreground));
+}
+
+*::-moz-selection {
+	background-color: oklch(0.511 0.262 276.966 / 0.4);
+	color: oklch(var(--foreground));
+}
+
+/* Smooth selection animation */
+@keyframes selection-pulse {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.8;
 	}
 }

@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { CustomCursor } from "./CustomCursor";
 
 type Theme = "dark" | "light" | "system";
 
@@ -57,6 +58,7 @@ export function ThemeProvider({
 
 	return (
 		<ThemeProviderContext.Provider {...props} value={value}>
+			<CustomCursor />
 			{children}
 		</ThemeProviderContext.Provider>
 	);
