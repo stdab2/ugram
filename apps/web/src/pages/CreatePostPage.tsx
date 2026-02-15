@@ -19,17 +19,22 @@ export function CreatePostPage() {
 			t.replace("#", "").toLowerCase()
 		);
 
-		await createPost({
-			variables: {
-				data: {
-					description: data.description,
-					image: data.image,
-					authorId: CURRENT_USER_ID,
-					hashtags,
-					mentionedUsers: data.mentionedUsers,
+		try {
+			await createPost({
+				variables: {
+					data: {
+						description: data.description,
+						image: data.image,
+						authorId: CURRENT_USER_ID,
+						hashtags,
+						mentionedUsers: data.mentionedUsers,
+					},
 				},
-			},
-		});
+			});
+		} catch (error) {
+			console.error("Error creating post:", error);
+		}
+
 		navigate("/");
 	};
 

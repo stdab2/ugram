@@ -1,6 +1,6 @@
 import { PrismaClient } from "../../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { validateUsersExist } from "../../validators/validateUser.js";
+import { validateUsersExist } from "../../Validators/validateUser.js";
 import { saveUploadedImage } from "../../services/image.service.js";
 import type { FileUpload } from "graphql-upload";
 import { Post } from "../../generated/prisma/client.js";
