@@ -67,22 +67,25 @@ export function PostForm({
 		setErrorMessage(null);
 		const mentionedUsernames = (description.match(/@\w+/g) || []).map((u) => u.slice(1));
 
-		const mentionedUsersVerified = await fetchUsersByUserNames({
-			variables: { userNames: mentionedUsernames },
-		});
+		let mentionedUsers: number[] = [];
 
-		if (mentionedUsersVerified.data?.usersByUserNames.missingUserNames.length) {
-			setErrorMessage(
-				`The following mentioned users were not found: ${mentionedUsersVerified.data.usersByUserNames.missingUserNames.join(
-					", "
-				)}`
-			);
-			setIsSaving(false);
-			return;
+		if (mentionedUsernames.length > 0) {
+			const mentionedUsersVerified = await fetchUsersByUserNames({
+				variables: { userNames: mentionedUsernames },
+			});
+
+			if (mentionedUsersVerified.data?.usersByUserNames.missingUserNames.length) {
+				setErrorMessage(
+					`The following mentioned users were not found: ${mentionedUsersVerified.data.usersByUserNames.missingUserNames.join(
+						", "
+					)}`
+				);
+				setIsSaving(false);
+				return;
+			}
+
+			mentionedUsers = mentionedUsersVerified.data?.usersByUserNames.users.map((u) => u.id) || [];
 		}
-
-		const mentionedUsers =
-			mentionedUsersVerified.data?.usersByUserNames.users.map((u) => u.id) || [];
 
 		try {
 			await onSubmit({ imagePreview, description, image, mentionedUsers });
