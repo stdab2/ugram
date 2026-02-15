@@ -68,10 +68,6 @@ export const postResolvers = {
 			validateUserId(authorId);
 			validateNonEmptyString(description, "Post description");
 
-			if (!description.trim()) {
-				throw new Error("Post description is required.");
-			}
-
 			if (mentionedUsers && mentionedUsers.length > 0) {
 				await validateUsersExist(mentionedUsers);
 			}
