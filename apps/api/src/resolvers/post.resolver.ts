@@ -1,9 +1,15 @@
 import { PrismaClient } from "../../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { validateUsersExist } from "../../Validators/validateUser.js";
+import {
+	validateUserId,
+	validateUsersExist,
+	validateNonEmptyString,
+} from "../../Validators/validateUser.js";
 import { saveUploadedImage } from "../../services/image.service.js";
 import type { FileUpload } from "graphql-upload";
 import { Post } from "../../generated/prisma/client.js";
+import { handlePrismaError } from "../../Validators/errors.js";
+import { validatePostId } from "../../Validators/validatePost.js";
 
 const adapter = new PrismaPg({
 	connectionString: process.env.DATABASE_URL,
@@ -26,6 +32,7 @@ type CreatePostArgs = {
 export const postResolvers = {
 	Query: {
 		post: async (_: unknown, args: { id: number }) => {
+			validatePostId(args.id);
 			return prisma.post.findUnique({
 				where: { id: args.id },
 			});
@@ -40,6 +47,7 @@ export const postResolvers = {
 			_: unknown,
 			args: { authorId: number; limit?: number; offset?: number }
 		) => {
+			validateUserId(args.authorId);
 			return prisma.post.findMany({
 				where: { authorId: args.authorId },
 				take: args.limit,
@@ -57,6 +65,12 @@ export const postResolvers = {
 	Mutation: {
 		createPost: async (_: unknown, { data }: CreatePostArgs) => {
 			const { description, image, authorId, hashtags, mentionedUsers } = data;
+			validateUserId(authorId);
+			validateNonEmptyString(description, "Post description");
+
+			if (!description.trim()) {
+				throw new Error("Post description is required.");
+			}
 
 			if (mentionedUsers && mentionedUsers.length > 0) {
 				await validateUsersExist(mentionedUsers);
@@ -90,46 +104,47 @@ export const postResolvers = {
 					: [];
 			}
 
-			const post = await prisma.post.create({
-				data: {
-					description,
-					imageUrl,
-					authorId,
-					hashtags: {
-						connect: hashtagRows.map((h) => ({ id: h.id })),
+			try {
+				const post = await prisma.post.create({
+					data: {
+						description,
+						imageUrl,
+						authorId,
+						hashtags: {
+							connect: hashtagRows.map((h) => ({ id: h.id })),
+						},
+						mentionedUsers: {
+							connect: mentionedUsers ? mentionedUsers.map((id: number) => ({ id })) : [],
+						},
 					},
-					mentionedUsers: {
-						connect: mentionedUsers ? mentionedUsers.map((id: number) => ({ id })) : [],
+					include: {
+						hashtags: true,
+						mentionedUsers: true,
+						author: true,
 					},
-				},
-				include: {
-					hashtags: true,
-					mentionedUsers: true,
-					author: true,
-				},
-			});
+				});
 
-			return post;
+				return post;
+			} catch (error: unknown) {
+				handlePrismaError(error, "Post");
+			}
 		},
 		deletePost: async (_: unknown, args: { id: number }) => {
 			try {
+				validatePostId(args.id);
 				return await prisma.post.delete({
 					where: { id: args.id },
 				});
-			} catch (e: unknown) {
-				const errorMessage = e instanceof Error ? e.message : "Unknown error";
-				throw Error(`Could not delete post ${errorMessage}`);
+			} catch (error: unknown) {
+				handlePrismaError(error, "Post");
 			}
 		},
 		updatePost: async (_: unknown, args: { id: number; description: string }) => {
-			try {
-				const post = await prisma.post.findUnique({
-					where: { id: args.id },
-				});
+			validatePostId(args.id);
+			validateNonEmptyString(args.description, "Post description");
 
-				if (!post) {
-					throw new Error(`Post with id ${args.id} not found`);
-				}
+			try {
+				validatePostId(args.id);
 
 				const postHashtags = getPostHashtags(args.description);
 				const postMentions = getPostMentions(args.description);
@@ -155,9 +170,8 @@ export const postResolvers = {
 						},
 					},
 				});
-			} catch (e: unknown) {
-				const errorMessage = e instanceof Error ? e.message : "Unknown error";
-				throw Error(`Could not update post ${errorMessage}`);
+			} catch (error: unknown) {
+				handlePrismaError(error, "Post");
 			}
 		},
 	},
