@@ -107,7 +107,7 @@ export const userResolvers = {
 					},
 				});
 			} catch (error: unknown) {
-				return handlePrismaError(error, "User");
+				handlePrismaError(error, "User");
 			}
 		},
 
