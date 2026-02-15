@@ -144,8 +144,6 @@ export const postResolvers = {
 			validateNonEmptyString(args.description, "Post description");
 
 			try {
-				validatePostId(args.id);
-
 				const postHashtags = getPostHashtags(args.description);
 				const postMentions = getPostMentions(args.description);
 				const existingUsers = await prisma.userUgram.findMany({
