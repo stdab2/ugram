@@ -2,7 +2,6 @@ import { PrismaClient, UserUgram, Prisma } from "../../generated/prisma/client.j
 import { PrismaPg } from "@prisma/adapter-pg";
 import { CreateUserInput, UpdateUserInput, QueryUsersInput } from "../types/user.types.js";
 import {
-	UserValidationError,
 	validateEmail,
 	validateUserName,
 	validatePassword,
@@ -11,6 +10,7 @@ import {
 	validatePhoneNumber,
 	validateUserExists,
 } from "../../Validators/validateUser.js";
+import { BadRequestError, handlePrismaError } from "../../Validators/errors.js";
 import { saveUploadedImage } from "../../services/image.service.js";
 
 const adapter = new PrismaPg({
@@ -20,13 +20,6 @@ const adapter = new PrismaPg({
 const prisma = new PrismaClient({
 	adapter,
 });
-
-/**
- * Type guard for Prisma errors
- */
-function isPrismaError(error: unknown): error is { code: string; meta?: { target?: string[] } } {
-	return typeof error === "object" && error !== null && "code" in error;
-}
 
 /**
  * User Resolvers
@@ -96,8 +89,8 @@ export const userResolvers = {
 	Mutation: {
 		/**
 		 * Create a new user
-		 * @throws {UserValidationError} If input validation fails
-		 * @throws {Error} If user already exists
+		 * @throws {BadRequestError} If input validation fails
+		 * @throws {ConflictError} If user already exists
 		 */
 		createUser: async (_: void, args: CreateUserInput): Promise<UserUgram> => {
 			// Validate inputs
@@ -127,19 +120,15 @@ export const userResolvers = {
 					},
 				});
 			} catch (error: unknown) {
-				// P2002: Unique constraint violation (duplicate email, username, etc.)
-				if (isPrismaError(error) && error.code === "P2002") {
-					const field = error.meta?.target?.[0] || "field";
-					throw new UserValidationError(`User with this ${field} already exists`);
-				}
-				throw error;
+				handlePrismaError(error, "User");
 			}
 		},
 
 		/**
 		 * Update an existing user
-		 * @throws {UserValidationError} If update data is invalid
-		 * @throws {Error} If user not found
+		 * @throws {BadRequestError} If update data is invalid
+		 * @throws {NotFoundError} If user not found
+		 * @throws {ConflictError} If duplicate field
 		 */
 		updateUser: async (_: void, args: UpdateUserInput): Promise<UserUgram> => {
 			validateUserId(args.id);
@@ -186,7 +175,7 @@ export const userResolvers = {
 			}
 
 			if (Object.keys(data).length === 0) {
-				throw new UserValidationError("No fields to update");
+				throw new BadRequestError("No fields to update");
 			}
 
 			try {
@@ -195,12 +184,7 @@ export const userResolvers = {
 					data,
 				});
 			} catch (error: unknown) {
-				// P2002: Unique constraint violation (duplicate email, username, etc.)
-				if (isPrismaError(error) && error.code === "P2002") {
-					const field = error.meta?.target?.[0] || "field";
-					throw new UserValidationError(`User with this ${field} already exists`);
-				}
-				throw error;
+				handlePrismaError(error, "User");
 			}
 		},
 	},
