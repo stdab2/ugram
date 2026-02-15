@@ -130,8 +130,8 @@ export const postResolvers = {
 			}
 		},
 		deletePost: async (_: unknown, args: { id: number }) => {
+			validatePostId(args.id);
 			try {
-				validatePostId(args.id);
 				return await prisma.post.delete({
 					where: { id: args.id },
 				});
