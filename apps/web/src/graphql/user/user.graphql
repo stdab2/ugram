@@ -7,6 +7,12 @@ query User($id: Int!) {
 		lastName
 		phoneNumber
 		picture
-        createdAt
+		createdAt
+		posts {
+			id
+			imageUrl
+			description
+			createdAt
+		}
 	}
 }

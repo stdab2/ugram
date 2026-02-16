@@ -9,6 +9,7 @@ import { useUserQuery, useUpdateUserMutation } from "@/generated/graphql";
 import { useState, useEffect } from "react";
 import { z } from "zod";
 import { settingsSchema, type SettingsFormData } from "@/lib/settingsSchema";
+import { toast } from "sonner";
 
 const USER_ID = 1; //TODO: Mettre vrai ID
 
@@ -25,7 +26,6 @@ export function UserSettings({ className, ...props }: React.ComponentProps<"div"
 	const [phoneNumber, setPhoneNumber] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [errors, setErrors] = useState<Partial<Record<keyof SettingsFormData, string>>>({});
-	const [showSuccess, setShowSuccess] = useState(false);
 
 	useEffect(() => {
 		if (data?.user) {
@@ -39,7 +39,6 @@ export function UserSettings({ className, ...props }: React.ComponentProps<"div"
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setErrors({});
-		setShowSuccess(false);
 		setIsSubmitting(true);
 
 		try {
@@ -60,8 +59,7 @@ export function UserSettings({ className, ...props }: React.ComponentProps<"div"
 				},
 			});
 
-			setShowSuccess(true);
-			setTimeout(() => setShowSuccess(false), 3000);
+			toast.success("Profile updated successfully!");
 		} catch (err) {
 			if (err instanceof z.ZodError) {
 				const fieldErrors: Partial<Record<keyof SettingsFormData, string>> = {};
@@ -91,7 +89,7 @@ export function UserSettings({ className, ...props }: React.ComponentProps<"div"
 
 	return (
 		<div className={cn("flex flex-col gap-6", className)} {...props}>
-			<Card className="overflow-hidden pt-2 pb-4 pl-4 pr-4 bg-muted">
+			<Card className="overflow-hidden pt-2 pb-4 pl-4 pr-4">
 				<CardContent className="p-0">
 					<h1 className="text-2xl font-bold mb-2">Settings</h1>
 					<FieldSeparator />
@@ -159,11 +157,6 @@ export function UserSettings({ className, ...props }: React.ComponentProps<"div"
 								{isSubmitting ? "Updating..." : "Update Profile"}
 							</Button>
 						</div>
-						{showSuccess && (
-							<div className="flex justify-center mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded w-full">
-								Profile updated successfully!
-							</div>
-						)}
 					</form>
 				</CardContent>
 			</Card>

@@ -8,6 +8,7 @@ import { SignupPage } from "@/pages/SignupPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { SearchPage } from "@/pages/SearchPage";
 import { CreatePostPage } from "@/pages/CreatePostPage";
+import { PostPage } from "@/pages/PostPage";
 import { EditPostPage } from "@/pages/EditPostPage";
 import { MessagesPage } from "@/pages/MessagesPage";
 import { SettingsPage } from "@/pages/SettingsPage";
@@ -20,6 +21,7 @@ export const router = createBrowserRouter([
 			{ path: "/", element: <FeedPage /> },
 			{ path: "/search", element: <SearchPage /> },
 			{ path: "/create", element: <CreatePostPage /> },
+			{ path: "/post/:id", element: <PostPage /> },
 			{ path: "/post/:id/edit", element: <EditPostPage /> },
 			{ path: "/messages", element: <MessagesPage /> },
 			{ path: "/notifications", element: <NotificationsPage /> },

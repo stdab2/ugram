@@ -9,7 +9,7 @@ import { CURRENT_USERNAME } from "@/lib/constants";
 import { Upload, X, Loader2 } from "lucide-react";
 import { getImageUrl } from "@/lib/utils";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/Alert";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 interface PostFormProps {
 	initialImage?: string;

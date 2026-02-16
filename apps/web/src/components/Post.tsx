@@ -21,7 +21,6 @@ interface PostProps {
 	isLiked?: boolean;
 	onLike?: () => void;
 	onComment?: () => void;
-	onShare?: () => void;
 	onPostDeletion: (postId: number) => void;
 }
 
@@ -33,7 +32,6 @@ export function Post({
 	isLiked = false,
 	onLike,
 	onComment,
-	onShare,
 	onPostDeletion,
 }: PostProps) {
 	const [isModalOpen, setIsModalOpen] = useState(false);
@@ -64,12 +62,19 @@ export function Post({
 				{/* Header */}
 				<div className="flex items-center justify-between gap-3 p-3">
 					<div className="flex items-center gap-3">
-						<Avatar className="h-8 w-8">
-							<AvatarImage src={getImageUrl(post.author.picture)} />
-							<AvatarFallback>{avatarFallback}</AvatarFallback>
-						</Avatar>
+						<Link to={`/profile/${post.author.userName}`}>
+							<Avatar className="h-8 w-8">
+								<AvatarImage src={getImageUrl(post.author.picture)} />
+								<AvatarFallback>{avatarFallback}</AvatarFallback>
+							</Avatar>
+						</Link>
 						<div className="flex items-center gap-2">
-							<span className="text-sm font-semibold">{post.author.userName}</span>
+							<Link
+								to={`/profile/${post.author.userName}`}
+								className="text-sm font-semibold hover:underline"
+							>
+								{post.author.userName}
+							</Link>
 							<span className="text-muted-foreground text-sm">•</span>
 							<span className="text-muted-foreground text-sm">{formatDate(post.createdAt)}</span>
 						</div>
@@ -83,19 +88,26 @@ export function Post({
 				</div>
 
 				{/* Image */}
-				<div className={cn("w-full overflow-hidden bg-muted", aspectRatioClasses[aspectRatio])}>
+				<button
+					onClick={() => setIsModalOpen(true)}
+					className={cn(
+						"w-full overflow-hidden bg-muted cursor-pointer",
+						aspectRatioClasses[aspectRatio]
+					)}
+					aria-label="View post details"
+				>
 					<img
 						src={getImageUrl(post.imageUrl)}
 						alt={`Post by ${post.author.userName}`}
 						className="w-full h-full object-cover"
 					/>
-				</div>
+				</button>
 
 				{/* Actions */}
 				<div className="flex items-center gap-4 p-3">
 					<button
 						onClick={onLike}
-						className="flex items-center gap-2 hover:text-muted-foreground transition-colors"
+						className="flex items-center gap-2 hover:text-muted-foreground transition-all duration-200 hover:scale-110"
 						aria-label="Like"
 					>
 						<Heart
@@ -109,7 +121,7 @@ export function Post({
 							setIsModalOpen(true);
 							onComment?.();
 						}}
-						className="flex items-center gap-2 hover:text-muted-foreground transition-colors"
+						className="flex items-center gap-2 hover:text-muted-foreground transition-all duration-200 hover:scale-110"
 						aria-label="Comment"
 					>
 						<MessageCircle className="w-6 h-6" strokeWidth={2} />
@@ -117,20 +129,25 @@ export function Post({
 							<span className="text-sm font-semibold">{comments.toLocaleString()}</span>
 						)}
 					</button>
-					<button
-						onClick={onShare}
-						className="hover:text-muted-foreground transition-colors"
+					<Link
+						to={`/post/${post.id}`}
+						className="hover:text-muted-foreground transition-all duration-200 hover:scale-110"
 						aria-label="Share"
 					>
 						<Send className="w-6 h-6" strokeWidth={2} />
-					</button>
+					</Link>
 				</div>
 
 				{/* Description */}
 				{post.description && (
 					<div className="px-3 pb-3">
 						<p className="text-sm">
-							<span className="font-semibold mr-2">{post.author.userName}</span>
+							<Link
+								to={`/profile/${post.author.userName}`}
+								className="font-semibold mr-2 hover:underline"
+							>
+								{post.author.userName}
+							</Link>
 							{formattedDescription}
 						</p>
 						{hashtags.length > 0 && (
@@ -139,7 +156,7 @@ export function Post({
 									<Link
 										key={index}
 										to={`/search?q=${encodeURIComponent(tag)}`}
-										className="hover:underline mr-1"
+										className="hover:underline mr-1 transition-all duration-200 hover:brightness-125"
 									>
 										{tag}
 									</Link>
@@ -149,7 +166,6 @@ export function Post({
 					</div>
 				)}
 			</Card>
-
 			<PostModal
 				key={post.id}
 				open={isModalOpen}

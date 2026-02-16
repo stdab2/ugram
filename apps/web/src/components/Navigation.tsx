@@ -53,7 +53,7 @@ export function Navigation() {
 						<Link
 							to="/"
 							className={cn(
-								"flex items-center gap-4 p-3 rounded-lg hover:bg-accent transition-colors",
+								"flex items-center gap-4 p-3 rounded-lg hover:bg-accent transition-all duration-200 hover:scale-105",
 								pathname === "/" && "bg-accent text-accent-foreground font-medium"
 							)}
 						>
@@ -73,7 +73,7 @@ export function Navigation() {
 									key={item.href}
 									to={item.href}
 									className={cn(
-										"flex items-center gap-4 p-3 rounded-lg hover:bg-accent transition-colors",
+										"flex items-center gap-4 p-3 rounded-lg hover:bg-accent transition-all duration-200 hover:scale-105",
 										isActive && "bg-accent text-accent-foreground font-medium"
 									)}
 								>
@@ -88,7 +88,7 @@ export function Navigation() {
 						<Link
 							to="/notifications"
 							className={cn(
-								"flex items-center gap-4 p-3 rounded-lg hover:bg-accent transition-colors",
+								"flex items-center gap-4 p-3 rounded-lg hover:bg-accent transition-all duration-200 hover:scale-105",
 								pathname === "/notifications" && "bg-accent text-accent-foreground font-medium"
 							)}
 						>
@@ -101,7 +101,7 @@ export function Navigation() {
 						<Link
 							to={`/profile/${CURRENT_USERNAME}`}
 							className={cn(
-								"flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors",
+								"flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-all duration-200 hover:scale-105",
 								pathname === `/profile/${CURRENT_USERNAME}` &&
 									"bg-accent text-accent-foreground font-medium"
 							)}
@@ -121,7 +121,7 @@ export function Navigation() {
 						<Link
 							to="/settings"
 							className={cn(
-								"flex items-center gap-4 p-3 rounded-lg hover:bg-accent transition-colors",
+								"flex items-center gap-4 p-3 rounded-lg hover:bg-accent transition-all duration-200 hover:scale-105",
 								pathname === "/settings" && "bg-accent text-accent-foreground font-medium"
 							)}
 						>
@@ -131,7 +131,7 @@ export function Navigation() {
 							</span>
 						</Link>
 						<button
-							className="flex items-center gap-4 p-3 rounded-lg hover:bg-accent transition-colors text-left"
+							className="flex items-center gap-4 p-3 rounded-lg hover:bg-accent transition-all duration-200 hover:scale-105 text-left"
 							onClick={() => console.log("Déconnexion")}
 						>
 							<LogOut className="w-6 h-6 flex-shrink-0" />
@@ -154,7 +154,7 @@ export function Navigation() {
 								to={item.href}
 								aria-label={item.label}
 								className={cn(
-									"flex items-center justify-center h-16 w-16 rounded-lg hover:bg-accent transition-colors",
+									"flex items-center justify-center h-16 w-16 rounded-lg hover:bg-accent transition-all duration-200 hover:scale-110",
 									isActive && "text-primary"
 								)}
 							>
@@ -165,7 +165,7 @@ export function Navigation() {
 					<DropdownMenu>
 						<DropdownMenuTrigger
 							aria-label="User menu"
-							className="flex items-center justify-center h-16 w-16 rounded-lg hover:bg-accent transition-colors relative"
+							className="flex items-center justify-center h-16 w-16 rounded-lg hover:bg-accent transition-all duration-200 hover:scale-110 relative"
 						>
 							<Avatar className="h-9 w-9">
 								<AvatarImage src={avatarUrl} />

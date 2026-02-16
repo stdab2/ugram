@@ -1,5 +1,5 @@
-query Users {
-	users {
+query Users($limit: Int, $offset: Int) {
+	users(limit: $limit, offset: $offset) {
 		id
 		userName
 		email
@@ -7,6 +7,12 @@ query Users {
 		lastName
 		phoneNumber
 		picture
+		posts {
+			id
+			imageUrl
+			description
+			createdAt
+		}
 		createdAt
 	}
 }

@@ -13,7 +13,7 @@ type UserUgram {
 extend type Query {
 	user(id: Int!): UserUgram
 	userByUserName(userName: String!): UserUgram
-	users: [UserUgram!]!
+	users(limit: Int, offset: Int): [UserUgram!]!
 }
 
 type UsersByUserNamesResult {
