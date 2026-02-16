@@ -12,7 +12,7 @@ import { usePostsQuery, useDeletePostMutation } from "@/generated/graphql";
 import { RefreshCcw, ImageOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { PageFade } from "@/components/PageFade";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 export function FeedPage() {
 	const { data, loading, error, refetch } = usePostsQuery({

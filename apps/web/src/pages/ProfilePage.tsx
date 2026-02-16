@@ -21,7 +21,7 @@ import { useState } from "react";
 import { CURRENT_USERNAME } from "@/lib/constants";
 import { getImageUrl } from "@/lib/utils";
 import { PageFade } from "@/components/PageFade";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 export function ProfilePage() {
 	const { username } = useParams();

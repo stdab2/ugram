@@ -15,7 +15,7 @@ import { CURRENT_USERNAME } from "@/lib/constants";
 import { AlertCircle, Lock } from "lucide-react";
 import { PageFade } from "@/components/PageFade";
 import { useUpdatePostMutation, PostDocument } from "@/generated/graphql";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 export function EditPostPage() {
 	const { id } = useParams();

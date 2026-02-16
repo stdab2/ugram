@@ -60,7 +60,11 @@ export function UserSearchResult({ user, onPostClick }: UserSearchResultProps) {
 								<button
 									key={post.id}
 									type="button"
-									onClick={() => onPostClick?.(post.id)}
+									onClick={(e) => {
+										e.stopPropagation();
+										e.preventDefault();
+										onPostClick?.(post.id);
+									}}
 									className="w-20 h-20 rounded-md overflow-hidden hover:opacity-80 transition-opacity"
 								>
 									<img

@@ -3,7 +3,7 @@ import { PostForm } from "@/components/PostForm";
 import { PageFade } from "@/components/PageFade";
 import { CURRENT_USER_ID } from "@/lib/constants";
 import { useCreatePostMutation } from "../generated/graphql";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 export function CreatePostPage() {
 	const navigate = useNavigate();

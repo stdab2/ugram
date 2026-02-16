@@ -147,17 +147,10 @@ export function SearchPage() {
 	};
 
 	const handleUserPostClick = (postId: string | number) => {
-		// Find post from any user's posts
-		for (const user of allUsers) {
-			const post = user.posts?.find((p) => p.id === postId);
-			if (post) {
-				// Convert to full post format for modal
-				const fullPost = allPosts.find((p) => p.id === postId);
-				if (fullPost) {
-					setSelectedPost(fullPost);
-				}
-				break;
-			}
+		// Find post directly from allPosts since we already have all posts loaded
+		const fullPost = allPosts.find((p) => p.id === postId);
+		if (fullPost) {
+			setSelectedPost(fullPost);
 		}
 	};
 
@@ -170,7 +163,7 @@ export function SearchPage() {
 			)
 		: allUsers;
 
-	const hasMoreUsers = allUsers.length >= (usersPage + 1) * USERS_PER_PAGE;
+	const hasMoreUsers = allUsers.length === (usersPage + 1) * USERS_PER_PAGE;
 
 	return (
 		<PageFade>
@@ -299,8 +292,16 @@ export function SearchPage() {
 				{selectedPost && (
 					<PostModal
 						open={!!selectedPost}
-						onOpenChange={(open) => !open && setSelectedPost(null)}
+						onOpenChange={(open) => {
+							if (!open) {
+								setSelectedPost(null);
+							}
+						}}
 						post={selectedPost}
+						onPostDeletion={() => {
+							setSelectedPost(null);
+							refetchPosts();
+						}}
 					/>
 				)}
 			</div>

@@ -9,10 +9,10 @@ export function CustomCursor() {
 	const [isPressed, setIsPressed] = useState(false);
 
 	useEffect(() => {
-		let animationFrame: number;
+		let animationFrame: number | undefined;
 
 		const updateCursor = (e: MouseEvent) => {
-			if (animationFrame) {
+			if (animationFrame !== undefined) {
 				cancelAnimationFrame(animationFrame);
 			}
 			animationFrame = requestAnimationFrame(() => {
@@ -78,7 +78,7 @@ export function CustomCursor() {
 				cancelAnimationFrame(animationFrame);
 			}
 		};
-	}, [cursorState]);
+	}, []);
 
 	return (
 		<>
