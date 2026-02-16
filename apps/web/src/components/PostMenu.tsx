@@ -18,7 +18,7 @@ export function PostMenu({ isOwnPost, onEdit, onDelete, onReport }: PostMenuProp
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
 				<button
-					className="p-2 hover:bg-accent rounded-full transition-colors"
+					className="p-2 hover:bg-accent rounded-full transition-all duration-200 hover:scale-110"
 					aria-label="Post options"
 				>
 					<MoreHorizontal className="h-5 w-5" />

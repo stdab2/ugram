@@ -21,13 +21,20 @@ export function PostPreview({
 
 	return (
 		<button
-			className={cn("aspect-square overflow-hidden bg-muted relative group w-full", className)}
+			className={cn(
+				"aspect-square overflow-hidden bg-muted relative group w-full transition-all duration-300 hover:shadow-lg",
+				className
+			)}
 			onClick={onClick}
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
 			aria-label="View post"
 		>
-			<img src={getImageUrl(imageUrl)} alt="Post preview" className="w-full h-full object-cover" />
+			<img
+				src={getImageUrl(imageUrl)}
+				alt="Post preview"
+				className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+			/>
 			{isHovered && (
 				<div className="absolute inset-0 bg-black/40 flex items-center justify-center gap-6 text-white">
 					<div className="flex items-center gap-2">

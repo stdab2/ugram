@@ -136,12 +136,19 @@ export function PostModal({
 							{/* Header */}
 							<div className="flex items-center justify-between gap-3 p-4 border-b flex-shrink-0">
 								<div className="flex items-center gap-3">
-									<Avatar className="h-10 w-10">
-										<AvatarImage src={getImageUrl(author.picture)} />
-										<AvatarFallback>{avatarFallback}</AvatarFallback>
-									</Avatar>
+									<Link to={`/profile/${author.userName}`}>
+										<Avatar className="h-10 w-10">
+											<AvatarImage src={getImageUrl(author.picture)} />
+											<AvatarFallback>{avatarFallback}</AvatarFallback>
+										</Avatar>
+									</Link>
 									<div>
-										<p className="font-semibold text-sm">{author.userName}</p>
+										<Link
+											to={`/profile/${author.userName}`}
+											className="font-semibold text-sm hover:underline"
+										>
+											{author.userName}
+										</Link>
 										<p className="text-xs text-muted-foreground">{formatDate(post.createdAt)}</p>
 									</div>
 								</div>
@@ -159,13 +166,20 @@ export function PostModal({
 							{/* Caption */}
 							<div className="p-4 border-b flex-shrink-0">
 								<div className="flex gap-3">
-									<Avatar className="h-8 w-8 flex-shrink-0">
-										<AvatarImage src={getImageUrl(author.picture)} />
-										<AvatarFallback>{avatarFallback}</AvatarFallback>
-									</Avatar>
+									<Link to={`/profile/${author.userName}`}>
+										<Avatar className="h-8 w-8 flex-shrink-0">
+											<AvatarImage src={getImageUrl(author.picture)} />
+											<AvatarFallback>{avatarFallback}</AvatarFallback>
+										</Avatar>
+									</Link>
 									<div className="flex-1">
 										<p className="text-sm">
-											<span className="font-semibold mr-2">{author.userName}</span>
+											<Link
+												to={`/profile/${author.userName}`}
+												className="font-semibold mr-2 hover:underline"
+											>
+												{author.userName}
+											</Link>
 											{formattedDescription}
 										</p>
 										{hashtags.length > 0 && (
@@ -190,13 +204,20 @@ export function PostModal({
 								<div className="h-full overflow-y-auto p-4 space-y-4">
 									{comments.map((comment) => (
 										<div key={comment.id} className="flex gap-3">
-											<Avatar className="h-8 w-8 flex-shrink-0">
-												<AvatarImage src={comment.author.avatarUrl} />
-												<AvatarFallback>{comment.author.avatarFallback}</AvatarFallback>
-											</Avatar>
+											<Link to={`/profile/${comment.author.username}`}>
+												<Avatar className="h-8 w-8 flex-shrink-0">
+													<AvatarImage src={comment.author.avatarUrl} />
+													<AvatarFallback>{comment.author.avatarFallback}</AvatarFallback>
+												</Avatar>
+											</Link>
 											<div className="flex-1">
 												<p className="text-sm">
-													<span className="font-semibold mr-2">{comment.author.username}</span>
+													<Link
+														to={`/profile/${comment.author.username}`}
+														className="font-semibold mr-2 hover:underline"
+													>
+														{comment.author.username}
+													</Link>
 													{comment.text}
 												</p>
 												<p className="text-xs text-muted-foreground mt-1">

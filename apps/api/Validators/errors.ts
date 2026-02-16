@@ -88,7 +88,9 @@ export const handlePrismaError = (error: unknown, resourceName: string = "Resour
 			}
 			case "P2003": {
 				// Foreign key constraint violation
-				throw new BadRequestError(`Invalid reference: related ${resourceName.toLowerCase()} does not exist`);
+				throw new BadRequestError(
+					`Invalid reference: related ${resourceName.toLowerCase()} does not exist`
+				);
 			}
 			default: {
 				// Other Prisma errors

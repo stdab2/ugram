@@ -1,8 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { PostForm } from "@/components/PostForm";
+import { PageFade } from "@/components/PageFade";
 import { CURRENT_USER_ID } from "@/lib/constants";
 import { useCreatePostMutation } from "../generated/graphql";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 export function CreatePostPage() {
 	const navigate = useNavigate();
@@ -46,16 +47,18 @@ export function CreatePostPage() {
 	};
 
 	return (
-		<div className="w-full min-h-screen bg-background pb-20 md:pb-0">
-			<div className="max-w-4xl mx-auto px-4 py-8">
-				{/* Header */}
-				<div className="mb-6">
-					<h1 className="text-3xl font-bold">Create a new post</h1>
-					<p className="text-muted-foreground mt-2">Share your moments with the world</p>
-				</div>
+		<PageFade>
+			<div className="w-full min-h-screen bg-background pb-20 md:pb-0">
+				<div className="max-w-4xl mx-auto px-4 py-8">
+					{/* Header */}
+					<div className="mb-6">
+						<h1 className="text-3xl font-bold">Create a new post</h1>
+						<p className="text-muted-foreground mt-2">Share your moments with the world</p>
+					</div>
 
-				<PostForm onSubmit={handleSubmit} submitButtonText="Publish" onCancel={handleCancel} />
+					<PostForm onSubmit={handleSubmit} submitButtonText="Publish" onCancel={handleCancel} />
+				</div>
 			</div>
-		</div>
+		</PageFade>
 	);
 }
