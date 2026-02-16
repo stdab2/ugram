@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { PostGrid } from "@/components/PostGrid";
 import { PostModal } from "@/components/PostModal";
 import { ProfileSkeleton } from "@/components/ProfileSkeleton";
+import { timestampToDateString } from "@/lib/utils";
 import {
 	Empty,
 	EmptyContent,
@@ -174,9 +175,7 @@ export function ProfilePage() {
 										<p className="text-sm text-muted-foreground">Following</p>
 									</div>
 								</div>
-
 								<Separator />
-
 								{/* Contact Info */}
 								<div className="space-y-2">
 									<div className="flex items-center gap-2 text-sm">
@@ -189,7 +188,7 @@ export function ProfilePage() {
 									</div>
 									<div className="flex items-center gap-2 text-sm">
 										<Calendar className="h-4 w-4 text-muted-foreground" />
-										<span>Member since {new Date().getFullYear()}</span>
+										<span>Member since {timestampToDateString(+user.createdAt)}</span>
 									</div>
 								</div>
 							</div>

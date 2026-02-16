@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 import { cn } from "@/lib/utils";
+import { timestampToDateString } from "@/lib/utils";
 
 interface UserDetailsProps {
 	pictureUrl: string;
@@ -7,16 +8,6 @@ interface UserDetailsProps {
 	fullname: string;
 	memberSince: string;
 	className?: string;
-}
-
-function timestampToDateString(timestamp: number): string {
-	const date = new Date(timestamp);
-
-	return date.toLocaleDateString(undefined, {
-		year: "numeric",
-		month: "long",
-		day: "numeric",
-	});
 }
 
 export function UserDetails({

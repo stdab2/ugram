@@ -7,6 +7,7 @@ query UserByUserName($userName: String!) {
 		lastName
 		phoneNumber
 		picture
+		createdAt
 		posts {
 			id
 			imageUrl

@@ -10,15 +10,15 @@ const prisma = new PrismaClient({
 });
 
 export const hashtagResolvers = {
-  Query: {
-    hashtag: async (_: any, args: { id: number }) => {
-      return prisma.hashtag.findUnique({
-        where: { id: args.id },
-      });
-    },
-    hashtags: async () => {
-      return prisma.hashtag.findMany();
-    },
-  },
-  Mutation: {},
+	Query: {
+		hashtag: async (_: unknown, args: { id: number }) => {
+			return prisma.hashtag.findUnique({
+				where: { id: args.id },
+			});
+		},
+		hashtags: async () => {
+			return prisma.hashtag.findMany();
+		},
+	},
+	Mutation: {},
 };
