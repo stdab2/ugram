@@ -23,3 +23,13 @@ export function getImageUrl(imageUrl: string | null | undefined): string | undef
 	// Otherwise, prepend / to make it relative to the public folder
 	return "http://localhost:4001" + `/${imageUrl}`;
 }
+
+export function timestampToDateString(timestamp: number): string {
+	const date = new Date(timestamp);
+
+	return date.toLocaleDateString(undefined, {
+		year: "numeric",
+		month: "long",
+		day: "numeric",
+	});
+}

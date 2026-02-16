@@ -215,28 +215,24 @@ This project includes:
 docker compose up --build
 ```
 
-3. Add environment variables:
-
-- Create .env file at <u>ugram-h2026-ugram-h2026-team-17\apps\api\\.env</u> with the content: <u>DATABASE_URL="postgresql://postgres:postgres@localhost:5432/ugram"</u>
-- Create .env file at <u>ugram-h2026-ugram-h2026-team-17\apps\web\\.env</u> with the content: <u>VITE_GRAPHQL_URL="http://localhost:4001/graphql"</u>
-
-4. Open the app: http://localhost:5173
+3. Open the app: http://localhost:5173
 
 **Useful endpoints**
 
 - Web: http://localhost:5173
 - GraphQL API: http://localhost:4001/graphql
-- DB: localhost:5432 (user: postgres, password: postgres, db: ugram)
-
-**Demo accounts (seed)**
-
-- Email: john.doe@example.com / Password: qwerty
-- Email: jane.smith@example.com / Password: qwerty
-- Email: travel.explorer@example.com / Password: qwerty
-- Email: foodie.lover@example.com / Password: qwerty
-- Email: urban.photographer@example.com / Password: qwerty
+- DB: localhost:5432
 
 **Demo walkthrough**
+Starting from the main page (http://localhost:5173), you can see a list of posts from all users, ordered by date.
+
+Then, you can navigate to the search page (http://localhost:5173/search) to see the list of users, then you can view a user's profile (http://localhost:5173/profile/:username) by clicking on them.
+
+After that, you can navigate to the create post page (http://localhost:5173/create) and upload an image you want to post. You can also add a description to your post, add tags directly from the description (e.g. \#nature) and also tag other users also from the description (e.g. \@jane_smith).
+
+After creating your post, you can navigate to your own profile page (http://localhost:5173/profile/me) and view your own posts. You can click on a post to view it's description and tags. You can also choose to either edit or delete a post that you made by clicking on the three dots at the top right of that view.
+
+Finally, you can navigate to the settings page to access and update your profile's informations.
 
 **Stop**
 
