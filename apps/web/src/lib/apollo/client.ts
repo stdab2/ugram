@@ -1,7 +1,8 @@
-import { ApolloClient, InMemoryCache, HttpLink, ApolloLink } from "@apollo/client";
+import { ApolloClient, InMemoryCache, ApolloLink } from "@apollo/client";
+import UploadHttpLink from "apollo-upload-client/UploadHttpLink.mjs";
 
-const httpLink = new HttpLink({
-	uri: import.meta.env.VITE_GRAPHQL_URL ?? "http://localhost:4000/graphql",
+const httpLink = new UploadHttpLink({
+	uri: import.meta.env.VITE_GRAPHQL_URL ?? "http://localhost:4001/graphql",
 });
 
 const authLink = new ApolloLink((operation, forward) => {
@@ -11,6 +12,7 @@ const authLink = new ApolloLink((operation, forward) => {
 		headers: {
 			...headers,
 			...(token ? { authorization: `Bearer ${token}` } : {}),
+			"apollo-require-preflight": "true",
 		},
 	}));
 

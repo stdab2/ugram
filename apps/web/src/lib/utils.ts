@@ -18,8 +18,8 @@ export function getImageUrl(imageUrl: string | null | undefined): string | undef
 		imageUrl.startsWith("http://") ||
 		imageUrl.startsWith("https://")
 	) {
-		return imageUrl;
+		return "http://localhost:4001" + imageUrl;
 	}
 	// Otherwise, prepend / to make it relative to the public folder
-	return `/${imageUrl}`;
+	return "http://localhost:4001" + `/${imageUrl}`;
 }

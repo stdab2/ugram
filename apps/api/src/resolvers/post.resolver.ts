@@ -1,9 +1,15 @@
 import { PrismaClient } from "../../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { validateUsersExist } from "../../Validators/validateUser.js";
+import {
+	validateUserId,
+	validateUsersExist,
+	validateNonEmptyString,
+} from "../../Validators/validateUser.js";
 import { saveUploadedImage } from "../../services/image.service.js";
 import type { FileUpload } from "graphql-upload";
 import { Post } from "../../generated/prisma/client.js";
+import { handlePrismaError } from "../../Validators/errors.js";
+import { validatePostId } from "../../Validators/validatePost.js";
 
 const adapter = new PrismaPg({
 	connectionString: process.env.DATABASE_URL,
@@ -26,6 +32,7 @@ type CreatePostArgs = {
 export const postResolvers = {
 	Query: {
 		post: async (_: unknown, args: { id: number }) => {
+			validatePostId(args.id);
 			return prisma.post.findUnique({
 				where: { id: args.id },
 			});
@@ -40,6 +47,7 @@ export const postResolvers = {
 			_: unknown,
 			args: { authorId: number; limit?: number; offset?: number }
 		) => {
+			validateUserId(args.authorId);
 			return prisma.post.findMany({
 				where: { authorId: args.authorId },
 				take: args.limit,
@@ -57,9 +65,11 @@ export const postResolvers = {
 	Mutation: {
 		createPost: async (_: unknown, { data }: CreatePostArgs) => {
 			const { description, image, authorId, hashtags, mentionedUsers } = data;
+			validateUserId(authorId);
+			validateNonEmptyString(description, "Post description");
 
 			if (mentionedUsers && mentionedUsers.length > 0) {
-				await validateUsersExist(mentionedUsers, prisma);
+				await validateUsersExist(mentionedUsers);
 			}
 
 			if (!image) {
@@ -90,26 +100,81 @@ export const postResolvers = {
 					: [];
 			}
 
-			const post = await prisma.post.create({
-				data: {
-					description,
-					imageUrl,
-					authorId,
-					hashtags: {
-						connect: hashtagRows.map((h) => ({ id: h.id })),
+			try {
+				const post = await prisma.post.create({
+					data: {
+						description,
+						imageUrl,
+						authorId,
+						hashtags: {
+							connect: hashtagRows.map((h) => ({ id: h.id })),
+						},
+						mentionedUsers: {
+							connect: mentionedUsers ? mentionedUsers.map((id: number) => ({ id })) : [],
+						},
 					},
-					mentionedUsers: {
-						connect: mentionedUsers ? mentionedUsers.map((id: number) => ({ id })) : [],
+					include: {
+						hashtags: true,
+						mentionedUsers: true,
+						author: true,
 					},
-				},
-				include: {
-					hashtags: true,
-					mentionedUsers: true,
-					author: true,
-				},
-			});
+				});
 
-			return post;
+				return post;
+			} catch (error: unknown) {
+				handlePrismaError(error, "Post");
+			}
+		},
+		deletePost: async (_: unknown, args: { id: number }) => {
+			validatePostId(args.id);
+			try {
+				return await prisma.post.delete({
+					where: { id: args.id },
+				});
+			} catch (error: unknown) {
+				handlePrismaError(error, "Post");
+			}
+		},
+		updatePost: async (_: unknown, args: { id: number; description: string }) => {
+			validatePostId(args.id);
+			validateNonEmptyString(args.description, "Post description");
+
+			try {
+				const postHashtags = getPostHashtags(args.description);
+				const postMentions = getPostMentions(args.description);
+				const existingUsers = await prisma.userUgram.findMany({
+					where: { userName: { in: postMentions } },
+				});
+				const existingUserPostMentions = existingUsers.map((existingUser) => existingUser.userName);
+
+				return await prisma.post.update({
+					where: { id: args.id },
+					data: {
+						description: args.description,
+						hashtags: {
+							set: [],
+							connectOrCreate: postHashtags.map((name) => ({
+								where: { name },
+								create: { name },
+							})),
+						},
+						mentionedUsers: {
+							set: [],
+							connect: existingUserPostMentions.map((userName) => ({ userName })),
+						},
+					},
+				});
+			} catch (error: unknown) {
+				handlePrismaError(error, "Post");
+			}
 		},
 	},
 };
+
+function getPostHashtags(description: string): string[] {
+	return description.match(/#\w+/g) || [];
+}
+
+function getPostMentions(description: string): string[] {
+	return description.match(/@\w+/g)?.map((mention) => mention.slice(1)) || [];
+}

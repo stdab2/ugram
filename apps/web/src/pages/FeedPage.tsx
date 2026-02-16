@@ -8,10 +8,11 @@ import {
 	EmptyTitle,
 } from "@/components/ui/Empty";
 import { Button } from "@/components/ui/Button";
-import { usePostsQuery } from "@/generated/graphql";
+import { usePostsQuery, useDeletePostMutation } from "@/generated/graphql";
 import { RefreshCcw, ImageOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { PageFade } from "@/components/PageFade";
+import { toast } from "react-toastify";
 
 export function FeedPage() {
 	const { data, loading, error, refetch } = usePostsQuery({
@@ -19,6 +20,25 @@ export function FeedPage() {
 	});
 
 	const navigate = useNavigate();
+
+	const [deletePost] = useDeletePostMutation({
+		update(cache, { data }) {
+			if (!data?.deletePost) return;
+
+			cache.evict({ id: cache.identify({ __typename: "Post", id: data.deletePost.id }) });
+			cache.gc();
+		},
+	});
+
+	const handlePostDeletion = async (postId: number) => {
+		try {
+			await deletePost({ variables: { id: postId } });
+			toast.success("Your post has been successfully deleted !");
+		} catch (error) {
+			console.error("Failed to delete post:", error);
+			toast.error("Failed to delete your post. Please try again.");
+		}
+	};
 
 	if (loading) {
 		return (
@@ -86,6 +106,7 @@ export function FeedPage() {
 							onLike={() => console.log("Like", post.id)}
 							onComment={() => console.log("Comment", post.id)}
 							onShare={() => console.log("Share", post.id)}
+							onPostDeletion={handlePostDeletion}
 						/>
 					))}
 				</div>

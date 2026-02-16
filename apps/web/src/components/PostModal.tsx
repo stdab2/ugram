@@ -33,6 +33,7 @@ interface PostModalProps {
 	likes?: number;
 	comments?: number;
 	isLiked?: boolean;
+	onPostDeletion: (postId: number) => void;
 }
 
 export function PostModal({
@@ -41,6 +42,7 @@ export function PostModal({
 	post,
 	likes = 0,
 	isLiked: initialIsLiked = false,
+	onPostDeletion,
 }: PostModalProps) {
 	const navigate = useNavigate();
 
@@ -102,6 +104,13 @@ export function PostModal({
 		setComments((prevComments) => [comment, ...prevComments]);
 		setNewComment("");
 	};
+
+	function handlePostDeletion(postId: number) {
+		setIsDeleting(true);
+		onPostDeletion(postId);
+		setIsDeleting(false);
+		setShowDeleteDialog(false);
+	}
 
 	const { description: formattedDescription, hashtags } = formatDescription(post.description);
 
@@ -261,17 +270,7 @@ export function PostModal({
 				open={showDeleteDialog}
 				onOpenChange={setShowDeleteDialog}
 				isDeleting={isDeleting}
-				onConfirm={async () => {
-					setIsDeleting(true);
-					// Simulate API call
-					await new Promise((resolve) => setTimeout(resolve, 1000));
-					console.log("Deleting post", post.id);
-					setIsDeleting(false);
-					setShowDeleteDialog(false);
-					onOpenChange(false);
-					// Navigate back to feed
-					navigate("/");
-				}}
+				onConfirm={() => handlePostDeletion(post.id)}
 			/>
 		</>
 	);

@@ -14,6 +14,8 @@ import { getImageUrl } from "@/lib/utils";
 import { CURRENT_USERNAME } from "@/lib/constants";
 import { AlertCircle, Lock } from "lucide-react";
 import { PageFade } from "@/components/PageFade";
+import { useUpdatePostMutation, PostDocument } from "@/generated/graphql";
+import { toast } from "react-toastify";
 
 export function EditPostPage() {
 	const { id } = useParams();
@@ -35,26 +37,24 @@ export function EditPostPage() {
 
 	const post = postData?.post;
 
-	const handleSubmit = async (data: { imagePreview: string | null; description: string }) => {
-		// TODO: Implement GraphQL mutation to update post
-		// Simulate API call
-		await new Promise((resolve) => setTimeout(resolve, 1000));
+	const [updatePost, { loading: updateLoading }] = useUpdatePostMutation({
+		update(cache, { data }) {
+			if (!data?.updatePost) return;
 
-		console.log("Updating post", {
-			id,
-			description: data.description,
-			hashtags: data.description.match(/#\w+/g) || [],
-		});
-
-		navigate("/");
-	};
+			cache.writeQuery({
+				query: PostDocument,
+				variables: { id: data.updatePost.id },
+				data: { post: data.updatePost },
+			});
+		},
+	});
 
 	const handleCancel = () => {
 		navigate(-1);
 	};
 
 	// Handle loading state
-	if (loading) {
+	if (loading || updateLoading) {
 		return (
 			<PageFade key="loading" delay={0.3}>
 				<EditPostSkeleton />
@@ -104,6 +104,17 @@ export function EditPostPage() {
 		);
 	}
 
+	const handlePostUpdate = async (description: string) => {
+		try {
+			await updatePost({ variables: { id: post.id, description } });
+			navigate(-1);
+			toast.success("Your post has been successfully updated !");
+		} catch (error) {
+			console.error("Failed to update post:", error);
+			toast.error("Failed to update your post. Please try again.");
+		}
+	};
+
 	// Check if user owns this post
 	if (post.author.userName !== CURRENT_USERNAME) {
 		return (
@@ -137,7 +148,7 @@ export function EditPostPage() {
 					<PostForm
 						initialImage={getImageUrl(post.imageUrl)}
 						initialDescription={post.description}
-						onSubmit={handleSubmit}
+						onPostEdit={handlePostUpdate}
 						submitButtonText="Save changes"
 						onCancel={handleCancel}
 						allowImageChange={false}

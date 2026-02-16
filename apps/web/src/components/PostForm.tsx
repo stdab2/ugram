@@ -4,15 +4,23 @@ import { Button } from "@/components/ui/Button";
 import { Textarea } from "@/components/ui/Textarea";
 import { Label } from "@/components/ui/Label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
-import { useUserByUserNameQuery } from "@/generated/graphql";
+import { useUserByUserNameQuery, useUsersByUserNamesLazyQuery } from "@/generated/graphql";
 import { CURRENT_USERNAME } from "@/lib/constants";
 import { Upload, X, Loader2 } from "lucide-react";
 import { getImageUrl } from "@/lib/utils";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/Alert";
+import { toast } from "react-toastify";
 
 interface PostFormProps {
 	initialImage?: string;
 	initialDescription?: string;
-	onSubmit: (data: { imagePreview: string | null; description: string }) => Promise<void>;
+	onPostEdit?: (description: string) => void;
+	onSubmit?: (data: {
+		imagePreview: string | null;
+		description: string;
+		image: File | null;
+		mentionedUsers: number[] | null;
+	}) => Promise<void>;
 	submitButtonText: string;
 	onCancel: () => void;
 	allowImageChange?: boolean;
@@ -21,6 +29,7 @@ interface PostFormProps {
 export function PostForm({
 	initialImage,
 	initialDescription = "",
+	onPostEdit,
 	onSubmit,
 	submitButtonText,
 	onCancel,
@@ -28,7 +37,10 @@ export function PostForm({
 }: PostFormProps) {
 	const [imagePreview, setImagePreview] = useState<string | null>(initialImage || null);
 	const [description, setDescription] = useState(initialDescription);
+	const [image, setImage] = useState<File | null>(null);
 	const [isSaving, setIsSaving] = useState(false);
+	const [fetchUsersByUserNames] = useUsersByUserNamesLazyQuery();
+	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
 	// Fetch current user data
 	const { data: userData, loading: userLoading } = useUserByUserNameQuery({
@@ -43,6 +55,7 @@ export function PostForm({
 	const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
 		if (file) {
+			setImage(file);
 			const reader = new FileReader();
 			reader.onloadend = () => {
 				setImagePreview(reader.result as string);
@@ -54,9 +67,47 @@ export function PostForm({
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setIsSaving(true);
+		setErrorMessage(null);
+		const mentionedUsernames = Array.from(
+			new Set((description.match(/@\w+/g) || []).map((u) => u.slice(1)))
+		);
+
+		let mentionedUsers: number[] = [];
 
 		try {
-			await onSubmit({ imagePreview, description });
+			if (mentionedUsernames.length > 0) {
+				const mentionedUsersVerified = await fetchUsersByUserNames({
+					variables: { userNames: mentionedUsernames },
+				});
+
+				if (mentionedUsersVerified.data?.usersByUserNames.missingUserNames.length) {
+					const errorMessage = `The following mentioned users were not found: ${mentionedUsersVerified.data.usersByUserNames.missingUserNames.join(", ")}`;
+					toast.error(errorMessage);
+					setIsSaving(false);
+					return;
+				}
+
+				mentionedUsers = mentionedUsersVerified.data?.usersByUserNames.users.map((u) => u.id) || [];
+			}
+		} catch (err) {
+			console.error("Error verifying mentioned users:", err);
+			toast.error("Failed to verify mentioned users. Please try again.");
+			setErrorMessage("Failed to verify mentioned users. Please try again.");
+			setIsSaving(false);
+			return;
+		}
+
+		try {
+			if (onSubmit) {
+				onSubmit({ imagePreview, description, image, mentionedUsers });
+			}
+			if (onPostEdit) {
+				onPostEdit(description);
+			}
+		} catch (err) {
+			console.error("Error submitting PostForm:", err);
+			setErrorMessage("Failed to submit changes. Please try again.");
+			return;
 		} finally {
 			setIsSaving(false);
 		}
@@ -75,7 +126,10 @@ export function PostForm({
 							{allowImageChange && (
 								<button
 									type="button"
-									onClick={() => setImagePreview(null)}
+									onClick={() => {
+										setImagePreview(null);
+										setImage(null);
+									}}
 									className="absolute top-2 right-2 p-2 bg-background/80 hover:bg-background rounded-full"
 									aria-label="Remove image"
 								>
@@ -142,7 +196,10 @@ export function PostForm({
 								id="description"
 								placeholder="Write a caption... Use # to add hashtags"
 								value={description}
-								onChange={(e) => setDescription(e.target.value)}
+								onChange={(e) => {
+									setDescription(e.target.value);
+									setErrorMessage(null);
+								}}
 								className="min-h-[200px] resize-none"
 								required
 							/>
@@ -181,7 +238,12 @@ export function PostForm({
 							<Button
 								size="lg"
 								type="submit"
-								disabled={isSaving || !imagePreview || !description.trim()}
+								disabled={
+									isSaving ||
+									!imagePreview ||
+									!description.trim() ||
+									description.trim() === initialDescription.trim()
+								}
 								className="flex-1 p-5"
 							>
 								{isSaving ? "Saving..." : submitButtonText}
@@ -190,6 +252,12 @@ export function PostForm({
 					</div>
 				</Card>
 			</div>
+			{errorMessage && (
+				<Alert variant="destructive">
+					<AlertTitle>Invalid mention</AlertTitle>
+					<AlertDescription>{errorMessage}</AlertDescription>
+				</Alert>
+			)}
 		</form>
 	);
 }

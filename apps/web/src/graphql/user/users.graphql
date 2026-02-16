@@ -13,5 +13,6 @@ query Users($limit: Int, $offset: Int) {
 			description
 			createdAt
 		}
+		createdAt
 	}
 }

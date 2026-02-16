@@ -14,13 +14,14 @@ import {
 	EmptyHeader,
 	EmptyTitle,
 } from "@/components/ui/Empty";
-import { useUserByUserNameQuery } from "@/generated/graphql";
+import { useUserByUserNameQuery, useDeletePostMutation } from "@/generated/graphql";
 import type { UserByUserNameQuery } from "@/generated/graphql";
 import { Mail, Phone, Calendar, UserX, AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { CURRENT_USERNAME } from "@/lib/constants";
 import { getImageUrl } from "@/lib/utils";
 import { PageFade } from "@/components/PageFade";
+import { toast } from "react-toastify";
 
 export function ProfilePage() {
 	const { username } = useParams();
@@ -44,7 +45,28 @@ export function ProfilePage() {
 	type UserPostType = NonNullable<
 		NonNullable<UserByUserNameQuery["userByUserName"]>["posts"]
 	>[number];
+
 	const [selectedPost, setSelectedPost] = useState<UserPostType | null>(null);
+
+	const [deletePost] = useDeletePostMutation({
+		update(cache, { data }) {
+			if (!data?.deletePost) return;
+
+			cache.evict({ id: cache.identify({ __typename: "Post", id: data.deletePost.id }) });
+			cache.gc();
+		},
+	});
+
+	const handlePostDeletion = async (postId: number) => {
+		try {
+			await deletePost({ variables: { id: postId } });
+			setSelectedPost(null);
+			toast.success("Your post has been successfully deleted !");
+		} catch (error) {
+			console.error("Failed to delete post:", error);
+			toast.error("Failed to delete your post. Please try again.");
+		}
+	};
 
 	// Handle loading state
 	if (userLoading) {
@@ -203,6 +225,7 @@ export function ProfilePage() {
 								...selectedPost,
 								author: user,
 							}}
+							onPostDeletion={handlePostDeletion}
 						/>
 					)}
 				</div>

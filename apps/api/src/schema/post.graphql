@@ -27,5 +27,6 @@ input CreatePostInput {
 
 extend type Mutation {
   createPost(data: CreatePostInput!): Post!
+  deletePost(id: Int!): Post!
+  updatePost(id: Int!, description: String!): Post!
 }
-
