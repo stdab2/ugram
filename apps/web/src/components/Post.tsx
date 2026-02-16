@@ -62,12 +62,19 @@ export function Post({
 				{/* Header */}
 				<div className="flex items-center justify-between gap-3 p-3">
 					<div className="flex items-center gap-3">
-						<Avatar className="h-8 w-8">
-							<AvatarImage src={getImageUrl(post.author.picture)} />
-							<AvatarFallback>{avatarFallback}</AvatarFallback>
-						</Avatar>
+						<Link to={`/profile/${post.author.userName}`}>
+							<Avatar className="h-8 w-8">
+								<AvatarImage src={getImageUrl(post.author.picture)} />
+								<AvatarFallback>{avatarFallback}</AvatarFallback>
+							</Avatar>
+						</Link>
 						<div className="flex items-center gap-2">
-							<span className="text-sm font-semibold">{post.author.userName}</span>
+							<Link
+								to={`/profile/${post.author.userName}`}
+								className="text-sm font-semibold hover:underline"
+							>
+								{post.author.userName}
+							</Link>
 							<span className="text-muted-foreground text-sm">•</span>
 							<span className="text-muted-foreground text-sm">{formatDate(post.createdAt)}</span>
 						</div>
@@ -135,7 +142,12 @@ export function Post({
 				{post.description && (
 					<div className="px-3 pb-3">
 						<p className="text-sm">
-							<span className="font-semibold mr-2">{post.author.userName}</span>
+							<Link
+								to={`/profile/${post.author.userName}`}
+								className="font-semibold mr-2 hover:underline"
+							>
+								{post.author.userName}
+							</Link>
 							{formattedDescription}
 						</p>
 						{hashtags.length > 0 && (

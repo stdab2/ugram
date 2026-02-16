@@ -286,13 +286,20 @@ export function PostPage() {
 									<div className="h-full overflow-y-auto p-4 space-y-4">
 										{comments.map((comment) => (
 											<div key={comment.id} className="flex gap-3">
-												<Avatar className="h-8 w-8 flex-shrink-0">
-													<AvatarImage src={comment.author.avatarUrl} />
-													<AvatarFallback>{comment.author.avatarFallback}</AvatarFallback>
-												</Avatar>
+												<Link to={`/profile/${comment.author.username}`}>
+													<Avatar className="h-8 w-8 flex-shrink-0">
+														<AvatarImage src={comment.author.avatarUrl} />
+														<AvatarFallback>{comment.author.avatarFallback}</AvatarFallback>
+													</Avatar>
+												</Link>
 												<div className="flex-1">
 													<p className="text-sm">
-														<span className="font-semibold mr-2">{comment.author.username}</span>
+														<Link
+															to={`/profile/${comment.author.username}`}
+															className="font-semibold mr-2 hover:underline"
+														>
+															{comment.author.username}
+														</Link>
 														{comment.text}
 													</p>
 													<p className="text-xs text-muted-foreground mt-1">
