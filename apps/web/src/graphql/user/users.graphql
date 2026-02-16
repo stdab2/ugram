@@ -1,0 +1,18 @@
+query Users($limit: Int, $offset: Int) {
+	users(limit: $limit, offset: $offset) {
+		id
+		userName
+		email
+		firstName
+		lastName
+		phoneNumber
+		picture
+		posts {
+			id
+			imageUrl
+			description
+			createdAt
+		}
+		createdAt
+	}
+}

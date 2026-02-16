@@ -1,0 +1,15 @@
+query PostsByAuthor($authorId: Int!, $limit: Int, $offset: Int) {
+	postsByAuthor(authorId: $authorId, limit: $limit, offset: $offset) {
+		id
+		description
+		imageUrl
+		createdAt
+		author {
+			id
+			userName
+			firstName
+			lastName
+			picture
+		}
+	}
+}

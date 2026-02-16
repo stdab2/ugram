@@ -32,14 +32,11 @@ Goal: keep the stack **simple, standard, and course-aligned**, while leaving roo
 - **React + TypeScript** — UI framework and type safety
 - **Vite** — fast dev server + build tool
 - **shadcn/ui + TailwindCSS** — UI components + styling
-- **React Router** — client-side routing (`/feed`, `/profile/:id`, etc.)
+- **React Router** — client-side routing (`/search`, `/profile/:username`, etc.)
 
 ### Data fetching & types
 
-- **TanStack Query** — server-state caching, retries, invalidation
-- **graphql-request** — lightweight GraphQL HTTP client (fetcher) used in TanStack Query:
-  - executes queries/mutations against `/graphql` with variables and headers (e.g., `Authorization`)
-  - returns response data and surfaces GraphQL errors
+- **Apollo Client** — server-state caching, retries, invalidation
 - **GraphQL Code Generator** — generates TypeScript types from the schema and operations (queries/mutations)
 
 ### Local UI state & forms
@@ -168,6 +165,7 @@ Goal: keep the stack **simple, standard, and course-aligned**, while leaving roo
 - `develop`: integration branch (latest combined work before release)
 - `feature/*`: feature branches (branched from `develop`, merged back into `develop`)
 - `fix/*`: bugfix branches (branched from `develop`, merged back into `develop`)
+- `chore/*`: other branches (branched from `develop`, merged back into `develop`)
 - Pull requests required to merge into `develop` (and `main` for releases)
 
 ### Conventional Commits (examples)
@@ -187,12 +185,8 @@ Goal: keep the stack **simple, standard, and course-aligned**, while leaving roo
 ├─ apps/
 │ ├─ web/ # React + Vite
 │ └─ api/ # Node + TS (Express + GraphQL)
-├─ packages/
-│ ├─ shared/ # shared types/utilities (optional)
-│ └─ config/ # shared configs (optional)
-├─ infra/
-│ ├─ docker/ # Dockerfiles and scripts
-│ └─ compose.yml # local dev stack
+├─ package.json # packages
+├─ docker-compose.yml # local dev stack
 ├─ .github/workflows/ # CI/CD pipelines
 └─ README.md
 ```
@@ -200,3 +194,51 @@ Goal: keep the stack **simple, standard, and course-aligned**, while leaving roo
 ## Notes
 
 - Exact infrastructure details may evolve as the course progresses.
+
+# UGRAM - Quick Start (Docker Compose)
+
+This project includes:
+
+- web: Vite/React
+- api: Node/GraphQL
+- db: Postgres
+
+**Quick start (for grading)**
+
+1. Install and run Docker Desktop (includes Docker Compose v2).
+2. From the repo root, run:
+
+```bash
+docker compose up --build
+```
+
+3. Open the app: http://localhost:5173
+
+**Useful endpoints**
+
+- Web: http://localhost:5173
+- GraphQL API: http://localhost:4001/graphql
+- DB: localhost:5432
+
+**Demo walkthrough**
+Starting from the main page (http://localhost:5173), you can see a list of posts from all users, ordered by date.
+
+Then, you can navigate to the search page (http://localhost:5173/search) to see the list of users, then you can view a user's profile (http://localhost:5173/profile/:username) by clicking on them.
+
+After that, you can navigate to the create post page (http://localhost:5173/create) and upload an image you want to post. You can also add a description to your post, add tags directly from the description (e.g. \#nature) and also tag other users also from the description (e.g. \@jane_smith).
+
+After creating your post, you can navigate to your own profile page (http://localhost:5173/profile/me) and view your own posts. You can click on a post to view it's description and tags. You can also choose to either edit or delete a post that you made by clicking on the three dots at the top right of that view.
+
+Finally, you can navigate to the settings page to access and update your profile's informations.
+
+**Stop**
+
+```bash
+docker compose down
+```
+
+**Full reset (optional)**
+
+```bash
+docker compose down -v
+```

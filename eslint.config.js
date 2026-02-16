@@ -1,0 +1,61 @@
+// For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
+import storybook from "eslint-plugin-storybook";
+
+import js from "@eslint/js";
+import globals from "globals";
+import reactHooks from "eslint-plugin-react-hooks";
+import reactRefresh from "eslint-plugin-react-refresh";
+import tseslint from "typescript-eslint";
+import { defineConfig, globalIgnores } from "eslint/config";
+import prettier from "eslint-plugin-prettier";
+import prettierConfig from "eslint-config-prettier";
+
+export default defineConfig([
+	globalIgnores(["**/dist/**", "**/node_modules/**", "**/.tmp/**", "**/.storybook/**"]),
+	{
+		files: ["**/*.{ts,tsx}"],
+		extends: [
+			js.configs.recommended,
+			tseslint.configs.recommended,
+			reactHooks.configs.flat.recommended,
+			reactRefresh.configs.vite,
+		],
+		plugins: {
+			prettier,
+		},
+		languageOptions: {
+			ecmaVersion: 2020,
+			globals: globals.browser,
+			parserOptions: {
+				project: [
+					"./apps/api/tsconfig.json",
+					"./apps/api/tsconfig.prisma.json",
+					"./apps/web/tsconfig.app.json",
+					"./apps/web/tsconfig.node.json",
+				],
+				tsconfigRootDir: import.meta.dirname,
+			},
+		},
+		rules: {
+			...prettierConfig.rules,
+			"prettier/prettier": ["error", { endOfLine: "auto" }],
+			"react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
+		},
+	},
+	...storybook.configs["flat/recommended"],
+	{
+		files: ["**/components/ui/**/*.{ts,tsx}"],
+		rules: {
+			"react-refresh/only-export-components": "off",
+		},
+	},
+  {
+    files: ["./apps/web/src/generated/**/*.{ts,tsx}"],
+    rules: {
+      "react-refresh/only-export-components": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/ban-ts-comment": "off",
+      "@typescript-eslint/no-unused-vars": "off"
+    }
+  }
+]);

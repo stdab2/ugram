@@ -1,0 +1,14 @@
+query Posts($limit: Int, $offset: Int) {
+	posts(limit: $limit, offset: $offset) {
+		id
+		description
+		imageUrl
+		author {
+			firstName
+			lastName
+			picture
+			userName
+		}
+		createdAt
+	}
+}

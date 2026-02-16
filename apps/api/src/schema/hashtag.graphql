@@ -1,0 +1,9 @@
+type Hashtag {
+  id: Int!
+  name: String!
+}
+
+extend type Query {
+  hashtag(id: Int!): Hashtag
+  hashtags: [Hashtag!]!
+}

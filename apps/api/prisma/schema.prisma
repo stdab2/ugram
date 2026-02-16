@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model UserUgram {
+  id            Int      @id @default(autoincrement())
+  createdAt     DateTime @default(now())
+  userName      String   @unique
+  password      String
+  email         String   @unique
+  phoneNumber   String   @unique
+  firstName     String
+  lastName      String
+  picture       String?
+  posts         Post[]   @relation("UserPosts")
+  mentions      Post[]   @relation("UserMentions")
+}
+
+model Post {
+  id             Int       @id @default(autoincrement())
+  createdAt      DateTime  @default(now())
+  description    String
+  imageUrl       String
+
+  authorId       Int
+  author         UserUgram  @relation("UserPosts", fields: [authorId], references: [id], onDelete: Cascade)
+
+  mentionedUsers UserUgram[] @relation("UserMentions")
+
+  hashtags       Hashtag[]   @relation("PostHashtags")
+}
+
+model Hashtag {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+
+  posts Post[] @relation("PostHashtags")
+}

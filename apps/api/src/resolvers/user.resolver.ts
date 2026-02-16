@@ -1,0 +1,191 @@
+import { PrismaClient, UserUgram, Prisma } from "../../generated/prisma/client.js";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { CreateUserInput, UpdateUserInput, QueryUsersInput } from "../types/user.types.js";
+import {
+	validateEmail,
+	validateUserName,
+	validatePassword,
+	validateUserId,
+	validateNonEmptyString,
+	validatePhoneNumber,
+	validateUserExists,
+} from "../../Validators/validateUser.js";
+import { BadRequestError, handlePrismaError } from "../../Validators/errors.js";
+import { saveUploadedImage } from "../../services/image.service.js";
+
+const adapter = new PrismaPg({
+	connectionString: process.env.DATABASE_URL,
+});
+
+const prisma = new PrismaClient({
+	adapter,
+});
+
+/**
+ * User Resolvers
+ * Handles all user-related GraphQL queries and mutations
+ */
+export const userResolvers = {
+	Query: {
+		/**
+		 * Get a single user by ID
+		 * @param id - User ID
+		 * @throws {Error} If user not found
+		 */
+		user: async (_: void, args: { id: number }): Promise<UserUgram | null> => {
+			validateUserId(args.id);
+			return prisma.userUgram.findUnique({
+				where: { id: args.id },
+			});
+		},
+
+		userByUserName: async (_: void, args: { userName: string }) => {
+			validateUserName(args.userName);
+			return prisma.userUgram.findUnique({
+				where: { userName: args.userName },
+			});
+		},
+
+		usersByUserNames: async (_: void, args: { userNames: string[] }) => {
+			const requested = Array.from(new Set(args.userNames.map((u) => u.trim()).filter(Boolean)));
+
+			const users = await prisma.userUgram.findMany({
+				where: { userName: { in: requested } },
+			});
+
+			const found = new Set(users.map((u) => u.userName));
+			const missingUserNames = requested.filter((u) => !found.has(u));
+
+			return { users, missingUserNames };
+		},
+
+		/**
+		 * Get multiple users with pagination
+		 * @param limit - Max number of users to return
+		 * @param offset - Number of users to skip
+		 */
+		users: async (_: void, args: QueryUsersInput): Promise<UserUgram[]> => {
+			const limit = Math.min(args.limit || 10, 100); // Cap at 100
+			const offset = Math.max(args.offset || 0, 0);
+
+			return prisma.userUgram.findMany({
+				take: limit,
+				skip: offset,
+			});
+		},
+	},
+
+	UserUgram: {
+		/**
+		 * Get posts for a user
+		 */
+		posts: async (parent: UserUgram) => {
+			return prisma.post.findMany({
+				where: { authorId: parent.id },
+			});
+		},
+	},
+
+	Mutation: {
+		/**
+		 * Create a new user
+		 * @throws {BadRequestError} If input validation fails
+		 * @throws {ConflictError} If user already exists
+		 */
+		createUser: async (_: void, args: CreateUserInput): Promise<UserUgram> => {
+			// Validate inputs
+			validateUserName(args.userName);
+			validateEmail(args.email);
+			validatePassword(args.password);
+			validateNonEmptyString(args.firstName, "First name");
+			validateNonEmptyString(args.lastName, "Last name");
+			validatePhoneNumber(args.phoneNumber);
+
+			// Handle profile picture upload
+			let pictureUrl: string | undefined;
+			if (args.picture) {
+				pictureUrl = await saveUploadedImage(args.picture, "profile");
+			}
+
+			try {
+				return await prisma.userUgram.create({
+					data: {
+						userName: args.userName,
+						email: args.email,
+						password: args.password,
+						firstName: args.firstName,
+						lastName: args.lastName,
+						phoneNumber: args.phoneNumber,
+						picture: pictureUrl,
+					},
+				});
+			} catch (error: unknown) {
+				handlePrismaError(error, "User");
+			}
+		},
+
+		/**
+		 * Update an existing user
+		 * @throws {BadRequestError} If update data is invalid
+		 * @throws {NotFoundError} If user not found
+		 * @throws {ConflictError} If duplicate field
+		 */
+		updateUser: async (_: void, args: UpdateUserInput): Promise<UserUgram> => {
+			validateUserId(args.id);
+
+			// Check if user exists before attempting update
+			await validateUserExists(args.id);
+
+			// Build data object with only provided fields
+			const data: Prisma.UserUgramUpdateInput = {};
+
+			if (args.userName !== undefined) {
+				validateUserName(args.userName);
+				data.userName = args.userName;
+			}
+
+			if (args.email !== undefined) {
+				validateEmail(args.email);
+				data.email = args.email;
+			}
+
+			if (args.password !== undefined) {
+				validatePassword(args.password);
+				data.password = args.password;
+			}
+
+			if (args.firstName !== undefined) {
+				validateNonEmptyString(args.firstName, "First name");
+				data.firstName = args.firstName;
+			}
+
+			if (args.lastName !== undefined) {
+				validateNonEmptyString(args.lastName, "Last name");
+				data.lastName = args.lastName;
+			}
+
+			if (args.phoneNumber !== undefined) {
+				validatePhoneNumber(args.phoneNumber);
+				data.phoneNumber = args.phoneNumber;
+			}
+
+			if (args.picture !== undefined) {
+				const pictureUrl = await saveUploadedImage(args.picture, "profile");
+				data.picture = pictureUrl;
+			}
+
+			if (Object.keys(data).length === 0) {
+				throw new BadRequestError("No fields to update");
+			}
+
+			try {
+				return await prisma.userUgram.update({
+					where: { id: args.id },
+					data,
+				});
+			} catch (error: unknown) {
+				handlePrismaError(error, "User");
+			}
+		},
+	},
+};

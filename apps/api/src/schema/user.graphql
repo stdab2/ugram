@@ -1,0 +1,49 @@
+type UserUgram {
+  id: Int!
+  userName: String!
+  email: String!
+  firstName: String!
+  lastName: String!
+  phoneNumber: String!
+  picture: String
+  createdAt: String!
+  posts: [Post!]
+}
+
+extend type Query {
+	user(id: Int!): UserUgram
+	userByUserName(userName: String!): UserUgram
+	users(limit: Int, offset: Int): [UserUgram!]!
+}
+
+type UsersByUserNamesResult {
+  users: [UserUgram!]!
+  missingUserNames: [String!]!
+}
+
+extend type Query {
+  usersByUserNames(userNames: [String!]!): UsersByUserNamesResult!
+}
+
+extend type Mutation {
+  createUser(
+    userName: String!
+    email: String!
+    password: String!
+    firstName: String!
+    lastName: String!
+    phoneNumber: String!
+    picture: Upload
+  ): UserUgram!
+  
+  updateUser(
+    id: Int!
+    userName: String
+    email: String
+    password: String
+    firstName: String
+    lastName: String
+    phoneNumber: String
+    picture: Upload
+  ): UserUgram!
+}
