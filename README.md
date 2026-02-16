@@ -32,7 +32,7 @@ Goal: keep the stack **simple, standard, and course-aligned**, while leaving roo
 - **React + TypeScript** — UI framework and type safety
 - **Vite** — fast dev server + build tool
 - **shadcn/ui + TailwindCSS** — UI components + styling
-- **React Router** — client-side routing (`/feed`, `/profile/:id`, etc.)
+- **React Router** — client-side routing (`/search`, `/profile/:username`, etc.)
 
 ### Data fetching & types
 
@@ -168,6 +168,7 @@ Goal: keep the stack **simple, standard, and course-aligned**, while leaving roo
 - `develop`: integration branch (latest combined work before release)
 - `feature/*`: feature branches (branched from `develop`, merged back into `develop`)
 - `fix/*`: bugfix branches (branched from `develop`, merged back into `develop`)
+- `chore/*`: other branches (branched from `develop`, merged back into `develop`)
 - Pull requests required to merge into `develop` (and `main` for releases)
 
 ### Conventional Commits (examples)
@@ -187,12 +188,8 @@ Goal: keep the stack **simple, standard, and course-aligned**, while leaving roo
 ├─ apps/
 │ ├─ web/ # React + Vite
 │ └─ api/ # Node + TS (Express + GraphQL)
-├─ packages/
-│ ├─ shared/ # shared types/utilities (optional)
-│ └─ config/ # shared configs (optional)
-├─ infra/
-│ ├─ docker/ # Dockerfiles and scripts
-│ └─ compose.yml # local dev stack
+├─ package.json # packages
+├─ docker-compose.yml # local dev stack
 ├─ .github/workflows/ # CI/CD pipelines
 └─ README.md
 ```
@@ -200,3 +197,55 @@ Goal: keep the stack **simple, standard, and course-aligned**, while leaving roo
 ## Notes
 
 - Exact infrastructure details may evolve as the course progresses.
+
+# UGRAM - Quick Start (Docker Compose)
+
+This project includes:
+
+- web: Vite/React
+- api: Node/GraphQL
+- db: Postgres
+
+**Quick start (for grading)**
+
+1. Install and run Docker Desktop (includes Docker Compose v2).
+2. From the repo root, run:
+
+```bash
+docker compose up --build
+```
+
+3. Add environment variables:
+
+- Create .env file at <u>ugram-h2026-ugram-h2026-team-17\apps\api\\.env</u> with the content: <u>DATABASE_URL="postgresql://postgres:postgres@localhost:5432/ugram"</u>
+- Create .env file at <u>ugram-h2026-ugram-h2026-team-17\apps\web\\.env</u> with the content: <u>VITE_GRAPHQL_URL="http://localhost:4001/graphql"</u>
+
+4. Open the app: http://localhost:5173
+
+**Useful endpoints**
+
+- Web: http://localhost:5173
+- GraphQL API: http://localhost:4001/graphql
+- DB: localhost:5432 (user: postgres, password: postgres, db: ugram)
+
+**Demo accounts (seed)**
+
+- Email: john.doe@example.com / Password: qwerty
+- Email: jane.smith@example.com / Password: qwerty
+- Email: travel.explorer@example.com / Password: qwerty
+- Email: foodie.lover@example.com / Password: qwerty
+- Email: urban.photographer@example.com / Password: qwerty
+
+**Demo walkthrough**
+
+**Stop**
+
+```bash
+docker compose down
+```
+
+**Full reset (optional)**
+
+```bash
+docker compose down -v
+```

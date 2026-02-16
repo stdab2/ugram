@@ -9,6 +9,7 @@ import { useUserQuery, useUpdateUserMutation } from "@/generated/graphql";
 import { useState, useEffect } from "react";
 import { z } from "zod";
 import { settingsSchema, type SettingsFormData } from "@/lib/settingsSchema";
+import { getImageUrl } from "@/lib/utils";
 
 const USER_ID = 1; //TODO: Mettre vrai ID
 
@@ -97,7 +98,7 @@ export function UserSettings({ className, ...props }: React.ComponentProps<"div"
 					<FieldSeparator />
 					<UserDetails
 						className="mt-2"
-						pictureUrl={user?.picture ?? ""}
+						pictureUrl={getImageUrl(user?.picture) ?? ""}
 						username={user?.userName ?? ""}
 						fullname={`${user?.firstName} ${user?.lastName}`}
 						memberSince={user?.createdAt ?? ""}
