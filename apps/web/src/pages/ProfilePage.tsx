@@ -28,7 +28,8 @@ export function ProfilePage() {
 	const navigate = useNavigate();
 
 	// Use username from URL or default to current user
-	const userNameToFetch = username || CURRENT_USERNAME;
+	// Treat "me" as a special keyword for the current user
+	const userNameToFetch = username === "me" || !username ? CURRENT_USERNAME : username;
 
 	// Check if this is the current user's profile
 	const isOwnProfile = userNameToFetch === CURRENT_USERNAME;

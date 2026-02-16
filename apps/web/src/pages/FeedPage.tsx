@@ -105,7 +105,6 @@ export function FeedPage() {
 							isLiked={false} // Replace with actual like status from API
 							onLike={() => console.log("Like", post.id)}
 							onComment={() => console.log("Comment", post.id)}
-							onShare={() => console.log("Share", post.id)}
 							onPostDeletion={handlePostDeletion}
 						/>
 					))}

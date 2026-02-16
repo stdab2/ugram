@@ -21,7 +21,6 @@ interface PostProps {
 	isLiked?: boolean;
 	onLike?: () => void;
 	onComment?: () => void;
-	onShare?: () => void;
 	onPostDeletion: (postId: number) => void;
 }
 
@@ -33,7 +32,6 @@ export function Post({
 	isLiked = false,
 	onLike,
 	onComment,
-	onShare,
 	onPostDeletion,
 }: PostProps) {
 	const [isModalOpen, setIsModalOpen] = useState(false);
@@ -83,13 +81,20 @@ export function Post({
 				</div>
 
 				{/* Image */}
-				<div className={cn("w-full overflow-hidden bg-muted", aspectRatioClasses[aspectRatio])}>
+				<button
+					onClick={() => setIsModalOpen(true)}
+					className={cn(
+						"w-full overflow-hidden bg-muted cursor-pointer",
+						aspectRatioClasses[aspectRatio]
+					)}
+					aria-label="View post details"
+				>
 					<img
 						src={getImageUrl(post.imageUrl)}
 						alt={`Post by ${post.author.userName}`}
 						className="w-full h-full object-cover"
 					/>
-				</div>
+				</button>
 
 				{/* Actions */}
 				<div className="flex items-center gap-4 p-3">
@@ -117,13 +122,13 @@ export function Post({
 							<span className="text-sm font-semibold">{comments.toLocaleString()}</span>
 						)}
 					</button>
-					<button
-						onClick={onShare}
+					<Link
+						to={`/post/${post.id}`}
 						className="hover:text-muted-foreground transition-all duration-200 hover:scale-110"
 						aria-label="Share"
 					>
 						<Send className="w-6 h-6" strokeWidth={2} />
-					</button>
+					</Link>
 				</div>
 
 				{/* Description */}
@@ -149,7 +154,6 @@ export function Post({
 					</div>
 				)}
 			</Card>
-
 			<PostModal
 				key={post.id}
 				open={isModalOpen}
