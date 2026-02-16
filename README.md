@@ -36,10 +36,7 @@ Goal: keep the stack **simple, standard, and course-aligned**, while leaving roo
 
 ### Data fetching & types
 
-- **TanStack Query** — server-state caching, retries, invalidation
-- **graphql-request** — lightweight GraphQL HTTP client (fetcher) used in TanStack Query:
-  - executes queries/mutations against `/graphql` with variables and headers (e.g., `Authorization`)
-  - returns response data and surfaces GraphQL errors
+- **Apollo Client** — server-state caching, retries, invalidation
 - **GraphQL Code Generator** — generates TypeScript types from the schema and operations (queries/mutations)
 
 ### Local UI state & forms
