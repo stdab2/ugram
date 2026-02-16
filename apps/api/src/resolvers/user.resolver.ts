@@ -120,7 +120,7 @@ export const userResolvers = {
 					},
 				});
 			} catch (error: unknown) {
-				handlePrismaError(error, "User");
+				throw handlePrismaError(error, "User");
 			}
 		},
 
@@ -184,7 +184,7 @@ export const userResolvers = {
 					data,
 				});
 			} catch (error: unknown) {
-				handlePrismaError(error, "User");
+				throw handlePrismaError(error, "User");
 			}
 		},
 	},

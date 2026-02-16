@@ -13,7 +13,7 @@ export const typeDefs = `#graphql
   scalar DateTime
 
   type Query {
-    hello: String
+    _empty: String
   }
 
   type Mutation {
