@@ -98,7 +98,10 @@ export function ProfilePage() {
 	}
 
 	const user = userData.userByUserName;
-	const userPosts = user.posts || [];
+	// Sort posts by date (most recent first)
+	const userPosts = [...(user.posts || [])].sort(
+		(a, b) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime()
+	);
 	const avatarFallback =
 		`${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase() || "??";
 

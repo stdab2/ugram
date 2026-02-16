@@ -66,11 +66,16 @@ export function FeedPage() {
 		);
 	}
 
+	// Sort posts by date (most recent first)
+	const sortedPosts = [...data.posts].sort(
+		(a, b) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime()
+	);
+
 	return (
 		<PageFade key="content">
 			<div className="flex justify-center min-h-screen bg-background">
 				<div className="w-full max-w-[630px] pb-20 md:pb-0">
-					{data.posts.map((post) => (
+					{sortedPosts.map((post) => (
 						<Post
 							key={post.id}
 							post={post}
