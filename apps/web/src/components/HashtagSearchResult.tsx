@@ -12,6 +12,7 @@ interface HashtagSearchResultProps {
 export function HashtagSearchResult({ hashtag, onClick }: HashtagSearchResultProps) {
 	return (
 		<button
+			type="button"
 			onClick={onClick}
 			className="w-full flex items-center gap-3 p-3 hover:bg-accent rounded-lg transition-colors"
 		>

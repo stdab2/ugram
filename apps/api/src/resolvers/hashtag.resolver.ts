@@ -17,8 +17,8 @@ export const hashtagResolvers = {
 			});
 		},
 		hashtags: async (_: unknown, args: { limit?: number; offset?: number }) => {
-			const limit = args.limit || 10;
-			const offset = args.offset || 0;
+			const limit = Math.min(Math.max(args.limit ?? 10, 0), 100);
+			const offset = Math.max(args.offset ?? 0, 0);
 			const hashtags = await prisma.hashtag.findMany({
 				include: {
 					_count: {

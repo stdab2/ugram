@@ -22,16 +22,15 @@ interface SearchArgs {
 export const searchResolvers = {
 	Query: {
 		search: async (_: unknown, args: SearchArgs) => {
-			const {
-				query,
-				usersLimit = 20,
-				usersOffset = 0,
-				postsLimit = 20,
-				postsOffset = 0,
-				hashtagsLimit = 20,
-				hashtagsOffset = 0,
-			} = args;
-			const searchTerm = query.trim();
+			// Validate and clamp pagination parameters
+			const usersLimit = Math.min(Math.max(args.usersLimit ?? 20, 0), 100);
+			const usersOffset = Math.max(args.usersOffset ?? 0, 0);
+			const postsLimit = Math.min(Math.max(args.postsLimit ?? 20, 0), 100);
+			const postsOffset = Math.max(args.postsOffset ?? 0, 0);
+			const hashtagsLimit = Math.min(Math.max(args.hashtagsLimit ?? 20, 0), 100);
+			const hashtagsOffset = Math.max(args.hashtagsOffset ?? 0, 0);
+
+			const searchTerm = args.query.trim();
 
 			if (!searchTerm) {
 				return { users: [], posts: [], hashtags: [] };
@@ -63,7 +62,7 @@ export const searchResolvers = {
 					where: {
 						hashtags: {
 							some: {
-								name: { equals: hashtagName, mode: "insensitive" },
+								name: { contains: hashtagName, mode: "insensitive" },
 							},
 						},
 					},
