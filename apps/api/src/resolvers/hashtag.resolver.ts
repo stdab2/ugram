@@ -16,11 +16,9 @@ export const hashtagResolvers = {
 				where: { id: args.id },
 			});
 		},
-		hashtags: async () => {
-			return prisma.hashtag.findMany();
-		},
-		popularHashtags: async (_: unknown, args: { limit?: number }) => {
-			const limit = args.limit || 5;
+		hashtags: async (_: unknown, args: { limit?: number; offset?: number }) => {
+			const limit = args.limit || 10;
+			const offset = args.offset || 0;
 			const hashtags = await prisma.hashtag.findMany({
 				include: {
 					_count: {
@@ -32,6 +30,7 @@ export const hashtagResolvers = {
 						_count: 'desc',
 					},
 				},
+				skip: offset,
 				take: limit,
 			});
 

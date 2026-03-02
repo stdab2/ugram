@@ -11,6 +11,5 @@ type HashtagWithCount {
 
 extend type Query {
   hashtag(id: Int!): Hashtag
-  hashtags: [Hashtag!]!
-  popularHashtags(limit: Int): [HashtagWithCount!]!
+  hashtags(limit: Int, offset: Int): [HashtagWithCount!]!
 }

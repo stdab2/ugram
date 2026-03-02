@@ -11,14 +11,26 @@ const prisma = new PrismaClient({
 
 interface SearchArgs {
   query: string;
-  limit?: number;
-  offset?: number;
+  usersLimit?: number;
+  usersOffset?: number;
+  postsLimit?: number;
+  postsOffset?: number;
+  hashtagsLimit?: number;
+  hashtagsOffset?: number;
 }
 
 export const searchResolvers = {
   Query: {
     search: async (_: unknown, args: SearchArgs) => {
-      const { query, limit = 20, offset = 0 } = args;
+      const { 
+        query, 
+        usersLimit = 20, 
+        usersOffset = 0,
+        postsLimit = 20,
+        postsOffset = 0,
+        hashtagsLimit = 20,
+        hashtagsOffset = 0
+      } = args;
       const searchTerm = query.trim();
 
       if (!searchTerm) {
@@ -38,8 +50,8 @@ export const searchResolvers = {
             { lastName: { contains: searchTerm, mode: "insensitive" } },
           ],
         },
-        take: limit,
-        skip: offset,
+        take: usersLimit,
+        skip: usersOffset,
       });
 
       // Recherche de posts
@@ -60,8 +72,8 @@ export const searchResolvers = {
             mentionedUsers: true,
             author: true,
           },
-          take: limit,
-          skip: offset,
+          take: postsLimit,
+          skip: postsOffset,
         });
       } else {
         // Sinon, chercher dans la description OU dans les hashtags
@@ -83,8 +95,8 @@ export const searchResolvers = {
             mentionedUsers: true,
             author: true,
           },
-          take: limit,
-          skip: offset,
+          take: postsLimit,
+          skip: postsOffset,
         });
       }
 
@@ -98,8 +110,8 @@ export const searchResolvers = {
             select: { posts: true },
           },
         },
-        take: limit,
-        skip: offset,
+        take: hashtagsLimit,
+        skip: hashtagsOffset,
         orderBy: {
           posts: {
             _count: 'desc', // Trier par popularité
