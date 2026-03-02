@@ -3,7 +3,14 @@ type Hashtag {
   name: String!
 }
 
+type HashtagWithCount {
+  id: Int!
+  name: String!
+  postCount: Int!
+}
+
 extend type Query {
   hashtag(id: Int!): Hashtag
   hashtags: [Hashtag!]!
+  popularHashtags(limit: Int): [HashtagWithCount!]!
 }

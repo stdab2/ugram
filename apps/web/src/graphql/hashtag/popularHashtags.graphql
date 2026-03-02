@@ -1,0 +1,7 @@
+query PopularHashtags($limit: Int) {
+  popularHashtags(limit: $limit) {
+    id
+    name
+    postCount
+  }
+}

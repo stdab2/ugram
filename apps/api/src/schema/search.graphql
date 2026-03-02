@@ -1,6 +1,13 @@
 type SearchResults {
   users: [UserUgram!]!
   posts: [Post!]!
+  hashtags: [HashtagResult!]!
+}
+
+type HashtagResult {
+  id: Int!
+  name: String!
+  postCount: Int!
 }
 
 extend type Query {

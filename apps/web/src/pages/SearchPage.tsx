@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { SearchBar } from "@/components/SearchBar";
 import { SearchFilters } from "@/components/SearchFilters";
-import { RecentSearchItem } from "@/components/RecentSearchItem";
 import { UserSearchResult } from "@/components/UserSearchResult";
+import { HashtagSearchResult } from "@/components/HashtagSearchResult";
 import { PostGrid } from "@/components/PostGrid";
 import { PostModal } from "@/components/PostModal";
 import { SearchSkeleton } from "@/components/SearchSkeleton";
@@ -14,19 +14,12 @@ import {
 	EmptyTitle,
 } from "@/components/ui/Empty";
 import { Button } from "@/components/ui/Button";
-import type { RecentSearch, SearchType } from "@/types/search";
+import type { SearchType } from "@/types/search";
 import { AlertCircle, RefreshCcw } from "lucide-react";
-import { useUsersQuery, usePostsQuery, useSearchQuery } from "@/generated/graphql";
+import { useUsersQuery, usePostsQuery, useSearchQuery, usePopularHashtagsQuery } from "@/generated/graphql";
 import type { PostsQuery } from "@/generated/graphql";
 import { PageFade } from "@/components/PageFade";
 import { useDebounce } from "@/hooks/use-debounce";
-
-// Mock data for recent searches (localStorage à implémenter plus tard)
-const mockRecentSearches: RecentSearch[] = [
-	{ id: "1", query: "nature", type: "hashtag", timestamp: new Date() },
-	{ id: "2", query: "john_doe", type: "user", timestamp: new Date() },
-	{ id: "3", query: "sunset", type: "general", timestamp: new Date() },
-];
 
 const USERS_PER_PAGE = 10;
 const MIN_SEARCH_LENGTH = 2;
@@ -35,12 +28,21 @@ const SEARCH_DEBOUNCE_MS = 300;
 export function SearchPage() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [activeFilter, setActiveFilter] = useState<SearchType>("all");
-	const [recentSearches, setRecentSearches] = useState<RecentSearch[]>(mockRecentSearches);
 	const [selectedPost, setSelectedPost] = useState<PostsQuery["posts"][0] | null>(null);
 
 	// Debounce search query
 	const debouncedSearchQuery = useDebounce(searchQuery, SEARCH_DEBOUNCE_MS);
 	const isSearching = debouncedSearchQuery.trim().length >= MIN_SEARCH_LENGTH;
+
+	// Fetch popular hashtags for default view
+	const {
+		data: popularHashtagsData,
+		loading: popularHashtagsLoading,
+		error: popularHashtagsError,
+	} = usePopularHashtagsQuery({
+		variables: { limit: 3 },
+		skip: isSearching,
+	});
 
 	// Fetch initial users for "Recent" section
 	const {
@@ -85,6 +87,7 @@ export function SearchPage() {
 	// Determine which data to use
 	const allUsers = isSearching ? searchData?.search.users || [] : initialUsersData?.users || [];
 	const allPosts = isSearching ? searchData?.search.posts || [] : initialPostsData?.posts || [];
+	const allHashtags = isSearching ? searchData?.search.hashtags || [] : [];
 
 	const isLoading = isSearching ? searchLoading : initialUsersLoading || initialPostsLoading;
 	const hasError = isSearching ? searchError : initialUsersError || initialPostsError;
@@ -133,14 +136,6 @@ export function SearchPage() {
 		);
 	}
 
-	const handleDeleteRecentSearch = (id: string) => {
-		setRecentSearches((prev) => prev.filter((search) => search.id !== id));
-	};
-
-	const handleRecentSearchClick = (query: string) => {
-		setSearchQuery(query);
-	};
-
 	const handlePostClick = (post: {
 		id: string | number;
 		imageUrl: string;
@@ -164,8 +159,9 @@ export function SearchPage() {
 	const isTyping = searchQuery.trim().length >= MIN_SEARCH_LENGTH && searchQuery !== debouncedSearchQuery;
 
 	// Filter users and posts based on active filter
-	const displayUsers = activeFilter === "posts" ? [] : allUsers;
-	const displayPosts = activeFilter === "users" ? [] : allPosts;
+	const displayUsers = activeFilter === "posts" || activeFilter === "hashtags" ? [] : allUsers;
+	const displayPosts = activeFilter === "users" || activeFilter === "hashtags" ? [] : allPosts;
+	const displayHashtags = activeFilter === "users" || activeFilter === "posts" ? [] : allHashtags;
 
 	return (
 		<PageFade>
@@ -191,27 +187,21 @@ export function SearchPage() {
 				<div className="mt-2">
 					{!isSearching ? (
 						<>
-							{/* Recent Searches - Only show when filter is "all" */}
-							{recentSearches.length > 0 && activeFilter === "all" && (
+							{/* Popular Hashtags - Only show when filter is "all" or "hashtags" */}
+							{(activeFilter === "all" || activeFilter === "hashtags") && (
 								<div className="mb-6">
-									<div className="flex items-center justify-between px-4 py-3">
-										<h2 className="font-semibold">Recent</h2>
-										<Button
-											variant="ghost"
-											size="sm"
-											onClick={() => setRecentSearches([])}
-											className="text-sm text-indigo-400 hover:text-indigo-300"
-										>
-											Clear all
-										</Button>
+									<div className="px-4 py-3">
+										<h2 className="font-semibold">Popular Hashtags</h2>
 									</div>
-									<div>
-										{recentSearches.map((search) => (
-											<RecentSearchItem
-												key={search.id}
-												search={search}
-												onClick={() => handleRecentSearchClick(search.query)}
-												onDelete={() => handleDeleteRecentSearch(search.id)}
+									<div className="flex flex-col gap-2 px-4">
+										{popularHashtagsData?.popularHashtags.map((hashtag) => (
+											<HashtagSearchResult
+												key={hashtag.id}
+												hashtag={hashtag}
+												onClick={() => {
+													setSearchQuery(hashtag.name);
+													setActiveFilter("posts");
+												}}
 											/>
 										))}
 									</div>
@@ -279,6 +269,34 @@ export function SearchPage() {
 										</div>
 									)}
 
+									{/* Hashtags Results */}
+									{(activeFilter === "all" || activeFilter === "hashtags") && (
+										<div className="mb-6">
+											<div className="px-4 py-3">
+												<h2 className="font-semibold">Hashtags</h2>
+											</div>
+											{displayHashtags.length > 0 ? (
+												<div className="flex flex-col gap-2 px-4">
+													{displayHashtags.map((hashtag) => (
+														<HashtagSearchResult
+															key={hashtag.id}
+															hashtag={hashtag}
+															onClick={() => {
+																// Filtrer les posts par ce hashtag
+																setSearchQuery(hashtag.name);
+																setActiveFilter("posts");
+															}}
+														/>
+													))}
+												</div>
+											) : (
+												<p className="px-4 py-8 text-center text-muted-foreground">
+													No hashtags found for "{debouncedSearchQuery}"
+												</p>
+											)}
+										</div>
+									)}
+
 									{/* Posts Results */}
 									{(activeFilter === "all" || activeFilter === "posts") && (
 										<div>
@@ -294,32 +312,32 @@ export function SearchPage() {
 											)}
 										</div>
 									)}
-								</>
-							)}
-						</>
-					)}
-				</div>
-
-				{/* Post Modal */}
-				{selectedPost && (
-					<PostModal
-						open={!!selectedPost}
-						onOpenChange={(open) => {
-							if (!open) {
-								setSelectedPost(null);
-							}
-						}}
-						post={selectedPost}
-						onPostDeletion={() => {
-							setSelectedPost(null);
-							if (isSearching) {
-								refetchSearch();
-							} else {
-								refetchInitialPosts();
-							}
-						}}
-					/>
+					</>
 				)}
+			</>
+		)}
+	</div>
+
+	{/* Post Modal */}
+	{selectedPost && (
+		<PostModal
+			open={!!selectedPost}
+			onOpenChange={(open) => {
+				if (!open) {
+					setSelectedPost(null);
+				}
+			}}
+			post={selectedPost}
+			onPostDeletion={() => {
+				setSelectedPost(null);
+				if (isSearching) {
+					refetchSearch();
+				} else {
+					refetchInitialPosts();
+				}
+			}}
+		/>
+	)}
 			</div>
 		</PageFade>
 	);

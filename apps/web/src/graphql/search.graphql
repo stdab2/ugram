@@ -24,5 +24,10 @@ query Search($query: String!, $limit: Int, $offset: Int) {
       imageUrl
       createdAt
     }
+    hashtags {
+      id
+      name
+      postCount
+    }
   }
 }
