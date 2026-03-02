@@ -30,15 +30,15 @@ services:
       - sh
       - -ce
       - |
-          corepack enable
-          corepack prepare pnpm@10.29.2 --activate
-          LOCK=$$(sha256sum pnpm-lock.yaml | cut -d' ' -f1)
-          if [ -f node_modules/.pnpm-lock.hash ] && [ "$$LOCK" = "$$(cat node_modules/.pnpm-lock.hash)" ]; then
-            echo "deps up to date"
-          else
-            pnpm install --frozen-lockfile --ignore-scripts --prefer-offline
-            echo "$$LOCK" > node_modules/.pnpm-lock.hash
-          fi
+        corepack enable
+        corepack prepare pnpm@10.29.2 --activate
+        LOCK=$$(sha256sum pnpm-lock.yaml | cut -d' ' -f1)
+        if [ -f node_modules/.pnpm-lock.hash ] && [ "$$LOCK" = "$$(cat node_modules/.pnpm-lock.hash)" ]; then
+          echo "deps up to date"
+        else
+          pnpm install --frozen-lockfile --ignore-scripts --prefer-offline
+          echo "$$LOCK" > node_modules/.pnpm-lock.hash
+        fi
     environment:
       HUSKY: "0"
       PNPM_FETCH_RETRIES: "5"
@@ -108,4 +108,3 @@ volumes:
   api_node_modules:
   web_node_modules:
   pnpm_store:
-

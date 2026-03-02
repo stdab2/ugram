@@ -1,14 +1,14 @@
 query UsersByUserNames($userNames: [String!]!) {
-  usersByUserNames(userNames: $userNames) {
-    users {
-      id
-      userName
-      email
-      firstName
-      lastName
-      phoneNumber
-      picture
-    }
-    missingUserNames
-  }
+	usersByUserNames(userNames: $userNames) {
+		users {
+			id
+			userName
+			email
+			firstName
+			lastName
+			phoneNumber
+			picture
+		}
+		missingUserNames
+	}
 }

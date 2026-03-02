@@ -16,7 +16,12 @@ import {
 import { Button } from "@/components/ui/Button";
 import type { SearchType } from "@/types/search";
 import { AlertCircle, RefreshCcw } from "lucide-react";
-import { useUsersQuery, usePostsQuery, useSearchQuery, useHashtagsQuery } from "@/generated/graphql";
+import {
+	useUsersQuery,
+	usePostsQuery,
+	useSearchQuery,
+	useHashtagsQuery,
+} from "@/generated/graphql";
 import type { PostsQuery } from "@/generated/graphql";
 import { PageFade } from "@/components/PageFade";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -107,13 +112,24 @@ export function SearchPage() {
 	// Determine which data to use
 	const allUsers = isSearching ? searchData?.search.users || [] : initialUsersData?.users || [];
 	const allPosts = isSearching ? searchData?.search.posts || [] : initialPostsData?.posts || [];
-	const allHashtags = isSearching ? searchData?.search.hashtags || [] : hashtagsData?.hashtags || [];
+	const allHashtags = isSearching
+		? searchData?.search.hashtags || []
+		: hashtagsData?.hashtags || [];
 
-	const isLoading = isSearching ? searchLoading : initialUsersLoading || initialPostsLoading;
-	const hasError = isSearching ? searchError : initialUsersError || initialPostsError;
+	const isLoading = isSearching
+		? searchLoading
+		: initialUsersLoading || initialPostsLoading || hashtagsLoading;
+	const hasError = isSearching
+		? searchError
+		: initialUsersError || initialPostsError || hashtagsError;
 
 	// Show loading only on initial load
-	if ((initialUsersLoading || initialPostsLoading) && !initialUsersData && !initialPostsData && !isSearching) {
+	if (
+		(initialUsersLoading || initialPostsLoading) &&
+		!initialUsersData &&
+		!initialPostsData &&
+		!isSearching
+	) {
 		return (
 			<PageFade key="loading" delay={0.3}>
 				<SearchSkeleton />
@@ -131,7 +147,10 @@ export function SearchPage() {
 							<AlertCircle className="h-12 w-12 mb-4 text-muted-foreground" />
 							<EmptyTitle>Unable to Load Search</EmptyTitle>
 							<EmptyDescription>
-								{(searchError?.message || initialUsersError?.message || initialPostsError?.message) || "Something went wrong"}
+								{searchError?.message ||
+									initialUsersError?.message ||
+									initialPostsError?.message ||
+									"Something went wrong"}
 							</EmptyDescription>
 						</EmptyHeader>
 						<EmptyContent>
@@ -302,7 +321,8 @@ export function SearchPage() {
 	};
 
 	// Show typing indicator when user is typing but debounce hasn't triggered yet
-	const isTyping = searchQuery.trim().length >= MIN_SEARCH_LENGTH && searchQuery !== debouncedSearchQuery;
+	const isTyping =
+		searchQuery.trim().length >= MIN_SEARCH_LENGTH && searchQuery !== debouncedSearchQuery;
 
 	// Filter based on active filter
 	const displayUsers = activeFilter === "posts" || activeFilter === "hashtags" ? [] : allUsers;
@@ -342,7 +362,7 @@ export function SearchPage() {
 												hashtag={hashtag}
 												onClick={() => {
 													setSearchQuery(hashtag.name);
-												setPendingFilter("posts");
+													setPendingFilter("posts");
 												}}
 											/>
 										))}
@@ -441,7 +461,7 @@ export function SearchPage() {
 																onClick={() => {
 																	// Filtrer les posts par ce hashtag
 																	setSearchQuery(hashtag.name);
-																setPendingFilter("posts");
+																	setPendingFilter("posts");
 																}}
 															/>
 														))}
@@ -484,15 +504,15 @@ export function SearchPage() {
 															/>
 														))}
 													</div>
-												{displayUsers.length >= INITIAL_USERS_LIMIT && (
-													<div className="px-4 py-3">
-														<Button
-															variant="ghost"
-															onClick={handleLoadMoreUsers}
-															disabled={searchLoading}
-															className="w-full text-indigo-400 hover:text-indigo-300"
-														>
-															{searchLoading ? "Loading..." : "See more users"}
+													{displayUsers.length >= INITIAL_USERS_LIMIT && (
+														<div className="px-4 py-3">
+															<Button
+																variant="ghost"
+																onClick={handleLoadMoreUsers}
+																disabled={searchLoading}
+																className="w-full text-indigo-400 hover:text-indigo-300"
+															>
+																{searchLoading ? "Loading..." : "See more users"}
 															</Button>
 														</div>
 													)}
@@ -538,28 +558,28 @@ export function SearchPage() {
 							)}
 						</>
 					)}
-	</div>
+				</div>
 
-	{/* Post Modal */}
-	{selectedPost && (
-		<PostModal
-			open={!!selectedPost}
-			onOpenChange={(open) => {
-				if (!open) {
-					setSelectedPost(null);
-				}
-			}}
-			post={selectedPost}
-			onPostDeletion={() => {
-				setSelectedPost(null);
-				if (isSearching) {
-					refetchSearch();
-				} else {
-					refetchInitialPosts();
-				}
-			}}
-		/>
-	)}
+				{/* Post Modal */}
+				{selectedPost && (
+					<PostModal
+						open={!!selectedPost}
+						onOpenChange={(open) => {
+							if (!open) {
+								setSelectedPost(null);
+							}
+						}}
+						post={selectedPost}
+						onPostDeletion={() => {
+							setSelectedPost(null);
+							if (isSearching) {
+								refetchSearch();
+							} else {
+								refetchInitialPosts();
+							}
+						}}
+					/>
+				)}
 			</div>
 		</PageFade>
 	);

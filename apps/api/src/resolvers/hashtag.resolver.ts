@@ -27,7 +27,7 @@ export const hashtagResolvers = {
 				},
 				orderBy: {
 					posts: {
-						_count: 'desc',
+						_count: "desc",
 					},
 				},
 				skip: offset,
