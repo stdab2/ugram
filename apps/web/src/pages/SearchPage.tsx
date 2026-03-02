@@ -21,8 +21,12 @@ import type { PostsQuery } from "@/generated/graphql";
 import { PageFade } from "@/components/PageFade";
 import { useDebounce } from "@/hooks/use-debounce";
 
-const INITIAL_LIMIT = 2;
-const LOAD_MORE_INCREMENT = 10;
+const INITIAL_HASHTAGS_LIMIT = 3;
+const INITIAL_USERS_LIMIT = 5;
+const INITIAL_POSTS_LIMIT = 6;
+const LOAD_MORE_HASHTAGS_INCREMENT = 3;
+const LOAD_MORE_USERS_INCREMENT = 5;
+const LOAD_MORE_POSTS_INCREMENT = 6;
 const MIN_SEARCH_LENGTH = 2;
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -49,7 +53,7 @@ export function SearchPage() {
 		error: hashtagsError,
 		fetchMore: fetchMoreHashtags,
 	} = useHashtagsQuery({
-		variables: { limit: INITIAL_LIMIT, offset: 0 },
+		variables: { limit: INITIAL_HASHTAGS_LIMIT, offset: 0 },
 		skip: isSearching,
 	});
 
@@ -62,7 +66,7 @@ export function SearchPage() {
 		fetchMore: fetchMoreUsers,
 	} = useUsersQuery({
 		variables: {
-			limit: INITIAL_LIMIT,
+			limit: INITIAL_USERS_LIMIT,
 			offset: 0,
 		},
 		skip: isSearching,
@@ -76,7 +80,7 @@ export function SearchPage() {
 		refetch: refetchInitialPosts,
 		fetchMore: fetchMorePosts,
 	} = usePostsQuery({
-		variables: { limit: INITIAL_LIMIT, offset: 0 },
+		variables: { limit: INITIAL_POSTS_LIMIT, offset: 0 },
 		skip: isSearching,
 	});
 
@@ -90,11 +94,11 @@ export function SearchPage() {
 	} = useSearchQuery({
 		variables: {
 			query: debouncedSearchQuery,
-			usersLimit: INITIAL_LIMIT,
+			usersLimit: INITIAL_USERS_LIMIT,
 			usersOffset: 0,
-			postsLimit: INITIAL_LIMIT,
+			postsLimit: INITIAL_POSTS_LIMIT,
 			postsOffset: 0,
-			hashtagsLimit: INITIAL_LIMIT,
+			hashtagsLimit: INITIAL_HASHTAGS_LIMIT,
 			hashtagsOffset: 0,
 		},
 		skip: !isSearching,
@@ -182,7 +186,7 @@ export function SearchPage() {
 					usersOffset: 0,
 					postsLimit: 0, // Don't load more posts
 					postsOffset: 0,
-					hashtagsLimit: LOAD_MORE_INCREMENT,
+					hashtagsLimit: LOAD_MORE_HASHTAGS_INCREMENT,
 					hashtagsOffset: currentLength,
 				},
 				updateQuery: (prev, { fetchMoreResult }) => {
@@ -201,7 +205,7 @@ export function SearchPage() {
 			fetchMoreHashtags({
 				variables: {
 					offset: currentLength,
-					limit: LOAD_MORE_INCREMENT,
+					limit: LOAD_MORE_HASHTAGS_INCREMENT,
 				},
 				updateQuery: (prev, { fetchMoreResult }) => {
 					if (!fetchMoreResult) return prev;
@@ -220,7 +224,7 @@ export function SearchPage() {
 			fetchMoreSearch({
 				variables: {
 					query: debouncedSearchQuery,
-					usersLimit: LOAD_MORE_INCREMENT,
+					usersLimit: LOAD_MORE_USERS_INCREMENT,
 					usersOffset: currentLength,
 					postsLimit: 0, // Don't load more posts
 					postsOffset: 0,
@@ -243,7 +247,7 @@ export function SearchPage() {
 			fetchMoreUsers({
 				variables: {
 					offset: currentLength,
-					limit: LOAD_MORE_INCREMENT,
+					limit: LOAD_MORE_USERS_INCREMENT,
 				},
 				updateQuery: (prev, { fetchMoreResult }) => {
 					if (!fetchMoreResult) return prev;
@@ -264,7 +268,7 @@ export function SearchPage() {
 					query: debouncedSearchQuery,
 					usersLimit: 0, // Don't load more users
 					usersOffset: 0,
-					postsLimit: LOAD_MORE_INCREMENT,
+					postsLimit: LOAD_MORE_POSTS_INCREMENT,
 					postsOffset: currentLength,
 					hashtagsLimit: 0, // Don't load more hashtags
 					hashtagsOffset: 0,
@@ -285,7 +289,7 @@ export function SearchPage() {
 			fetchMorePosts({
 				variables: {
 					offset: currentLength,
-					limit: LOAD_MORE_INCREMENT,
+					limit: LOAD_MORE_POSTS_INCREMENT,
 				},
 				updateQuery: (prev, { fetchMoreResult }) => {
 					if (!fetchMoreResult) return prev;
@@ -343,7 +347,7 @@ export function SearchPage() {
 											/>
 										))}
 									</div>
-									{hashtagsData && hashtagsData.hashtags.length >= INITIAL_LIMIT && (
+									{hashtagsData && hashtagsData.hashtags.length >= INITIAL_HASHTAGS_LIMIT && (
 										<div className="px-4 py-3">
 											<Button
 												variant="ghost"
@@ -373,7 +377,7 @@ export function SearchPage() {
 											/>
 										))}
 									</div>
-									{initialUsersData && initialUsersData.users.length >= INITIAL_LIMIT && (
+									{initialUsersData && initialUsersData.users.length >= INITIAL_USERS_LIMIT && (
 										<div className="px-4 py-3">
 											<Button
 												variant="ghost"
@@ -395,7 +399,7 @@ export function SearchPage() {
 										<h2 className="font-semibold">Posts</h2>
 									</div>
 									<PostGrid posts={displayPosts} onPostClick={handlePostClick} />
-									{initialPostsData && initialPostsData.posts.length >= INITIAL_LIMIT && (
+									{initialPostsData && initialPostsData.posts.length >= INITIAL_POSTS_LIMIT && (
 										<div className="px-4 py-3">
 											<Button
 												variant="ghost"
@@ -442,7 +446,7 @@ export function SearchPage() {
 															/>
 														))}
 													</div>
-													{displayHashtags.length >= INITIAL_LIMIT && (
+													{displayHashtags.length >= INITIAL_HASHTAGS_LIMIT && (
 														<div className="px-4 py-3">
 															<Button
 																variant="ghost"
@@ -480,7 +484,7 @@ export function SearchPage() {
 															/>
 														))}
 													</div>
-												{displayUsers.length >= INITIAL_LIMIT && (
+												{displayUsers.length >= INITIAL_USERS_LIMIT && (
 													<div className="px-4 py-3">
 														<Button
 															variant="ghost"
@@ -510,7 +514,7 @@ export function SearchPage() {
 											{displayPosts.length > 0 ? (
 												<>
 													<PostGrid posts={displayPosts} onPostClick={handlePostClick} />
-													{displayPosts.length >= INITIAL_LIMIT && (
+													{displayPosts.length >= INITIAL_POSTS_LIMIT && (
 														<div className="px-4 py-3">
 															<Button
 																variant="ghost"
