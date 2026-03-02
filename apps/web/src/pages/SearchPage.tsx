@@ -39,23 +39,25 @@ export function SearchPage() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [activeFilter, setActiveFilter] = useState<SearchType>("all");
 	const [selectedPost, setSelectedPost] = useState<PostsQuery["posts"][0] | null>(null);
-	const [pendingFilter, setPendingFilter] = useState<SearchType | null>(null);
+
+	// Track pagination state
+	const [hasMoreHashtags, setHasMoreHashtags] = useState(true);
+	const [hasMoreUsers, setHasMoreUsers] = useState(true);
+	const [hasMorePosts, setHasMorePosts] = useState(true);
+	const [hasMoreSearchHashtags, setHasMoreSearchHashtags] = useState(true);
+	const [hasMoreSearchUsers, setHasMoreSearchUsers] = useState(true);
+	const [hasMoreSearchPosts, setHasMoreSearchPosts] = useState(true);
 
 	// Debounce search query
 	const debouncedSearchQuery = useDebounce(searchQuery, SEARCH_DEBOUNCE_MS);
 	const isSearching = debouncedSearchQuery.trim().length >= MIN_SEARCH_LENGTH;
-
-	// Apply pending filter change when debounced query updates
-	if (pendingFilter !== null && debouncedSearchQuery === searchQuery) {
-		setActiveFilter(pendingFilter);
-		setPendingFilter(null);
-	}
 
 	// Fetch hashtags
 	const {
 		data: hashtagsData,
 		loading: hashtagsLoading,
 		error: hashtagsError,
+		refetch: refetchHashtags,
 		fetchMore: fetchMoreHashtags,
 	} = useHashtagsQuery({
 		variables: { limit: INITIAL_HASHTAGS_LIMIT, offset: 0 },
@@ -148,6 +150,7 @@ export function SearchPage() {
 							<EmptyTitle>Unable to Load Search</EmptyTitle>
 							<EmptyDescription>
 								{searchError?.message ||
+									hashtagsError?.message ||
 									initialUsersError?.message ||
 									initialPostsError?.message ||
 									"Something went wrong"}
@@ -159,6 +162,7 @@ export function SearchPage() {
 									if (isSearching) {
 										refetchSearch();
 									} else {
+										refetchHashtags();
 										refetchInitialUsers();
 										refetchInitialPosts();
 									}
@@ -194,6 +198,11 @@ export function SearchPage() {
 		}
 	};
 
+	const handleHashtagClick = (hashtagName: string) => {
+		setSearchQuery(hashtagName);
+		setActiveFilter("posts");
+	};
+
 	const handleLoadMoreHashtags = () => {
 		if (isSearching) {
 			// For search, use fetchMore with offset
@@ -210,10 +219,13 @@ export function SearchPage() {
 				},
 				updateQuery: (prev, { fetchMoreResult }) => {
 					if (!fetchMoreResult) return prev;
+					const newHashtags = fetchMoreResult.search.hashtags;
+					setHasMoreSearchHashtags(newHashtags.length >= LOAD_MORE_HASHTAGS_INCREMENT);
 					return {
+						__typename: "Query",
 						search: {
 							...prev.search,
-							hashtags: [...prev.search.hashtags, ...fetchMoreResult.search.hashtags],
+							hashtags: [...prev.search.hashtags, ...newHashtags],
 						},
 					};
 				},
@@ -228,8 +240,11 @@ export function SearchPage() {
 				},
 				updateQuery: (prev, { fetchMoreResult }) => {
 					if (!fetchMoreResult) return prev;
+					const newHashtags = fetchMoreResult.hashtags;
+					setHasMoreHashtags(newHashtags.length >= LOAD_MORE_HASHTAGS_INCREMENT);
 					return {
-						hashtags: [...prev.hashtags, ...fetchMoreResult.hashtags],
+						__typename: "Query",
+						hashtags: [...prev.hashtags, ...newHashtags],
 					};
 				},
 			});
@@ -252,10 +267,13 @@ export function SearchPage() {
 				},
 				updateQuery: (prev, { fetchMoreResult }) => {
 					if (!fetchMoreResult) return prev;
+					const newUsers = fetchMoreResult.search.users;
+					setHasMoreSearchUsers(newUsers.length >= LOAD_MORE_USERS_INCREMENT);
 					return {
+						__typename: "Query",
 						search: {
 							...prev.search,
-							users: [...prev.search.users, ...fetchMoreResult.search.users],
+							users: [...prev.search.users, ...newUsers],
 						},
 					};
 				},
@@ -270,8 +288,11 @@ export function SearchPage() {
 				},
 				updateQuery: (prev, { fetchMoreResult }) => {
 					if (!fetchMoreResult) return prev;
+					const newUsers = fetchMoreResult.users;
+					setHasMoreUsers(newUsers.length >= LOAD_MORE_USERS_INCREMENT);
 					return {
-						users: [...prev.users, ...fetchMoreResult.users],
+						__typename: "Query",
+						users: [...prev.users, ...newUsers],
 					};
 				},
 			});
@@ -294,10 +315,13 @@ export function SearchPage() {
 				},
 				updateQuery: (prev, { fetchMoreResult }) => {
 					if (!fetchMoreResult) return prev;
+					const newPosts = fetchMoreResult.search.posts;
+					setHasMoreSearchPosts(newPosts.length >= LOAD_MORE_POSTS_INCREMENT);
 					return {
+						__typename: "Query",
 						search: {
 							...prev.search,
-							posts: [...prev.search.posts, ...fetchMoreResult.search.posts],
+							posts: [...prev.search.posts, ...newPosts],
 						},
 					};
 				},
@@ -312,8 +336,11 @@ export function SearchPage() {
 				},
 				updateQuery: (prev, { fetchMoreResult }) => {
 					if (!fetchMoreResult) return prev;
+					const newPosts = fetchMoreResult.posts;
+					setHasMorePosts(newPosts.length >= LOAD_MORE_POSTS_INCREMENT);
 					return {
-						posts: [...prev.posts, ...fetchMoreResult.posts],
+						__typename: "Query",
+						posts: [...prev.posts, ...newPosts],
 					};
 				},
 			});
@@ -347,7 +374,7 @@ export function SearchPage() {
 
 				{/* Content */}
 				<div className="mt-2">
-					{!isSearching ? (
+					{!isSearching && !isTyping ? (
 						<>
 							{/* Hashtags - Only show when filter is "all" or "hashtags" */}
 							{(activeFilter === "all" || activeFilter === "hashtags") && (
@@ -360,14 +387,11 @@ export function SearchPage() {
 											<HashtagSearchResult
 												key={hashtag.id}
 												hashtag={hashtag}
-												onClick={() => {
-													setSearchQuery(hashtag.name);
-													setPendingFilter("posts");
-												}}
+												onClick={() => handleHashtagClick(hashtag.name)}
 											/>
 										))}
 									</div>
-									{hashtagsData && hashtagsData.hashtags.length >= INITIAL_HASHTAGS_LIMIT && (
+									{hashtagsData && hasMoreHashtags && (
 										<div className="px-4 py-3">
 											<Button
 												variant="ghost"
@@ -397,7 +421,7 @@ export function SearchPage() {
 											/>
 										))}
 									</div>
-									{initialUsersData && initialUsersData.users.length >= INITIAL_USERS_LIMIT && (
+									{initialUsersData && hasMoreUsers && (
 										<div className="px-4 py-3">
 											<Button
 												variant="ghost"
@@ -419,7 +443,7 @@ export function SearchPage() {
 										<h2 className="font-semibold">Posts</h2>
 									</div>
 									<PostGrid posts={displayPosts} onPostClick={handlePostClick} />
-									{initialPostsData && initialPostsData.posts.length >= INITIAL_POSTS_LIMIT && (
+									{initialPostsData && hasMorePosts && (
 										<div className="px-4 py-3">
 											<Button
 												variant="ghost"
@@ -458,15 +482,11 @@ export function SearchPage() {
 															<HashtagSearchResult
 																key={hashtag.id}
 																hashtag={hashtag}
-																onClick={() => {
-																	// Filtrer les posts par ce hashtag
-																	setSearchQuery(hashtag.name);
-																	setPendingFilter("posts");
-																}}
+																onClick={() => handleHashtagClick(hashtag.name)}
 															/>
 														))}
 													</div>
-													{displayHashtags.length >= INITIAL_HASHTAGS_LIMIT && (
+													{hasMoreSearchHashtags && (
 														<div className="px-4 py-3">
 															<Button
 																variant="ghost"
@@ -504,7 +524,7 @@ export function SearchPage() {
 															/>
 														))}
 													</div>
-													{displayUsers.length >= INITIAL_USERS_LIMIT && (
+													{hasMoreSearchUsers && (
 														<div className="px-4 py-3">
 															<Button
 																variant="ghost"
@@ -534,7 +554,7 @@ export function SearchPage() {
 											{displayPosts.length > 0 ? (
 												<>
 													<PostGrid posts={displayPosts} onPostClick={handlePostClick} />
-													{displayPosts.length >= INITIAL_POSTS_LIMIT && (
+													{hasMoreSearchPosts && (
 														<div className="px-4 py-3">
 															<Button
 																variant="ghost"
