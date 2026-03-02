@@ -1,0 +1,28 @@
+query Search($query: String!, $limit: Int, $offset: Int) {
+  search(query: $query, limit: $limit, offset: $offset) {
+    users {
+      id
+      userName
+      firstName
+      lastName
+      picture
+      posts {
+        id
+        imageUrl
+      }
+    }
+    posts {
+      id
+      author {
+        id
+        firstName
+        lastName
+        picture
+        userName
+      }
+      description
+      imageUrl
+      createdAt
+    }
+  }
+}
