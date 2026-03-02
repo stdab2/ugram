@@ -1,0 +1,12 @@
+type SearchResults {
+  users: [UserUgram!]!
+  posts: [Post!]!
+}
+
+extend type Query {
+  search(
+    query: String!
+    limit: Int = 20
+    offset: Int = 0
+  ): SearchResults!
+}
