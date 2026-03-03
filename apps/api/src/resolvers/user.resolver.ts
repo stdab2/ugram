@@ -1,5 +1,6 @@
 import { PrismaClient, UserUgram, Prisma } from "../../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
+import bcrypt from "bcrypt";
 import { CreateUserInput, UpdateUserInput, QueryUsersInput } from "../types/user.types.js";
 import {
 	validateEmail,
@@ -12,6 +13,8 @@ import {
 } from "../../Validators/validateUser.js";
 import { BadRequestError, handlePrismaError } from "../../Validators/errors.js";
 import { saveUploadedImage } from "../../services/image.service.js";
+
+const SALT_ROUNDS = 10;
 
 const adapter = new PrismaPg({
 	connectionString: process.env.DATABASE_URL,
@@ -107,12 +110,15 @@ export const userResolvers = {
 				pictureUrl = await saveUploadedImage(args.picture, "profile");
 			}
 
+			// Hash password before storing
+			const hashedPassword = await bcrypt.hash(args.password, SALT_ROUNDS);
+
 			try {
 				return await prisma.userUgram.create({
 					data: {
 						userName: args.userName,
 						email: args.email,
-						password: args.password,
+						password: hashedPassword,
 						firstName: args.firstName,
 						lastName: args.lastName,
 						phoneNumber: args.phoneNumber,
@@ -151,7 +157,8 @@ export const userResolvers = {
 
 			if (args.password !== undefined) {
 				validatePassword(args.password);
-				data.password = args.password;
+				// Hash password before storing
+				data.password = await bcrypt.hash(args.password, SALT_ROUNDS);
 			}
 
 			if (args.firstName !== undefined) {

@@ -1,0 +1,49 @@
+name: Web CI
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'apps/web/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/web-ci.yml'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.29.2
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Generate GraphQL types
+        run: pnpm --filter web codegen
+        env:
+          GRAPHQL_SCHEMA_URL: ${{ secrets.GRAPHQL_SCHEMA_URL }}
+
+      - name: Format generated files
+        run: pnpm --filter web exec prettier --write src/generated/graphql.tsx
+      
+      - name: Lint
+        run: pnpm --filter web lint
+      
+      - name: Build
+        run: pnpm --filter web build
+        env:
+          VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
+          VITE_GRAPHQL_URL: ${{ secrets.VITE_GRAPHQL_URL }}
+          VITE_APP_VERSION: ${{ github.head_ref }}-${{ github.event.pull_request.head.sha }}

@@ -1,0 +1,80 @@
+"""Exposes a URL that specifies the behavior of this scalar."""
+directive @specifiedBy(
+  """The URL that specifies the behavior of this scalar."""
+  url: String!
+) on SCALAR
+
+"""
+Indicates exactly one field must be supplied and this field must not be `null`.
+"""
+directive @oneOf on INPUT_OBJECT
+
+input CreatePostInput {
+  description: String!
+  image: Upload!
+  authorId: Int!
+  hashtags: [String!]
+  mentionedUsers: [Int!]
+}
+
+"""DateTime custom scalar type"""
+scalar DateTime
+
+type Hashtag {
+  id: Int!
+  name: String!
+}
+
+type Mutation {
+  _empty: String
+  createUser(userName: String!, email: String!, password: String!, firstName: String!, lastName: String!, phoneNumber: String!, picture: Upload): UserUgram!
+  updateUser(id: Int!, userName: String, email: String, password: String, firstName: String, lastName: String, phoneNumber: String, picture: Upload): UserUgram!
+  createPost(data: CreatePostInput!): Post!
+  deletePost(id: Int!): Post!
+  updatePost(id: Int!, description: String!): Post!
+}
+
+type Post {
+  id: Int!
+  description: String!
+  imageUrl: String!
+  authorId: Int!
+  author: UserUgram!
+  createdAt: DateTime!
+  hashtags: [Hashtag!]
+  mentionedUsers: [UserUgram!]
+}
+
+type Query {
+  _empty: String
+  user(id: Int!): UserUgram
+  userByUserName(userName: String!): UserUgram
+  users(limit: Int, offset: Int): [UserUgram!]!
+  usersByUserNames(userNames: [String!]!): UsersByUserNamesResult!
+  post(id: Int!): Post
+  posts(limit: Int, offset: Int): [Post!]!
+  postsByAuthor(authorId: Int!, limit: Int, offset: Int): [Post!]!
+  hashtag(id: Int!): Hashtag
+  hashtags: [Hashtag!]!
+}
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
+
+type UsersByUserNamesResult {
+  users: [UserUgram!]!
+  missingUserNames: [String!]!
+}
+
+type UserUgram {
+  id: Int!
+  userName: String!
+  email: String!
+  firstName: String!
+  lastName: String!
+  phoneNumber: String!
+  picture: String
+  createdAt: String!
+  posts: [Post!]
+}
+

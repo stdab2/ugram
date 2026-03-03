@@ -104,6 +104,34 @@ services:
         condition: service_completed_successfully
       api:
         condition: service_healthy
+  
+  # Prisma Studio - Optional database inspector
+  # Usage:
+  #   Start: docker compose --profile studio up
+  #   Stop:  docker compose --profile studio down
+  # Access at http://localhost:5555
+  studio:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile.dev
+    working_dir: /app/apps/api
+    volumes:
+      - ./:/app
+      - node_modules:/app/node_modules
+      - api_node_modules:/app/apps/api/node_modules
+      - pnpm_store:/root/.local/share/pnpm/store
+    command: sh -c "corepack enable && corepack prepare pnpm@10.29.2 --activate && pnpm dlx prisma studio --browser none --port 5555"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/ugram?schema=public
+    ports:
+      - "5555:5555"
+    depends_on:
+      db:
+        condition: service_healthy
+      deps:
+        condition: service_completed_successfully
+    profiles:
+      - studio
 
 volumes:
   db_data:
