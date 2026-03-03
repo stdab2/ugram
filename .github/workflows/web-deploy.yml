@@ -64,4 +64,4 @@ jobs:
       - name: Deployment summary
         run: |
           echo "✅ Deployment successful!"
-          echo "🌐 URL: https://${{ secrets.AWS_S3_BUCKET }}.s3-website-ca-central-1.amazonaws.com"
+          echo "🌐 URL: http://${{ secrets.AWS_S3_BUCKET }}.s3-website-ca-central-1.amazonaws.com"
