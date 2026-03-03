@@ -1,0 +1,7 @@
+query Hashtags($limit: Int, $offset: Int) {
+	hashtags(limit: $limit, offset: $offset) {
+		id
+		name
+		postCount
+	}
+}

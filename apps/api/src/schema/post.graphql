@@ -1,32 +1,32 @@
 scalar Upload
 
 type Post {
-  id: Int!
-  description: String!
-  imageUrl: String!
-  authorId: Int!
-  author: UserUgram!
-  createdAt: DateTime!
-  hashtags: [Hashtag!]
-  mentionedUsers:[UserUgram!]
+	id: Int!
+	description: String!
+	imageUrl: String!
+	authorId: Int!
+	author: UserUgram!
+	createdAt: DateTime!
+	hashtags: [Hashtag!]
+	mentionedUsers: [UserUgram!]
 }
 
 extend type Query {
-  post(id: Int!): Post
-  posts(limit: Int, offset: Int): [Post!]!
-  postsByAuthor(authorId: Int!, limit: Int, offset: Int): [Post!]!
+	post(id: Int!): Post
+	posts(limit: Int, offset: Int): [Post!]!
+	postsByAuthor(authorId: Int!, limit: Int, offset: Int): [Post!]!
 }
 
 input CreatePostInput {
-  description: String!
-  image: Upload!
-  authorId: Int!
-  hashtags: [String!]
-  mentionedUsers: [Int!]
+	description: String!
+	image: Upload!
+	authorId: Int!
+	hashtags: [String!]
+	mentionedUsers: [Int!]
 }
 
 extend type Mutation {
-  createPost(data: CreatePostInput!): Post!
-  deletePost(id: Int!): Post!
-  updatePost(id: Int!, description: String!): Post!
+	createPost(data: CreatePostInput!): Post!
+	deletePost(id: Int!): Post!
+	updatePost(id: Int!, description: String!): Post!
 }

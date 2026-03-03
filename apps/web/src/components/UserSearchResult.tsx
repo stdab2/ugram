@@ -1,11 +1,11 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 import { Card } from "@/components/ui/Card";
-import type { UserQuery } from "@/generated/graphql";
+import type { UserQuery, SearchQuery } from "@/generated/graphql";
 import { Link } from "react-router-dom";
 import { getImageUrl } from "@/lib/utils";
 
 interface UserSearchResultProps {
-	user: UserQuery["user"] | null;
+	user: UserQuery["user"] | SearchQuery["search"]["users"][0] | null;
 	onPostClick?: (postId: string | number) => void;
 }
 

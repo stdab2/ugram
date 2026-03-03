@@ -1,12 +1,12 @@
 mutation DeletePost($id: Int!) {
-  deletePost(id: $id) {
-    id
-    description
-    imageUrl
-    authorId
-    author {
-      id
-    }
-    createdAt
-  }
+	deletePost(id: $id) {
+		id
+		description
+		imageUrl
+		authorId
+		author {
+			id
+		}
+		createdAt
+	}
 }

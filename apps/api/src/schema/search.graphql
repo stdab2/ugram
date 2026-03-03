@@ -1,0 +1,23 @@
+type SearchResults {
+	users: [UserUgram!]!
+	posts: [Post!]!
+	hashtags: [HashtagResult!]!
+}
+
+type HashtagResult {
+	id: Int!
+	name: String!
+	postCount: Int!
+}
+
+extend type Query {
+	search(
+		query: String!
+		usersLimit: Int = 20
+		usersOffset: Int = 0
+		postsLimit: Int = 20
+		postsOffset: Int = 0
+		hashtagsLimit: Int = 20
+		hashtagsOffset: Int = 0
+	): SearchResults!
+}
