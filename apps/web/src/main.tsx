@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { ApolloProvider } from "@apollo/client/react";
+import { ApolloProvider } from "@apollo/client";
 import { apolloClient } from "./lib/apollo/client";
 import { RouterProvider } from "react-router-dom";
 import { router } from "./router";
