@@ -1,15 +1,27 @@
 import type { CodegenConfig } from "@graphql-codegen/cli";
-import { existsSync } from "fs";
-import { resolve as resolvePath } from "path";
+import { existsSync, readdirSync } from "fs";
+import { dirname, resolve as resolvePath } from "path";
+import { fileURLToPath } from "url";
 
-const getSchema = (): string => {
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+const getSchema = (): string | string[] => {
 	if (process.env.GRAPHQL_SCHEMA_URL) {
 		return process.env.GRAPHQL_SCHEMA_URL;
 	}
 
-	const schemaPath = resolvePath(__dirname, "../api/schema.graphql");
-	if (existsSync(schemaPath)) {
-		return schemaPath;
+	// Use source schema files from API to avoid duplication
+	const apiSchemaDir = resolvePath(__dirname, "../api/src/schema");
+	if (existsSync(apiSchemaDir)) {
+		const schemaFiles = readdirSync(apiSchemaDir)
+			.filter((file) => file.endsWith(".graphql"))
+			.map((file) => resolvePath(apiSchemaDir, file));
+
+		if (schemaFiles.length === 0) {
+			throw new Error("No GraphQL schema files found in API schema directory");
+		}
+
+		return schemaFiles;
 	}
 
 	throw new Error("No GraphQL schema source found");
