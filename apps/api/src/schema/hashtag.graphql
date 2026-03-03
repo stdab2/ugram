@@ -1,9 +1,15 @@
 type Hashtag {
-  id: Int!
-  name: String!
+	id: Int!
+	name: String!
+}
+
+type HashtagWithCount {
+	id: Int!
+	name: String!
+	postCount: Int!
 }
 
 extend type Query {
-  hashtag(id: Int!): Hashtag
-  hashtags: [Hashtag!]!
+	hashtag(id: Int!): Hashtag
+	hashtags(limit: Int, offset: Int): [HashtagWithCount!]!
 }

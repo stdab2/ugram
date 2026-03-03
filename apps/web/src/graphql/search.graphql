@@ -1,0 +1,49 @@
+query Search(
+	$query: String!
+	$usersLimit: Int
+	$usersOffset: Int
+	$postsLimit: Int
+	$postsOffset: Int
+	$hashtagsLimit: Int
+	$hashtagsOffset: Int
+) {
+	search(
+		query: $query
+		usersLimit: $usersLimit
+		usersOffset: $usersOffset
+		postsLimit: $postsLimit
+		postsOffset: $postsOffset
+		hashtagsLimit: $hashtagsLimit
+		hashtagsOffset: $hashtagsOffset
+	) {
+		users {
+			id
+			userName
+			firstName
+			lastName
+			picture
+			posts {
+				id
+				imageUrl
+			}
+		}
+		posts {
+			id
+			author {
+				id
+				firstName
+				lastName
+				picture
+				userName
+			}
+			description
+			imageUrl
+			createdAt
+		}
+		hashtags {
+			id
+			name
+			postCount
+		}
+	}
+}
