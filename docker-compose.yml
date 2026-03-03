@@ -94,6 +94,8 @@ services:
       CHOKIDAR_USEPOLLING: "true"
       HUSKY: "0"
       GRAPHQL_SCHEMA_URL: "http://api:4000/graphql"
+      VITE_SENTRY_DSN: ${VITE_SENTRY_DSN:-}
+      VITE_GRAPHQL_URL: "http://localhost:4001/graphql"
     ports:
       - "5173:5173"
     depends_on:
