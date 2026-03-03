@@ -7,6 +7,8 @@ on:
       - 'apps/web/**'
       - 'pnpm-lock.yaml'
       - '.github/workflows/web-deploy.yml'
+    tags:
+      - 'Release-*'
 
 jobs:
   deploy:
@@ -35,11 +37,23 @@ jobs:
         env:
           GRAPHQL_SCHEMA_URL: ${{ secrets.GRAPHQL_SCHEMA_URL }}
       
+      - name: Set version
+        id: version
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/}"
+          else
+            VERSION="${{ github.ref_name }}-${GITHUB_SHA::7}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Version: $VERSION"
+      
       - name: Build for production
         run: pnpm --filter web build
         env:
           VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
           VITE_GRAPHQL_URL: ${{ secrets.VITE_GRAPHQL_URL }}
+          VITE_APP_VERSION: ${{ steps.version.outputs.version }}
       
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -64,4 +78,5 @@ jobs:
       - name: Deployment summary
         run: |
           echo "✅ Deployment successful!"
+          echo "📦 Version: ${{ steps.version.outputs.version }}"
           echo "🌐 URL: http://${{ secrets.AWS_S3_BUCKET }}.s3-website.ca-central-1.amazonaws.com"

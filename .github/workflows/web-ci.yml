@@ -46,3 +46,4 @@ jobs:
         env:
           VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
           VITE_GRAPHQL_URL: ${{ secrets.VITE_GRAPHQL_URL }}
+          VITE_APP_VERSION: ${{ github.head_ref }}-${{ github.event.pull_request.head.sha }}
