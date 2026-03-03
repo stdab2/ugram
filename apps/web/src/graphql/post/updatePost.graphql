@@ -1,12 +1,12 @@
 mutation UpdatePost($id: Int!, $description: String!) {
-  updatePost(id: $id, description: $description) {
-    id
-    description
-    imageUrl
-    authorId
-    author {
-      id
-    }
-    createdAt
-  }
+	updatePost(id: $id, description: $description) {
+		id
+		description
+		imageUrl
+		authorId
+		author {
+			id
+		}
+		createdAt
+	}
 }
