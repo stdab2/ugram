@@ -122,12 +122,12 @@ export function PostPage() {
 			await deletePost({ variables: { id: postId } });
 			toast.success("Your post has been successfully deleted!");
 			navigate("/");
-		} catch (error) {
-			console.error("Failed to delete post:", error);
-			toast.error("Failed to delete your post. Please try again.");
+		} catch {
+			// Error already handled by errorLink
 			setIsDeleting(false);
+		} finally {
+			setShowDeleteDialog(false);
 		}
-		setShowDeleteDialog(false);
 	};
 
 	// Handle loading state

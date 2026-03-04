@@ -74,9 +74,8 @@ export function UserSettings({ className, ...props }: React.ComponentProps<"div"
 				});
 
 				setErrors(fieldErrors);
-			} else {
-				console.error("Failed to update:", err);
 			}
+			// Apollo mutation errors are already handled by errorLink
 		} finally {
 			setIsSubmitting(false);
 		}

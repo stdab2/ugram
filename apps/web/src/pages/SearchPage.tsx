@@ -143,7 +143,7 @@ export function SearchPage() {
 	if (hasError) {
 		return (
 			<PageFade key="error">
-				<div className="max-w-[630px] mx-auto pb-20 flex items-center justify-center min-h-[60vh]">
+				<div className="flex justify-center min-h-screen bg-background items-center">
 					<Empty>
 						<EmptyHeader>
 							<AlertCircle className="h-12 w-12 mb-4 text-muted-foreground" />

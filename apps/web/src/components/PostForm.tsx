@@ -89,28 +89,20 @@ export function PostForm({
 
 				mentionedUsers = mentionedUsersVerified.data?.usersByUserNames.users.map((u) => u.id) || [];
 			}
-		} catch (err) {
-			console.error("Error verifying mentioned users:", err);
-			toast.error("Failed to verify mentioned users. Please try again.");
+		} catch {
+			// Verification error already handled by errorLink
 			setErrorMessage("Failed to verify mentioned users. Please try again.");
 			setIsSaving(false);
 			return;
 		}
 
-		try {
-			if (onSubmit) {
-				onSubmit({ imagePreview, description, image, mentionedUsers });
-			}
-			if (onPostEdit) {
-				onPostEdit(description);
-			}
-		} catch (err) {
-			console.error("Error submitting PostForm:", err);
-			setErrorMessage("Failed to submit changes. Please try again.");
-			return;
-		} finally {
-			setIsSaving(false);
+		if (onSubmit) {
+			onSubmit({ imagePreview, description, image, mentionedUsers });
 		}
+		if (onPostEdit) {
+			onPostEdit(description);
+		}
+		setIsSaving(false);
 	};
 
 	return (

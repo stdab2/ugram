@@ -34,12 +34,10 @@ export function CreatePostPage() {
 				},
 			});
 			toast.success("Your post has been created!");
-		} catch (error) {
-			console.error("Error creating post:", error);
-			toast.error("Something went wrong. Please try again!");
+			navigate("/");
+		} catch {
+			// Error already handled by errorLink
 		}
-
-		navigate("/");
 	};
 
 	const handleCancel = () => {
