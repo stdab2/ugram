@@ -190,8 +190,9 @@ export function getStatusCode(error: unknown): number | undefined {
 			const firstError = (err.graphQLErrors[0] as Record<string, unknown>) || {};
 			if (typeof firstError.extensions === "object" && firstError.extensions) {
 				const ext = firstError.extensions as Record<string, unknown>;
-				if (typeof ext.code === "number") {
-					return ext.code;
+				const http = ext.http as Record<string, unknown> | undefined;
+				if (http && typeof http.status === "number") {
+					return http.status;
 				}
 			}
 		}

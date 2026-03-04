@@ -36,9 +36,15 @@ export const errorLink = onError(({ graphQLErrors, networkError, operation }) =>
 		const message = primaryError.message || "GraphQL Error";
 		const errorCode = (primaryError.extensions?.code as string) || "GRAPHQL_ERROR";
 
-		// Check if it's an auth error
-		const statusCode = primaryError.extensions?.code as number;
-		if (statusCode === 401 || statusCode === 403) {
+		// Check if it's an auth error (based on HTTP status and/or string error code)
+		const statusCode = primaryError.extensions?.http?.status as number | undefined;
+		const normalizedErrorCode = errorCode.toUpperCase();
+		if (
+			statusCode === 401 ||
+			statusCode === 403 ||
+			normalizedErrorCode === "UNAUTHENTICATED" ||
+			normalizedErrorCode === "FORBIDDEN"
+		) {
 			handleAuthError(message, currentContext);
 			return;
 		}
@@ -90,6 +96,7 @@ export const errorLink = onError(({ graphQLErrors, networkError, operation }) =>
 
 		if (isAuthErr) {
 			handleAuthError(getErrorMessage(networkError) || "Network error", currentContext);
+			return;
 		}
 
 		// Log the network error

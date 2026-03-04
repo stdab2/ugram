@@ -14,9 +14,7 @@ export const postFormSchema = z.object({
 		.refine(
 			(file) => ["image/jpeg", "image/jpg", "image/png", "image/webp"].includes(file.type),
 			"Only JPEG, PNG, and WebP images are allowed"
-		)
-		.optional()
-		.nullable(),
+		),
 	imagePreview: z.string().optional().nullable(),
 });
 

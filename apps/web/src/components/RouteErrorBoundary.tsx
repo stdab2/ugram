@@ -8,7 +8,28 @@ export default function RouteErrorBoundary() {
 	let error: Error;
 
 	if (isRouteErrorResponse(routeError)) {
-		error = new Error(routeError.statusText || routeError.data || "Route error");
+		let message = "Route error";
+
+		if (routeError.statusText) {
+			message = routeError.statusText;
+		} else {
+			const data = routeError.data;
+
+			if (typeof data === "string") {
+				message = data;
+			} else if (data != null) {
+				try {
+					const serialized = JSON.stringify(data);
+					if (serialized.length > 0) {
+						message = serialized;
+					}
+				} catch {
+					// keep default message
+				}
+			}
+		}
+
+		error = new Error(message);
 	} else if (routeError instanceof Error) {
 		error = routeError;
 	} else {

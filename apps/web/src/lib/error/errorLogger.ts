@@ -117,29 +117,6 @@ export class ErrorLogger {
 	 * Log error to Sentry
 	 */
 	private logToSentry(appError: AppError): void {
-		const scope = new Sentry.Scope();
-
-		// Add tags
-		scope.setTag("error_type", appError.type);
-		scope.setTag("error_code", appError.code);
-		scope.setTag("retryable", appError.retryable);
-
-		// Add context
-		if (appError.context?.route) {
-			scope.setTag("route", appError.context.route);
-		}
-		if (appError.context?.action) {
-			scope.setTag("action", appError.context.action);
-		}
-		if (appError.context?.userId) {
-			scope.setUser({ id: appError.context.userId });
-		}
-
-		// Add extra context
-		if (appError.context?.state) {
-			scope.setContext("appState", appError.context.state);
-		}
-
 		// Add breadcrumb
 		Sentry.addBreadcrumb({
 			category: "error",
@@ -152,36 +129,48 @@ export class ErrorLogger {
 			},
 		});
 
-		// Capture exception
-		const exception = appError.originalError || new Error(appError.message);
-		Sentry.captureException(exception, {
-			level: this.severityToSentryLevel(appError.severity),
-			tags: {
-				error_type: appError.type,
-				error_code: appError.code,
-				...(appError.context?.route && { route: appError.context.route }),
-				...(appError.context?.action && { action: appError.context.action }),
-			},
+		// Capture exception with scoped tags/user/context
+		Sentry.withScope((scope) => {
+			scope.setTag("error_type", appError.type);
+			scope.setTag("error_code", appError.code);
+			scope.setTag("retryable", String(appError.retryable));
+
+			if (appError.context?.route) {
+				scope.setTag("route", appError.context.route);
+			}
+			if (appError.context?.action) {
+				scope.setTag("action", appError.context.action);
+			}
+			if (appError.context?.userId) {
+				scope.setUser({ id: appError.context.userId });
+			}
+			if (appError.context?.state) {
+				scope.setContext("appState", appError.context.state);
+			}
+
+			const exception = appError.originalError || new Error(appError.message);
+			Sentry.captureException(exception, {
+				level: this.severityToSentryLevel(appError.severity),
+			});
 		});
 	}
 
 	/**
-	 * Log error to console (dev mode)
+	 * Log error to console (dev mode) using browser-compatible styling
 	 */
 	private logToConsole(appError: AppError): void {
-		const colors = {
-			debug: "\x1b[36m", // Cyan
-			info: "\x1b[32m", // Green
-			warning: "\x1b[33m", // Yellow
-			error: "\x1b[31m", // Red
-			fatal: "\x1b[35m", // Magenta
-			reset: "\x1b[0m",
+		const colorMap: Record<string, string> = {
+			debug: "color: #0ea5e9",
+			info: "color: #22c55e",
+			warning: "color: #f59e0b",
+			error: "color: #ef4444",
+			fatal: "color: #a855f7",
 		};
 
-		const color = colors[appError.severity as keyof typeof colors] || colors.error;
+		const style = colorMap[appError.severity] ?? colorMap.error;
 		const tag = `[${appError.severity.toUpperCase()}]`;
 
-		console.group(`${color}${tag} ${appError.type}${colors.reset}`);
+		console.group(`%c${tag} ${appError.type}`, style);
 		console.log(`Code: ${appError.code}`);
 		console.log(`Message: ${appError.message}`);
 		if (appError.statusCode) {

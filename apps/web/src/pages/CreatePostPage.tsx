@@ -15,7 +15,7 @@ export function CreatePostPage() {
 	const [fetchUsersByUserNames] = useUsersByUserNamesLazyQuery();
 
 	// Fetch current user data
-	const { data: userData, loading: userLoading } = useUserByUserNameQuery({
+	const { data: userData, loading: userLoading, error: userError } = useUserByUserNameQuery({
 		variables: { userName: CURRENT_USERNAME },
 	});
 
@@ -78,7 +78,7 @@ export function CreatePostPage() {
 	};
 
 	// Show loading state while fetching user
-	if (userLoading || !user) {
+	if (userLoading) {
 		return (
 			<PageFade>
 				<div className="w-full min-h-screen bg-background pb-20 md:pb-0">
@@ -89,6 +89,27 @@ export function CreatePostPage() {
 						</div>
 						<div className="flex items-center justify-center p-12">
 							<div className="text-muted-foreground">Loading...</div>
+						</div>
+					</div>
+				</div>
+			</PageFade>
+		);
+	}
+
+	// Show error state if user could not be loaded
+	if (userError || !user) {
+		return (
+			<PageFade>
+				<div className="w-full min-h-screen bg-background pb-20 md:pb-0">
+					<div className="max-w-4xl mx-auto px-4 py-8">
+						<div className="mb-6">
+							<h1 className="text-3xl font-bold">Create a new post</h1>
+							<p className="text-muted-foreground mt-2">Share your moments with the world</p>
+						</div>
+						<div className="flex items-center justify-center p-12">
+							<div className="text-destructive">
+								{userError ? "Failed to load user data." : "User not found."}
+							</div>
 						</div>
 					</div>
 				</div>

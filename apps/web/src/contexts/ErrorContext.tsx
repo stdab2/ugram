@@ -3,7 +3,7 @@ import React, {
 	useContext,
 	useState,
 	useCallback,
-	useEffect,
+	useLayoutEffect,
 	useRef,
 	type ReactNode,
 } from "react";
@@ -56,8 +56,8 @@ export const ErrorProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 		setErrors((prev) => prev.filter((err) => err.id !== id));
 	}, []);
 
-	// Set up error context getter for Apollo errorLink
-	useEffect(() => {
+	// Set up error context getter for Apollo errorLink (synchronous to avoid race conditions)
+	useLayoutEffect(() => {
 		setErrorContextGetter(() => ({
 			route: window.location.pathname,
 			timestamp: Date.now(),
@@ -101,8 +101,8 @@ export const ErrorProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 		setErrors([]);
 	}, []);
 
-	// Set up error notifier for Apollo errorLink
-	useEffect(() => {
+	// Set up error notifier for Apollo errorLink (synchronous to avoid race conditions)
+	useLayoutEffect(() => {
 		setErrorNotifier((error: AppError) => {
 			addError(error);
 		});
@@ -149,6 +149,11 @@ function showErrorToast(error: AppError): void {
 	// For network errors that are retryable, show auto-retry countdown
 	if (isNetworkLike && error.retryable && !hasCustomAction) {
 		let countdown = 5; // 5 seconds before auto-retry
+		let countdownInterval: ReturnType<typeof setInterval> = 0 as unknown as ReturnType<typeof setInterval>;
+
+		const cancelCountdown = () => {
+			clearInterval(countdownInterval);
+		};
 
 		// Show initial toast with countdown
 		toast.warning(message, {
@@ -156,10 +161,12 @@ function showErrorToast(error: AppError): void {
 			duration: Infinity,
 			description: `Retrying automatically in ${countdown} seconds...`,
 			closeButton: true,
+			onDismiss: cancelCountdown,
+			onAutoClose: cancelCountdown,
 		});
 
 		// Update countdown every second
-		const countdownInterval = setInterval(() => {
+		countdownInterval = setInterval(() => {
 			countdown--;
 
 			if (countdown > 0) {
@@ -168,6 +175,8 @@ function showErrorToast(error: AppError): void {
 					duration: Infinity,
 					description: `Retrying automatically in ${countdown} second${countdown > 1 ? "s" : ""}...`,
 					closeButton: true,
+					onDismiss: cancelCountdown,
+					onAutoClose: cancelCountdown,
 				});
 			} else {
 				clearInterval(countdownInterval);
