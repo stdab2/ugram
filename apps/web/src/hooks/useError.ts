@@ -18,23 +18,25 @@ export const useError = (): UseErrorReturn => {
 	const { addError } = useErrorContext();
 
 	const handleLogError = useCallback(
-		(message: string, _type?: AppError["type"], shouldToast = true): AppError => {
+		(message: string, type?: AppError["type"], shouldToast = true): AppError => {
 			const err = new Error(message);
 			const context: ErrorContext = {
 				timestamp: Date.now(),
 			};
 
 			const appError = logError(err, context);
+			const classifiedError: AppError =
+				type !== undefined ? { ...appError, type } : appError;
 
 			// Update local state
-			setError(appError);
+			setError(classifiedError);
 
 			// Show toast if requested
 			if (shouldToast) {
-				addError(appError);
+				addError(classifiedError);
 			}
 
-			return appError;
+			return classifiedError;
 		},
 		[addError]
 	);
