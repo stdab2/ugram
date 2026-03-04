@@ -45,8 +45,7 @@ export function CreatePostPage() {
 					variables: { userNames: data.mentionedUsernames },
 				});
 
-				const missingUserNames =
-					mentionedUsersVerified.data?.usersByUserNames?.missingUserNames;
+				const missingUserNames = mentionedUsersVerified.data?.usersByUserNames?.missingUserNames;
 				if (missingUserNames && missingUserNames.length > 0) {
 					const errorMessage = `The following mentioned users were not found: ${missingUserNames.join(", ")}`;
 					toast.error(errorMessage);
@@ -54,8 +53,7 @@ export function CreatePostPage() {
 				}
 
 				mentionedUsers =
-					mentionedUsersVerified.data?.usersByUserNames?.users?.map((u) => u.id) ||
-					[];
+					mentionedUsersVerified.data?.usersByUserNames?.users?.map((u) => u.id) || [];
 			} catch {
 				// Verification error already handled by errorLink
 				return;

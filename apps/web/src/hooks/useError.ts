@@ -25,8 +25,7 @@ export const useError = (): UseErrorReturn => {
 			};
 
 			const appError = logError(err, context);
-			const classifiedError: AppError =
-				type !== undefined ? { ...appError, type } : appError;
+			const classifiedError: AppError = type !== undefined ? { ...appError, type } : appError;
 
 			// Update local state
 			setError(classifiedError);

@@ -1,5 +1,4 @@
 import React, { type ErrorInfo, type ReactNode } from "react";
-import * as Sentry from "@sentry/react";
 import { logError } from "@/lib/error/errorLogger";
 import ErrorFallback from "@/components/ErrorFallback";
 
@@ -28,20 +27,7 @@ class ErrorBoundary extends React.Component<Props, State> {
 	}
 
 	public componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-		// Log error to Sentry
-		Sentry.captureException(error, {
-			contexts: {
-				react: {
-					componentStack: errorInfo.componentStack,
-				},
-			},
-			level: "error",
-			tags: {
-				error_source: "ErrorBoundary",
-			},
-		});
-
-		// Log to our error logger
+		// Log to our error logger (which handles Sentry capture)
 		logError(error, {
 			action: "React Render Error",
 			state: {
