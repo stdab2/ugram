@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { useUserQuery, useUpdateUserMutation } from "@/generated/graphql";
 import { useState, useEffect } from "react";
 import { z } from "zod";
-import { settingsSchema, type SettingsFormData } from "@/lib/settingsSchema";
+import { userSettingsSchema, type UserSettingsFormData } from "@/lib/schemas";
 import { getImageUrl } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -26,7 +26,7 @@ export function UserSettings({ className, ...props }: React.ComponentProps<"div"
 	const [email, setEmail] = useState("");
 	const [phoneNumber, setPhoneNumber] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [errors, setErrors] = useState<Partial<Record<keyof SettingsFormData, string>>>({});
+	const [errors, setErrors] = useState<Partial<Record<keyof UserSettingsFormData, string>>>({});
 
 	useEffect(() => {
 		if (data?.user) {
@@ -43,7 +43,7 @@ export function UserSettings({ className, ...props }: React.ComponentProps<"div"
 		setIsSubmitting(true);
 
 		try {
-			const validatedData = settingsSchema.parse({
+			const validatedData = userSettingsSchema.parse({
 				firstName,
 				lastName,
 				email,
@@ -63,10 +63,10 @@ export function UserSettings({ className, ...props }: React.ComponentProps<"div"
 			toast.success("Profile updated successfully!");
 		} catch (err) {
 			if (err instanceof z.ZodError) {
-				const fieldErrors: Partial<Record<keyof SettingsFormData, string>> = {};
+				const fieldErrors: Partial<Record<keyof UserSettingsFormData, string>> = {};
 
 				err.issues.forEach((error) => {
-					const fieldName = error.path[0] as keyof SettingsFormData;
+					const fieldName = error.path[0] as keyof UserSettingsFormData;
 
 					if (fieldName) {
 						fieldErrors[fieldName] = error.message;

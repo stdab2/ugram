@@ -145,6 +145,12 @@ export function EditPostPage() {
 					</div>
 
 					<PostForm
+						user={{
+							userName: post.author.userName,
+							firstName: post.author.firstName,
+							lastName: post.author.lastName,
+							picture: post.author.picture,
+						}}
 						initialImage={getImageUrl(post.imageUrl)}
 						initialDescription={post.description}
 						onPostEdit={handlePostUpdate}

@@ -4,14 +4,18 @@ import { Button } from "@/components/ui/Button";
 import { Textarea } from "@/components/ui/Textarea";
 import { Label } from "@/components/ui/Label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
-import { useUserByUserNameQuery, useUsersByUserNamesLazyQuery } from "@/generated/graphql";
-import { CURRENT_USERNAME } from "@/lib/constants";
-import { Upload, X, Loader2 } from "lucide-react";
-import { getImageUrl } from "@/lib/utils";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/Alert";
-import { toast } from "sonner";
+import { Upload, X } from "lucide-react";
+import { getImageUrl, cn } from "@/lib/utils";
+import { postFormSchema, editPostFormSchema, type PostFormData } from "@/lib/schemas";
+import { z } from "zod";
 
 interface PostFormProps {
+	user: {
+		userName: string;
+		firstName: string;
+		lastName: string;
+		picture?: string | null;
+	};
 	initialImage?: string;
 	initialDescription?: string;
 	onPostEdit?: (description: string) => void;
@@ -19,7 +23,7 @@ interface PostFormProps {
 		imagePreview: string | null;
 		description: string;
 		image: File | null;
-		mentionedUsers: number[] | null;
+		mentionedUsernames: string[];
 	}) => Promise<void>;
 	submitButtonText: string;
 	onCancel: () => void;
@@ -27,6 +31,7 @@ interface PostFormProps {
 }
 
 export function PostForm({
+	user,
 	initialImage,
 	initialDescription = "",
 	onPostEdit,
@@ -39,18 +44,13 @@ export function PostForm({
 	const [description, setDescription] = useState(initialDescription);
 	const [image, setImage] = useState<File | null>(null);
 	const [isSaving, setIsSaving] = useState(false);
-	const [fetchUsersByUserNames] = useUsersByUserNamesLazyQuery();
-	const [errorMessage, setErrorMessage] = useState<string | null>(null);
+	const [errors, setErrors] = useState<Partial<Record<keyof PostFormData, string>>>({});
 
-	// Fetch current user data
-	const { data: userData, loading: userLoading } = useUserByUserNameQuery({
-		variables: { userName: CURRENT_USERNAME },
-	});
-
-	const user = userData?.userByUserName;
-
-	// Extract hashtags from description
+	// Extract hashtags and mentions from description
 	const hashtags = description.match(/#\w+/g) || [];
+	const mentionedUsernames = Array.from(
+		new Set((description.match(/@\w+/g) || []).map((u) => u.slice(1)))
+	);
 
 	const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
@@ -61,48 +61,54 @@ export function PostForm({
 				setImagePreview(reader.result as string);
 			};
 			reader.readAsDataURL(file);
+			setErrors((prev) => ({ ...prev, image: undefined }));
 		}
 	};
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setIsSaving(true);
-		setErrorMessage(null);
-		const mentionedUsernames = Array.from(
-			new Set((description.match(/@\w+/g) || []).map((u) => u.slice(1)))
-		);
-
-		let mentionedUsers: number[] = [];
+		setErrors({});
 
 		try {
-			if (mentionedUsernames.length > 0) {
-				const mentionedUsersVerified = await fetchUsersByUserNames({
-					variables: { userNames: mentionedUsernames },
+			// Validate based on mode (create or edit)
+			if (onSubmit) {
+				// Create mode - validate with image
+				const validatedData = postFormSchema.parse({
+					description,
+					image,
+					imagePreview,
 				});
 
-				if (mentionedUsersVerified.data?.usersByUserNames.missingUserNames.length) {
-					const errorMessage = `The following mentioned users were not found: ${mentionedUsersVerified.data.usersByUserNames.missingUserNames.join(", ")}`;
-					toast.error(errorMessage);
-					setIsSaving(false);
-					return;
-				}
+				await onSubmit({
+					imagePreview: validatedData.imagePreview || null,
+					description: validatedData.description,
+					image: validatedData.image || null,
+					mentionedUsernames,
+				});
+			} else if (onPostEdit) {
+				// Edit mode - validate description only
+				const validatedData = editPostFormSchema.parse({
+					description,
+				});
 
-				mentionedUsers = mentionedUsersVerified.data?.usersByUserNames.users.map((u) => u.id) || [];
+				await onPostEdit(validatedData.description);
 			}
-		} catch {
-			// Verification error already handled by errorLink
-			setErrorMessage("Failed to verify mentioned users. Please try again.");
+		} catch (err) {
+			if (err instanceof z.ZodError) {
+				const fieldErrors: Partial<Record<keyof PostFormData, string>> = {};
+				err.issues.forEach((issue) => {
+					const fieldName = issue.path[0] as keyof PostFormData;
+					if (fieldName) {
+						fieldErrors[fieldName] = issue.message;
+					}
+				});
+				setErrors(fieldErrors);
+			}
+			// Apollo errors handled by errorLink
+		} finally {
 			setIsSaving(false);
-			return;
 		}
-
-		if (onSubmit) {
-			onSubmit({ imagePreview, description, image, mentionedUsers });
-		}
-		if (onPostEdit) {
-			onPostEdit(description);
-		}
-		setIsSaving(false);
 	};
 
 	return (
@@ -133,16 +139,11 @@ export function PostForm({
 						<label className="flex flex-col items-center justify-center aspect-square border-2 border-dashed border-muted-foreground/25 rounded-lg cursor-pointer hover:border-muted-foreground/50 transition-colors">
 							<Upload className="w-12 h-12 text-muted-foreground mb-2" />
 							<span className="text-sm text-muted-foreground">Click to upload image</span>
-							<input
-								type="file"
-								accept="image/*"
-								onChange={handleImageUpload}
-								className="hidden"
-								required={!initialImage}
-							/>
+							<input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
 						</label>
 					)}
 
+					{errors.image && <p className="text-sm text-red-500 mt-2">{errors.image}</p>}
 					{!allowImageChange && (
 						<p className="text-xs text-muted-foreground mt-2">
 							Image cannot be changed when editing
@@ -155,30 +156,19 @@ export function PostForm({
 					<div className="space-y-6">
 						{/* User info */}
 						<div className="flex items-center gap-3 pb-4 border-b">
-							{userLoading ? (
-								<div className="flex items-center gap-3">
-									<Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
-									<span className="text-sm text-muted-foreground">Loading user info...</span>
-								</div>
-							) : user ? (
-								<>
-									<Avatar className="h-10 w-10">
-										<AvatarImage src={getImageUrl(user.picture)} />
-										<AvatarFallback>
-											{user.firstName[0]}
-											{user.lastName[0]}
-										</AvatarFallback>
-									</Avatar>
-									<div>
-										<p className="font-semibold text-sm">{user.userName}</p>
-										<p className="text-xs text-muted-foreground">
-											{user.firstName} {user.lastName}
-										</p>
-									</div>
-								</>
-							) : (
-								<span className="text-sm text-muted-foreground">User not found</span>
-							)}
+							<Avatar className="h-10 w-10">
+								<AvatarImage src={getImageUrl(user.picture)} />
+								<AvatarFallback>
+									{user.firstName[0]}
+									{user.lastName[0]}
+								</AvatarFallback>
+							</Avatar>
+							<div>
+								<p className="font-semibold text-sm">{user.userName}</p>
+								<p className="text-xs text-muted-foreground">
+									{user.firstName} {user.lastName}
+								</p>
+							</div>
 						</div>
 
 						{/* Description */}
@@ -186,16 +176,18 @@ export function PostForm({
 							<Label htmlFor="description">Description</Label>
 							<Textarea
 								id="description"
-								placeholder="Write a caption... Use # to add hashtags"
+								placeholder="Write a caption... Use # to add hashtags and @ to mention users"
 								value={description}
 								onChange={(e) => {
 									setDescription(e.target.value);
-									setErrorMessage(null);
+									setErrors((prev) => ({ ...prev, description: undefined }));
 								}}
-								className="min-h-[200px] resize-none"
-								required
+								className={cn("min-h-[200px] resize-none", errors.description && "border-red-500")}
 							/>
-							<p className="text-xs text-muted-foreground">{description.length} characters</p>
+							{errors.description && <p className="text-sm text-red-500">{errors.description}</p>}
+							<p className="text-xs text-muted-foreground">
+								{description.length} / 2200 characters
+							</p>
 						</div>
 
 						{/* Hashtags preview */}
@@ -209,6 +201,23 @@ export function PostForm({
 											className="px-3 py-1 bg-primary/10 text-primary text-sm rounded-full"
 										>
 											{tag}
+										</span>
+									))}
+								</div>
+							</div>
+						)}
+
+						{/* Mentioned users preview */}
+						{mentionedUsernames.length > 0 && (
+							<div className="space-y-2">
+								<Label>Mentioned users ({mentionedUsernames.length})</Label>
+								<div className="flex flex-wrap gap-2">
+									{mentionedUsernames.map((username, index) => (
+										<span
+											key={index}
+											className="px-3 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 text-sm rounded-full"
+										>
+											@{username}
 										</span>
 									))}
 								</div>
@@ -244,12 +253,6 @@ export function PostForm({
 					</div>
 				</Card>
 			</div>
-			{errorMessage && (
-				<Alert variant="destructive">
-					<AlertTitle>Invalid mention</AlertTitle>
-					<AlertDescription>{errorMessage}</AlertDescription>
-				</Alert>
-			)}
 		</form>
 	);
 }
