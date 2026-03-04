@@ -149,7 +149,9 @@ function showErrorToast(error: AppError): void {
 	// For network errors that are retryable, show auto-retry countdown
 	if (isNetworkLike && error.retryable && !hasCustomAction) {
 		let countdown = 5; // 5 seconds before auto-retry
-		let countdownInterval: ReturnType<typeof setInterval> = 0 as unknown as ReturnType<typeof setInterval>;
+		let countdownInterval: ReturnType<typeof setInterval> = 0 as unknown as ReturnType<
+			typeof setInterval
+		>;
 
 		const cancelCountdown = () => {
 			clearInterval(countdownInterval);

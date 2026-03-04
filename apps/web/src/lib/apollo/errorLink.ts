@@ -27,7 +27,7 @@ export function setErrorNotifier(notifier: (error: AppError) => void): void {
  */
 export const errorLink = onError(({ graphQLErrors, networkError, operation }) => {
 	// Get current context
-	const currentContext = getErrorContext?.() || {};
+	const currentContext: ErrorContext = getErrorContext?.() || {};
 	const hasGraphQLErrors = Boolean(graphQLErrors && graphQLErrors.length > 0);
 
 	// Handle GraphQL errors
@@ -37,7 +37,9 @@ export const errorLink = onError(({ graphQLErrors, networkError, operation }) =>
 		const errorCode = (primaryError.extensions?.code as string) || "GRAPHQL_ERROR";
 
 		// Check if it's an auth error (based on HTTP status and/or string error code)
-		const statusCode = primaryError.extensions?.http?.status as number | undefined;
+		const statusCode = (primaryError.extensions?.http as { status?: number })?.status as
+			| number
+			| undefined;
 		const normalizedErrorCode = errorCode.toUpperCase();
 		if (
 			statusCode === 401 ||

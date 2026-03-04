@@ -15,7 +15,11 @@ export function CreatePostPage() {
 	const [fetchUsersByUserNames] = useUsersByUserNamesLazyQuery();
 
 	// Fetch current user data
-	const { data: userData, loading: userLoading, error: userError } = useUserByUserNameQuery({
+	const {
+		data: userData,
+		loading: userLoading,
+		error: userError,
+	} = useUserByUserNameQuery({
 		variables: { userName: CURRENT_USERNAME },
 	});
 
