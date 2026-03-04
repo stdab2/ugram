@@ -71,7 +71,7 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, onReset }) => {
 
 				{/* Help Text */}
 				<p className="text-center text-xs text-muted-foreground mt-6">
-					Error ID: {error.name || "UNKNOWN"}
+					Error type: {error.name || "UNKNOWN"}
 				</p>
 			</div>
 		</div>
