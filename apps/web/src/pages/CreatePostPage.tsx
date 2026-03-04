@@ -45,13 +45,17 @@ export function CreatePostPage() {
 					variables: { userNames: data.mentionedUsernames },
 				});
 
-				if (mentionedUsersVerified.data?.usersByUserNames.missingUserNames.length) {
-					const errorMessage = `The following mentioned users were not found: ${mentionedUsersVerified.data.usersByUserNames.missingUserNames.join(", ")}`;
+				const missingUserNames =
+					mentionedUsersVerified.data?.usersByUserNames?.missingUserNames;
+				if (missingUserNames && missingUserNames.length > 0) {
+					const errorMessage = `The following mentioned users were not found: ${missingUserNames.join(", ")}`;
 					toast.error(errorMessage);
 					return;
 				}
 
-				mentionedUsers = mentionedUsersVerified.data?.usersByUserNames.users.map((u) => u.id) || [];
+				mentionedUsers =
+					mentionedUsersVerified.data?.usersByUserNames?.users?.map((u) => u.id) ||
+					[];
 			} catch {
 				// Verification error already handled by errorLink
 				return;
