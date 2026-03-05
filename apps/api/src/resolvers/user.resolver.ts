@@ -11,7 +11,7 @@ import {
 	validateUserExists,
 } from "../../Validators/validateUser.js";
 import { BadRequestError, handlePrismaError } from "../../Validators/errors.js";
-import { saveUploadedImage } from "../../services/image.service.js";
+import { saveUploadedImage } from "../services/image.service.js";
 
 const adapter = new PrismaPg({
 	connectionString: process.env.DATABASE_URL,

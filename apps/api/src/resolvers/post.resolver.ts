@@ -5,7 +5,7 @@ import {
 	validateUsersExist,
 	validateNonEmptyString,
 } from "../../Validators/validateUser.js";
-import { saveUploadedImage } from "../../services/image.service.js";
+import { saveUploadedImage } from "../services/image.service.js";
 import type { FileUpload } from "graphql-upload";
 import { Post } from "../../generated/prisma/client.js";
 import { handlePrismaError } from "../../Validators/errors.js";
