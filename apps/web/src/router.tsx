@@ -13,10 +13,12 @@ import { EditPostPage } from "@/pages/EditPostPage";
 import { MessagesPage } from "@/pages/MessagesPage";
 import { SettingsPage } from "@/pages/SettingsPage";
 import { NotificationsPage } from "@/pages/NotificationsPage";
+import RouteErrorBoundary from "@/components/RouteErrorBoundary";
 
 export const router = createBrowserRouter([
 	{
 		element: <NavigationLayout />,
+		errorElement: <RouteErrorBoundary />,
 		children: [
 			{ path: "/", element: <FeedPage /> },
 			{ path: "/search", element: <SearchPage /> },
@@ -31,6 +33,7 @@ export const router = createBrowserRouter([
 	},
 	{
 		element: <EmptyLayout />,
+		errorElement: <RouteErrorBoundary />,
 		children: [
 			{ path: "/login", element: <LoginPage /> },
 			{ path: "/signup", element: <SignupPage /> },
