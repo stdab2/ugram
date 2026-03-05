@@ -44,6 +44,7 @@ jobs:
 
           # Copier les fichiers essentiels
           cp -r dist ../../deploy/
+          cp -r generated ../../deploy/
           cp -r prisma ../../deploy/
           cp -r .ebextensions ../../deploy/
           cp package.json ../../deploy/
