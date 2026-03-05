@@ -1,0 +1,86 @@
+name: Deploy API to Elastic Beanstalk
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - feature/deploy-api-to-beanstalk
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: |
+          pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        working-directory: ./apps/api
+        run: |
+          pnpm exec prisma generate
+
+      - name: Build API
+        run: |
+          pnpm run build:api
+
+      - name: Prepare deployment package
+        run: |
+          mkdir -p deploy
+          cd apps/api
+
+          # Copier les fichiers essentiels
+          cp -r dist ../../deploy/
+          cp -r prisma ../../deploy/
+          cp -r .ebextensions ../../deploy/
+          cp package.json ../../deploy/
+          cp Procfile ../../deploy/
+
+          # Créer les dossiers uploads
+          mkdir -p ../../deploy/uploads/post
+          mkdir -p ../../deploy/uploads/profile
+
+          # Copier node_modules (seulement les dépendances de production)
+          cd ../../
+          pnpm --filter api --prod deploy deploy/node_modules_temp
+          mv deploy/node_modules_temp/node_modules deploy/
+          rm -rf deploy/node_modules_temp
+
+      - name: Generate deployment package
+        run: |
+          cd deploy
+          zip -r ../deploy.zip . -x '*.git*'
+          cd ..
+          ls -lh deploy.zip
+
+      - name: Get timestamp
+        id: timestamp
+        run: echo "timestamp=$(date +'%Y%m%d_%H%M%S')" >> $GITHUB_OUTPUT
+
+      - name: Deploy to Elastic Beanstalk
+        uses: einaregilsson/beanstalk-deploy@v22
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: ugram-h2026-team17-api
+          environment_name: ugram-h2026-team17-api-dev
+          version_label: "v-${{ steps.timestamp.outputs.timestamp }}-${{ github.sha }}"
+          region: ca-central-1
+          deployment_package: deploy.zip
+          wait_for_deployment: true
+          wait_for_environment_recovery: 300
