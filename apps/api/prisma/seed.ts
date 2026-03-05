@@ -11,7 +11,6 @@ const prisma = new PrismaClient({
 	adapter,
 });
 
-//marche dont 
 
 const hashtags: Prisma.HashtagCreateInput[] = [
 	{ name: "#sunset" },
