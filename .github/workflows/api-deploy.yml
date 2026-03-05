@@ -31,6 +31,8 @@ jobs:
 
       - name: Generate Prisma Client
         working-directory: ./apps/api
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
         run: |
           pnpm exec prisma generate
 
