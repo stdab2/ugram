@@ -6,13 +6,14 @@ import {
 	validateNonEmptyString,
 } from "../../Validators/validateUser.js";
 import { saveUploadedImage } from "../../services/image.service.js";
-import type { FileUpload } from "graphql-upload";
+import type { FileUpload } from "graphql-upload/processRequest.mjs";
 import { Post } from "../../generated/prisma/client.js";
 import { handlePrismaError } from "../../Validators/errors.js";
 import { validatePostId } from "../../Validators/validatePost.js";
+import { getDatabaseUrl } from "../../database-url.js";
 
 const adapter = new PrismaPg({
-	connectionString: process.env.DATABASE_URL,
+	connectionString: getDatabaseUrl(),
 });
 
 const prisma = new PrismaClient({

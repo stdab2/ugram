@@ -48,6 +48,8 @@ jobs:
           cp -r generated ../../deploy/
           cp -r prisma ../../deploy/
           cp -r .ebextensions ../../deploy/
+          cp prisma.config.ts ../../deploy/
+          cp database-url.ts ../../deploy/
           cp package.json ../../deploy/
           cp Procfile ../../deploy/
 
