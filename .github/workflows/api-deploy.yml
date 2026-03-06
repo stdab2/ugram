@@ -61,7 +61,7 @@ jobs:
 
           # Copier node_modules (seulement les dépendances de production)
           cd ../../deploy
-          pnpm install --prod --shamefully-hoist --no-optional
+          pnpm install --prod --shamefully-hoist --no-optional --ignore-workspace
 
       - name: Generate deployment package
         run: |
