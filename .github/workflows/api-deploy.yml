@@ -80,7 +80,7 @@ jobs:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           application_name: ugram-h2026-team17-api
-          environment_name: ugram-h2026-team17-api-dev
+          environment_name: ugram-h2026-team17-api-production
           version_label: "v-${{ steps.timestamp.outputs.timestamp }}-${{ github.sha }}"
           region: ca-central-1
           deployment_package: deploy.zip
