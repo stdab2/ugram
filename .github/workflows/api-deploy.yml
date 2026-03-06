@@ -60,11 +60,7 @@ jobs:
           mkdir -p ../../deploy/src
           cp dist/src/database-url.js ../../deploy/src/database-url.js
 
-          # Copier node_modules (seulement les dépendances de production)
-          cd ../../
-          pnpm --filter api --prod deploy --legacy deploy/node_modules_temp
-          mv deploy/node_modules_temp/node_modules deploy/
-          rm -rf deploy/node_modules_temp
+          # Laisser Elastic Beanstalk installer les dependances via npm
 
       - name: Generate deployment package
         run: |
