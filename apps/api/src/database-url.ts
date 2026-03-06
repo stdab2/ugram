@@ -1,6 +1,12 @@
 type DatabaseEnv = Record<string, string | undefined>;
 
-const rdsKeys = ["RDS_HOSTNAME", "RDS_PORT", "RDS_DB_NAME", "RDS_USERNAME", "RDS_PASSWORD"] as const;
+const rdsKeys = [
+	"RDS_HOSTNAME",
+	"RDS_PORT",
+	"RDS_DB_NAME",
+	"RDS_USERNAME",
+	"RDS_PASSWORD",
+] as const;
 
 export function getDatabaseUrl(env: DatabaseEnv = process.env): string {
 	const databaseUrl = env.DATABASE_URL?.trim();

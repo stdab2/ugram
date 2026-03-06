@@ -4,7 +4,7 @@
 	"description": "",
 	"main": "index.js",
 	"engines": {
-		"node": "22.x"
+		"node": "20.x"
 	},
 	"scripts": {
 		"build": "tsc && shx cp src/schema/*.graphql dist/src/schema/",
@@ -20,14 +20,14 @@
 		"@apollo/server": "^5.4.0",
 		"@as-integrations/express5": "^1.1.2",
 		"@prisma/adapter-pg": "^7.3.0",
-		"@prisma/client": "^7.3.0",
+		"@prisma/client": "^7.4.2",
 		"bcrypt": "^6.0.0",
 		"cors": "^2.8.6",
 		"dotenv": "^16.4.5",
 		"express": "^5.2.1",
 		"graphql": "^16.12.0",
 		"graphql-upload": "^17.0.0",
-		"prisma": "^7.3.0"
+		"prisma": "^7.4.2"
 	},
 	"devDependencies": {
 		"@types/bcrypt": "^6.0.0",

@@ -22,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: "20"
           cache: "pnpm"
 
       - name: Install dependencies
@@ -51,7 +51,6 @@ jobs:
           cp -r prisma ../../deploy/
           cp -r .ebextensions ../../deploy/
           cp prisma.config.ts ../../deploy/
-          cp database-url.ts ../../deploy/
           cp package.json ../../deploy/
           cp Procfile ../../deploy/
 

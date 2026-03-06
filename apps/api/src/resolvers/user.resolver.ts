@@ -13,7 +13,7 @@ import {
 } from "../../Validators/validateUser.js";
 import { BadRequestError, handlePrismaError } from "../../Validators/errors.js";
 import { saveUploadedImage } from "../../services/image.service.js";
-import { getDatabaseUrl } from "../../database-url.js";
+import { getDatabaseUrl } from "../database-url.js";
 
 const SALT_ROUNDS = 10;
 

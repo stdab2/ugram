@@ -10,7 +10,7 @@ import type { FileUpload } from "graphql-upload/processRequest.mjs";
 import { Post } from "../../generated/prisma/client.js";
 import { handlePrismaError } from "../../Validators/errors.js";
 import { validatePostId } from "../../Validators/validatePost.js";
-import { getDatabaseUrl } from "../../database-url.js";
+import { getDatabaseUrl } from "../database-url.js";
 
 const adapter = new PrismaPg({
 	connectionString: getDatabaseUrl(),

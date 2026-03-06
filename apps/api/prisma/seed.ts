@@ -1,7 +1,7 @@
 import { PrismaClient, Prisma } from "../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 import "dotenv/config";
-import { getDatabaseUrl } from "../database-url.js";
+import { getDatabaseUrl } from "../src/database-url.js";
 
 const adapter = new PrismaPg({
 	connectionString: getDatabaseUrl(),
@@ -10,7 +10,6 @@ const adapter = new PrismaPg({
 const prisma = new PrismaClient({
 	adapter,
 });
-
 
 const hashtags: Prisma.HashtagCreateInput[] = [
 	{ name: "#sunset" },

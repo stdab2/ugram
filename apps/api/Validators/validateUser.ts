@@ -6,7 +6,7 @@
 import { PrismaClient } from "../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { BadRequestError, NotFoundError } from "./errors.js";
-import { getDatabaseUrl } from "../database-url.js";
+import { getDatabaseUrl } from "../src/database-url.js";
 
 const adapter = new PrismaPg({
 	connectionString: getDatabaseUrl(),
