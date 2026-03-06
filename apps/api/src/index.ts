@@ -22,6 +22,8 @@ async function startServer() {
 	});
 
 	app.use(cors());
+	// Simple health check for load balancers and quick manual tests
+	app.get("/health", (_req, res) => res.status(200).json({ status: "ok" }));
 	app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 	app.use("/graphql", graphqlUploadExpress({ maxFileSize: 10_000_000, maxFiles: 1 }));
