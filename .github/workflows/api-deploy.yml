@@ -50,17 +50,19 @@ jobs:
           cp -r generated ../../deploy/
           cp -r prisma ../../deploy/
           cp -r .ebextensions ../../deploy/
-          cp prisma.config.ts ../../deploy/
+          cp dist/prisma.config.js ../../deploy/prisma.config.js
           cp package.json ../../deploy/
           cp Procfile ../../deploy/
 
           # Créer les dossiers uploads
           mkdir -p ../../deploy/uploads/post
           mkdir -p ../../deploy/uploads/profile
+          mkdir -p ../../deploy/src
+          cp dist/src/database-url.js ../../deploy/src/database-url.js
 
           # Copier node_modules (seulement les dépendances de production)
           cd ../../deploy
-          pnpm install --prod --shamefully-hoist --no-optional --ignore-workspace
+          pnpm install --prod --no-optional --ignore-workspace
 
       - name: Generate deployment package
         run: |
