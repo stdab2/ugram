@@ -62,7 +62,7 @@ jobs:
 
           # Copier node_modules (seulement les dépendances de production)
           cd ../../deploy
-          pnpm install --prod --no-optional --ignore-workspace
+          pnpm install --prod --ignore-workspace
 
       - name: Generate deployment package
         run: |
