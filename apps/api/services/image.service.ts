@@ -35,5 +35,4 @@ export async function saveUploadedImage(
 	await pipeline(createReadStream(), fs.createWriteStream(filePath));
 
 	return subfolder ? `/uploads/${subfolder}/${storedName}` : `/uploads/${storedName}`;
-//sure sure sure
 }
