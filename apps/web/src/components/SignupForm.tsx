@@ -10,17 +10,79 @@ import {
 } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
 import { Link } from "react-router-dom";
-
-function signUpWithGoogle() {
-	window.location.href = "http://localhost:4001/oauth2/google";
-}
+import { useState } from "react";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 export function SignupForm({ className, ...props }: React.ComponentProps<"div">) {
+	const [email, setEmail] = useState("");
+	const [firstName, setFirstName] = useState("");
+	const [lastName, setLastName] = useState("");
+	const [phone, setPhone] = useState("");
+	const [password, setPassword] = useState("");
+	const [confirmPassword, setConfirmPassword] = useState("");
+
+	const navigate = useNavigate();
+
+	const signUpWithGoogle = () => {
+		const w = 500,
+			h = 600;
+		const left = window.screenX + (window.outerWidth - w) / 2;
+		const top = window.screenY + (window.outerHeight - h) / 2;
+
+		window.open(
+			"http://localhost:4001/oauth2/google",
+			"google_oauth",
+			`width=${w},height=${h},left=${left},top=${top}`
+		);
+	};
+
+	const signUp = async (e: React.SubmitEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		if (password.length < 8) {
+			toast.error("Password must be at least 8 characters long.");
+			return;
+		}
+		if (password !== confirmPassword) {
+			toast.error("Passwords do not match!");
+			return;
+		}
+
+		try {
+			const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:4001";
+
+			const response = await fetch(`${baseUrl}/auth/signup`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ email, firstName, lastName, phone, password }),
+			});
+
+			const data = await response.json();
+			console.log(data);
+
+			if (data.success) {
+				const token = data.token;
+				localStorage.setItem("token", token);
+				navigate("/");
+				toast.success("Account created successfully!");
+			} else {
+				if (data.message.includes("User already exists")) {
+					toast.error("An account with this email already exists. Please log in instead.");
+				} else {
+					toast.error("Failed to create account. Please try again.");
+				}
+			}
+		} catch (error) {
+			console.error(error);
+			toast.error("An error occurred. Please try again.");
+		}
+	};
+
 	return (
 		<div className={cn("flex flex-col gap-6", className)} {...props}>
 			<Card className="overflow-hidden p-0">
 				<CardContent className="grid p-0 md:grid-cols-2">
-					<form className="p-6 md:p-8">
+					<form className="p-6 md:p-8" onSubmit={signUp}>
 						<FieldGroup>
 							<div className="flex flex-col items-center gap-2 text-center">
 								<h1 className="text-2xl font-bold">Create your account</h1>
@@ -30,7 +92,14 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
 							</div>
 							<Field>
 								<FieldLabel htmlFor="email">Email</FieldLabel>
-								<Input id="email" type="email" placeholder="m@example.com" required />
+								<Input
+									id="email"
+									type="email"
+									placeholder="m@example.com"
+									value={email}
+									onChange={(event) => setEmail(event.target.value)}
+									required
+								/>
 								<FieldDescription>
 									We&apos;ll use this to contact you. We will not share your email with anyone else.
 								</FieldDescription>
@@ -38,12 +107,60 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
 							<Field>
 								<Field className="grid grid-cols-2 gap-4">
 									<Field>
+										<FieldLabel htmlFor="first-name">First Name</FieldLabel>
+										<Input
+											id="first-name"
+											type="text"
+											required
+											value={firstName}
+											onChange={(event) => setFirstName(event.target.value)}
+										/>
+									</Field>
+									<Field>
+										<FieldLabel htmlFor="last-name">Last Name</FieldLabel>
+										<Input
+											id="last-name"
+											type="text"
+											required
+											value={lastName}
+											onChange={(event) => setLastName(event.target.value)}
+										/>
+									</Field>
+								</Field>
+							</Field>
+							<Field>
+								<Field>
+									<FieldLabel htmlFor="phone">Phone Number</FieldLabel>
+									<Input
+										id="phone"
+										type="text"
+										required
+										value={phone}
+										onChange={(event) => setPhone(event.target.value)}
+									/>
+								</Field>
+							</Field>
+							<Field>
+								<Field className="grid grid-cols-2 gap-4">
+									<Field>
 										<FieldLabel htmlFor="password">Password</FieldLabel>
-										<Input id="password" type="password" required />
+										<Input
+											id="password"
+											type="password"
+											required
+											value={password}
+											onChange={(event) => setPassword(event.target.value)}
+										/>
 									</Field>
 									<Field>
 										<FieldLabel htmlFor="confirm-password">Confirm Password</FieldLabel>
-										<Input id="confirm-password" type="password" required />
+										<Input
+											id="confirm-password"
+											type="password"
+											required
+											value={confirmPassword}
+											onChange={(event) => setConfirmPassword(event.target.value)}
+										/>
 									</Field>
 								</Field>
 								<FieldDescription>Must be at least 8 characters long.</FieldDescription>

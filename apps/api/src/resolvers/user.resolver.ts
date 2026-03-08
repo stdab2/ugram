@@ -9,9 +9,11 @@ import {
 	validateNonEmptyString,
 	validatePhoneNumber,
 	validateUserExists,
+	authenticateUser,
 } from "../../Validators/validateUser.js";
 import { BadRequestError, handlePrismaError } from "../../Validators/errors.js";
 import { saveUploadedImage } from "../services/image.service.js";
+import { UserContext } from "../types/userContext.types.js";
 
 const adapter = new PrismaPg({
 	connectionString: process.env.DATABASE_URL,
@@ -32,21 +34,28 @@ export const userResolvers = {
 		 * @param id - User ID
 		 * @throws {Error} If user not found
 		 */
-		user: async (_: void, args: { id: number }): Promise<UserUgram | null> => {
+		user: async (
+			_: void,
+			args: { id: number },
+			context: UserContext
+		): Promise<UserUgram | null> => {
+			authenticateUser(context.user);
 			validateUserId(args.id);
 			return prisma.userUgram.findUnique({
 				where: { id: args.id },
 			});
 		},
 
-		userByUserName: async (_: void, args: { userName: string }) => {
+		userByUserName: async (_: void, args: { userName: string }, context: UserContext) => {
+			authenticateUser(context.user);
 			validateUserName(args.userName);
 			return prisma.userUgram.findUnique({
 				where: { userName: args.userName },
 			});
 		},
 
-		usersByUserNames: async (_: void, args: { userNames: string[] }) => {
+		usersByUserNames: async (_: void, args: { userNames: string[] }, context: UserContext) => {
+			authenticateUser(context.user);
 			const requested = Array.from(new Set(args.userNames.map((u) => u.trim()).filter(Boolean)));
 
 			const users = await prisma.userUgram.findMany({
@@ -64,7 +73,8 @@ export const userResolvers = {
 		 * @param limit - Max number of users to return
 		 * @param offset - Number of users to skip
 		 */
-		users: async (_: void, args: QueryUsersInput): Promise<UserUgram[]> => {
+		users: async (_: void, args: QueryUsersInput, context: UserContext): Promise<UserUgram[]> => {
+			authenticateUser(context.user);
 			const limit = Math.min(args.limit || 10, 100); // Cap at 100
 			const offset = Math.max(args.offset || 0, 0);
 
@@ -79,7 +89,8 @@ export const userResolvers = {
 		/**
 		 * Get posts for a user
 		 */
-		posts: async (parent: UserUgram) => {
+		posts: async (parent: UserUgram, _: unknown, context: UserContext) => {
+			authenticateUser(context.user);
 			return prisma.post.findMany({
 				where: { authorId: parent.id },
 			});
@@ -130,7 +141,12 @@ export const userResolvers = {
 		 * @throws {NotFoundError} If user not found
 		 * @throws {ConflictError} If duplicate field
 		 */
-		updateUser: async (_: void, args: UpdateUserInput): Promise<UserUgram> => {
+		updateUser: async (
+			_: void,
+			args: UpdateUserInput,
+			context: UserContext
+		): Promise<UserUgram> => {
+			authenticateUser(context.user);
 			validateUserId(args.id);
 
 			// Check if user exists before attempting update
