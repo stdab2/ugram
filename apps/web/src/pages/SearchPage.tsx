@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { SearchBar } from "@/components/SearchBar";
 import { SearchFilters } from "@/components/SearchFilters";
-import { RecentSearchItem } from "@/components/RecentSearchItem";
 import { UserSearchResult } from "@/components/UserSearchResult";
+import { HashtagSearchResult } from "@/components/HashtagSearchResult";
 import { PostGrid } from "@/components/PostGrid";
 import { PostModal } from "@/components/PostModal";
 import { SearchSkeleton } from "@/components/SearchSkeleton";
@@ -14,61 +14,124 @@ import {
 	EmptyTitle,
 } from "@/components/ui/Empty";
 import { Button } from "@/components/ui/Button";
-import type { RecentSearch, SearchType } from "@/types/search";
+import type { SearchType } from "@/types/search";
 import { AlertCircle, RefreshCcw } from "lucide-react";
-import { useUsersQuery, usePostsQuery } from "@/generated/graphql";
+import {
+	useUsersQuery,
+	usePostsQuery,
+	useSearchQuery,
+	useHashtagsQuery,
+} from "@/generated/graphql";
 import type { PostsQuery } from "@/generated/graphql";
 import { PageFade } from "@/components/PageFade";
+import { useDebounce } from "@/hooks/use-debounce";
 
-// Mock data for recent searches (localStorage à implémenter plus tard)
-const mockRecentSearches: RecentSearch[] = [
-	{ id: "1", query: "nature", type: "hashtag", timestamp: new Date() },
-	{ id: "2", query: "john_doe", type: "user", timestamp: new Date() },
-	{ id: "3", query: "sunset", type: "general", timestamp: new Date() },
-];
-
-const USERS_PER_PAGE = 10;
+const INITIAL_HASHTAGS_LIMIT = 3;
+const INITIAL_USERS_LIMIT = 5;
+const INITIAL_POSTS_LIMIT = 6;
+const LOAD_MORE_HASHTAGS_INCREMENT = 3;
+const LOAD_MORE_USERS_INCREMENT = 5;
+const LOAD_MORE_POSTS_INCREMENT = 6;
+const MIN_SEARCH_LENGTH = 2;
+const SEARCH_DEBOUNCE_MS = 300;
 
 export function SearchPage() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [activeFilter, setActiveFilter] = useState<SearchType>("all");
-	const [recentSearches, setRecentSearches] = useState<RecentSearch[]>(mockRecentSearches);
-	const [usersPage, setUsersPage] = useState(0);
 	const [selectedPost, setSelectedPost] = useState<PostsQuery["posts"][0] | null>(null);
 
-	// Fetch users with pagination
+	// Track pagination state
+	const [hasMoreHashtags, setHasMoreHashtags] = useState(true);
+	const [hasMoreUsers, setHasMoreUsers] = useState(true);
+	const [hasMorePosts, setHasMorePosts] = useState(true);
+	const [hasMoreSearchHashtags, setHasMoreSearchHashtags] = useState(true);
+	const [hasMoreSearchUsers, setHasMoreSearchUsers] = useState(true);
+	const [hasMoreSearchPosts, setHasMoreSearchPosts] = useState(true);
+
+	// Debounce search query
+	const debouncedSearchQuery = useDebounce(searchQuery, SEARCH_DEBOUNCE_MS);
+	const isSearching = debouncedSearchQuery.trim().length >= MIN_SEARCH_LENGTH;
+
+	// Fetch hashtags
 	const {
-		data: usersData,
-		loading: usersLoading,
-		error: usersError,
-		refetch: refetchUsers,
+		data: hashtagsData,
+		loading: hashtagsLoading,
+		error: hashtagsError,
+		refetch: refetchHashtags,
+		fetchMore: fetchMoreHashtags,
+	} = useHashtagsQuery({
+		variables: { limit: INITIAL_HASHTAGS_LIMIT, offset: 0 },
+		skip: isSearching,
+	});
+
+	// Fetch initial users
+	const {
+		data: initialUsersData,
+		loading: initialUsersLoading,
+		error: initialUsersError,
+		refetch: refetchInitialUsers,
 		fetchMore: fetchMoreUsers,
 	} = useUsersQuery({
 		variables: {
-			limit: USERS_PER_PAGE,
+			limit: INITIAL_USERS_LIMIT,
 			offset: 0,
 		},
+		skip: isSearching,
 	});
 
-	// Fetch posts
+	// Fetch initial posts
 	const {
-		data: postsData,
-		loading: postsLoading,
-		error: postsError,
-		refetch: refetchPosts,
+		data: initialPostsData,
+		loading: initialPostsLoading,
+		error: initialPostsError,
+		refetch: refetchInitialPosts,
+		fetchMore: fetchMorePosts,
 	} = usePostsQuery({
-		variables: { limit: 30, offset: 0 },
+		variables: { limit: INITIAL_POSTS_LIMIT, offset: 0 },
+		skip: isSearching,
 	});
 
-	const allUsers = usersData?.users || [];
-	const allPosts = postsData?.posts || [];
+	// Unified search query
+	const {
+		data: searchData,
+		loading: searchLoading,
+		error: searchError,
+		refetch: refetchSearch,
+		fetchMore: fetchMoreSearch,
+	} = useSearchQuery({
+		variables: {
+			query: debouncedSearchQuery,
+			usersLimit: INITIAL_USERS_LIMIT,
+			usersOffset: 0,
+			postsLimit: INITIAL_POSTS_LIMIT,
+			postsOffset: 0,
+			hashtagsLimit: INITIAL_HASHTAGS_LIMIT,
+			hashtagsOffset: 0,
+		},
+		skip: !isSearching,
+	});
 
-	const isSearching = searchQuery.trim().length > 0;
-	const isLoading = usersLoading || postsLoading;
-	const hasError = usersError || postsError;
+	// Determine which data to use
+	const allUsers = isSearching ? searchData?.search.users || [] : initialUsersData?.users || [];
+	const allPosts = isSearching ? searchData?.search.posts || [] : initialPostsData?.posts || [];
+	const allHashtags = isSearching
+		? searchData?.search.hashtags || []
+		: hashtagsData?.hashtags || [];
 
-	// Loading state
-	if (isLoading && !usersData && !postsData) {
+	const isLoading = isSearching
+		? searchLoading
+		: initialUsersLoading || initialPostsLoading || hashtagsLoading;
+	const hasError = isSearching
+		? searchError
+		: initialUsersError || initialPostsError || hashtagsError;
+
+	// Show loading only on initial load
+	if (
+		(initialUsersLoading || initialPostsLoading) &&
+		!initialUsersData &&
+		!initialPostsData &&
+		!isSearching
+	) {
 		return (
 			<PageFade key="loading" delay={0.3}>
 				<SearchSkeleton />
@@ -80,20 +143,29 @@ export function SearchPage() {
 	if (hasError) {
 		return (
 			<PageFade key="error">
-				<div className="max-w-[630px] mx-auto pb-20 flex items-center justify-center min-h-[60vh]">
+				<div className="flex justify-center min-h-screen bg-background items-center">
 					<Empty>
 						<EmptyHeader>
 							<AlertCircle className="h-12 w-12 mb-4 text-muted-foreground" />
 							<EmptyTitle>Unable to Load Search</EmptyTitle>
 							<EmptyDescription>
-								{usersError?.message || postsError?.message || "Something went wrong"}
+								{searchError?.message ||
+									hashtagsError?.message ||
+									initialUsersError?.message ||
+									initialPostsError?.message ||
+									"Something went wrong"}
 							</EmptyDescription>
 						</EmptyHeader>
 						<EmptyContent>
 							<Button
 								onClick={() => {
-									refetchUsers();
-									refetchPosts();
+									if (isSearching) {
+										refetchSearch();
+									} else {
+										refetchHashtags();
+										refetchInitialUsers();
+										refetchInitialPosts();
+									}
 								}}
 								variant="default"
 							>
@@ -107,39 +179,12 @@ export function SearchPage() {
 		);
 	}
 
-	const handleLoadMoreUsers = async () => {
-		const nextPage = usersPage + 1;
-		await fetchMoreUsers({
-			variables: {
-				limit: USERS_PER_PAGE,
-				offset: nextPage * USERS_PER_PAGE,
-			},
-			updateQuery: (prev, { fetchMoreResult }) => {
-				if (!fetchMoreResult) return prev;
-				return {
-					...prev,
-					users: [...prev.users, ...fetchMoreResult.users],
-				};
-			},
-		});
-		setUsersPage(nextPage);
-	};
-
-	const handleDeleteRecentSearch = (id: string) => {
-		setRecentSearches((prev) => prev.filter((search) => search.id !== id));
-	};
-
-	const handleRecentSearchClick = (query: string) => {
-		setSearchQuery(query);
-	};
-
 	const handlePostClick = (post: {
 		id: string | number;
 		imageUrl: string;
 		likes?: number;
 		comments?: number;
 	}) => {
-		// Find the full post data from allPosts
 		const fullPost = allPosts.find((p) => p.id === post.id);
 		if (fullPost) {
 			setSelectedPost(fullPost);
@@ -147,23 +192,169 @@ export function SearchPage() {
 	};
 
 	const handleUserPostClick = (postId: string | number) => {
-		// Find post directly from allPosts since we already have all posts loaded
 		const fullPost = allPosts.find((p) => p.id === postId);
 		if (fullPost) {
 			setSelectedPost(fullPost);
 		}
 	};
 
-	// Filter users based on search
-	const filteredUsers = isSearching
-		? allUsers.filter(
-				(user) =>
-					user.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-					`${user.firstName} ${user.lastName}`.toLowerCase().includes(searchQuery.toLowerCase())
-			)
-		: allUsers;
+	const handleHashtagClick = (hashtagName: string) => {
+		setSearchQuery(hashtagName);
+		setActiveFilter("posts");
+	};
 
-	const hasMoreUsers = allUsers.length === (usersPage + 1) * USERS_PER_PAGE;
+	const handleLoadMoreHashtags = () => {
+		if (isSearching) {
+			// For search, use fetchMore with offset
+			const currentLength = searchData?.search.hashtags.length || 0;
+			fetchMoreSearch({
+				variables: {
+					query: debouncedSearchQuery,
+					usersLimit: 0, // Don't load more users
+					usersOffset: 0,
+					postsLimit: 0, // Don't load more posts
+					postsOffset: 0,
+					hashtagsLimit: LOAD_MORE_HASHTAGS_INCREMENT,
+					hashtagsOffset: currentLength,
+				},
+				updateQuery: (prev, { fetchMoreResult }) => {
+					if (!fetchMoreResult) return prev;
+					const newHashtags = fetchMoreResult.search.hashtags;
+					setHasMoreSearchHashtags(newHashtags.length >= LOAD_MORE_HASHTAGS_INCREMENT);
+					return {
+						__typename: "Query",
+						search: {
+							...prev.search,
+							hashtags: [...prev.search.hashtags, ...newHashtags],
+						},
+					};
+				},
+			});
+		} else {
+			// For default view, use fetchMore with offset
+			const currentLength = hashtagsData?.hashtags.length || 0;
+			fetchMoreHashtags({
+				variables: {
+					offset: currentLength,
+					limit: LOAD_MORE_HASHTAGS_INCREMENT,
+				},
+				updateQuery: (prev, { fetchMoreResult }) => {
+					if (!fetchMoreResult) return prev;
+					const newHashtags = fetchMoreResult.hashtags;
+					setHasMoreHashtags(newHashtags.length >= LOAD_MORE_HASHTAGS_INCREMENT);
+					return {
+						__typename: "Query",
+						hashtags: [...prev.hashtags, ...newHashtags],
+					};
+				},
+			});
+		}
+	};
+
+	const handleLoadMoreUsers = () => {
+		if (isSearching) {
+			// For search, use fetchMore with offset
+			const currentLength = searchData?.search.users.length || 0;
+			fetchMoreSearch({
+				variables: {
+					query: debouncedSearchQuery,
+					usersLimit: LOAD_MORE_USERS_INCREMENT,
+					usersOffset: currentLength,
+					postsLimit: 0, // Don't load more posts
+					postsOffset: 0,
+					hashtagsLimit: 0, // Don't load more hashtags
+					hashtagsOffset: 0,
+				},
+				updateQuery: (prev, { fetchMoreResult }) => {
+					if (!fetchMoreResult) return prev;
+					const newUsers = fetchMoreResult.search.users;
+					setHasMoreSearchUsers(newUsers.length >= LOAD_MORE_USERS_INCREMENT);
+					return {
+						__typename: "Query",
+						search: {
+							...prev.search,
+							users: [...prev.search.users, ...newUsers],
+						},
+					};
+				},
+			});
+		} else {
+			// For default view, use fetchMore with offset
+			const currentLength = initialUsersData?.users.length || 0;
+			fetchMoreUsers({
+				variables: {
+					offset: currentLength,
+					limit: LOAD_MORE_USERS_INCREMENT,
+				},
+				updateQuery: (prev, { fetchMoreResult }) => {
+					if (!fetchMoreResult) return prev;
+					const newUsers = fetchMoreResult.users;
+					setHasMoreUsers(newUsers.length >= LOAD_MORE_USERS_INCREMENT);
+					return {
+						__typename: "Query",
+						users: [...prev.users, ...newUsers],
+					};
+				},
+			});
+		}
+	};
+
+	const handleLoadMorePosts = () => {
+		if (isSearching) {
+			// For search, use fetchMore with offset
+			const currentLength = searchData?.search.posts.length || 0;
+			fetchMoreSearch({
+				variables: {
+					query: debouncedSearchQuery,
+					usersLimit: 0, // Don't load more users
+					usersOffset: 0,
+					postsLimit: LOAD_MORE_POSTS_INCREMENT,
+					postsOffset: currentLength,
+					hashtagsLimit: 0, // Don't load more hashtags
+					hashtagsOffset: 0,
+				},
+				updateQuery: (prev, { fetchMoreResult }) => {
+					if (!fetchMoreResult) return prev;
+					const newPosts = fetchMoreResult.search.posts;
+					setHasMoreSearchPosts(newPosts.length >= LOAD_MORE_POSTS_INCREMENT);
+					return {
+						__typename: "Query",
+						search: {
+							...prev.search,
+							posts: [...prev.search.posts, ...newPosts],
+						},
+					};
+				},
+			});
+		} else {
+			// For default view, use fetchMore with offset
+			const currentLength = initialPostsData?.posts.length || 0;
+			fetchMorePosts({
+				variables: {
+					offset: currentLength,
+					limit: LOAD_MORE_POSTS_INCREMENT,
+				},
+				updateQuery: (prev, { fetchMoreResult }) => {
+					if (!fetchMoreResult) return prev;
+					const newPosts = fetchMoreResult.posts;
+					setHasMorePosts(newPosts.length >= LOAD_MORE_POSTS_INCREMENT);
+					return {
+						__typename: "Query",
+						posts: [...prev.posts, ...newPosts],
+					};
+				},
+			});
+		}
+	};
+
+	// Show typing indicator when user is typing but debounce hasn't triggered yet
+	const isTyping =
+		searchQuery.trim().length >= MIN_SEARCH_LENGTH && searchQuery !== debouncedSearchQuery;
+
+	// Filter based on active filter
+	const displayUsers = activeFilter === "posts" || activeFilter === "hashtags" ? [] : allUsers;
+	const displayPosts = activeFilter === "users" || activeFilter === "hashtags" ? [] : allPosts;
+	const displayHashtags = activeFilter === "users" || activeFilter === "posts" ? [] : allHashtags;
 
 	return (
 		<PageFade>
@@ -183,32 +374,35 @@ export function SearchPage() {
 
 				{/* Content */}
 				<div className="mt-2">
-					{!isSearching ? (
+					{!isSearching && !isTyping ? (
 						<>
-							{/* Recent Searches - Only show when filter is "all" */}
-							{recentSearches.length > 0 && activeFilter === "all" && (
+							{/* Hashtags - Only show when filter is "all" or "hashtags" */}
+							{(activeFilter === "all" || activeFilter === "hashtags") && (
 								<div className="mb-6">
-									<div className="flex items-center justify-between px-4 py-3">
-										<h2 className="font-semibold">Recent</h2>
-										<Button
-											variant="ghost"
-											size="sm"
-											onClick={() => setRecentSearches([])}
-											className="text-sm text-indigo-400 hover:text-indigo-300"
-										>
-											Clear all
-										</Button>
+									<div className="px-4 py-3">
+										<h2 className="font-semibold">Hashtags</h2>
 									</div>
-									<div>
-										{recentSearches.map((search) => (
-											<RecentSearchItem
-												key={search.id}
-												search={search}
-												onClick={() => handleRecentSearchClick(search.query)}
-												onDelete={() => handleDeleteRecentSearch(search.id)}
+									<div className="flex flex-col gap-2 px-4">
+										{hashtagsData?.hashtags.map((hashtag) => (
+											<HashtagSearchResult
+												key={hashtag.id}
+												hashtag={hashtag}
+												onClick={() => handleHashtagClick(hashtag.name)}
 											/>
 										))}
 									</div>
+									{hashtagsData && hasMoreHashtags && (
+										<div className="px-4 py-3">
+											<Button
+												variant="ghost"
+												onClick={handleLoadMoreHashtags}
+												disabled={hashtagsLoading}
+												className="w-full text-indigo-400 hover:text-indigo-300"
+											>
+												{hashtagsLoading ? "Loading..." : "See more hashtags"}
+											</Button>
+										</div>
+									)}
 								</div>
 							)}
 
@@ -219,7 +413,7 @@ export function SearchPage() {
 										<h2 className="font-semibold">Users</h2>
 									</div>
 									<div className="flex flex-col gap-4 px-4">
-										{filteredUsers.map((user) => (
+										{displayUsers.map((user) => (
 											<UserSearchResult
 												key={user.id}
 												user={user}
@@ -227,15 +421,15 @@ export function SearchPage() {
 											/>
 										))}
 									</div>
-									{hasMoreUsers && (
+									{initialUsersData && hasMoreUsers && (
 										<div className="px-4 py-3">
 											<Button
 												variant="ghost"
 												onClick={handleLoadMoreUsers}
-												disabled={usersLoading}
+												disabled={initialUsersLoading}
 												className="w-full text-indigo-400 hover:text-indigo-300"
 											>
-												{usersLoading ? "Loading..." : "See more users"}
+												{initialUsersLoading ? "Loading..." : "See more users"}
 											</Button>
 										</div>
 									)}
@@ -248,41 +442,139 @@ export function SearchPage() {
 									<div className="px-4 py-3">
 										<h2 className="font-semibold">Posts</h2>
 									</div>
-									<PostGrid posts={allPosts} onPostClick={handlePostClick} />
+									<PostGrid posts={displayPosts} onPostClick={handlePostClick} />
+									{initialPostsData && hasMorePosts && (
+										<div className="px-4 py-3">
+											<Button
+												variant="ghost"
+												onClick={handleLoadMorePosts}
+												disabled={initialPostsLoading}
+												className="w-full text-indigo-400 hover:text-indigo-300"
+											>
+												{initialPostsLoading ? "Loading..." : "See more posts"}
+											</Button>
+										</div>
+									)}
 								</div>
 							)}
 						</>
 					) : (
 						<>
-							{/* Search Results */}
-							{(activeFilter === "all" || activeFilter === "users") && (
-								<div className="mb-6">
-									<div className="px-4 py-3">
-										<h2 className="font-semibold">Users</h2>
+							{/* Search Results with Loading State */}
+							{isLoading || isTyping ? (
+								<PageFade key="skeleton">
+									<div className="px-4 py-8">
+										<SearchSkeleton />
 									</div>
-									{filteredUsers.length > 0 ? (
-										<div className="space-y-3 px-4">
-											{filteredUsers.map((user) => (
-												<UserSearchResult
-													key={user.id}
-													user={user}
-													onPostClick={handleUserPostClick}
-												/>
-											))}
+								</PageFade>
+							) : (
+								<PageFade key={debouncedSearchQuery}>
+									{/* Hashtags Results */}
+									{(activeFilter === "all" || activeFilter === "hashtags") && (
+										<div className="mb-6">
+											<div className="px-4 py-3">
+												<h2 className="font-semibold">Hashtags</h2>
+											</div>
+											{displayHashtags.length > 0 ? (
+												<>
+													<div className="flex flex-col gap-2 px-4">
+														{displayHashtags.map((hashtag) => (
+															<HashtagSearchResult
+																key={hashtag.id}
+																hashtag={hashtag}
+																onClick={() => handleHashtagClick(hashtag.name)}
+															/>
+														))}
+													</div>
+													{hasMoreSearchHashtags && (
+														<div className="px-4 py-3">
+															<Button
+																variant="ghost"
+																onClick={handleLoadMoreHashtags}
+																disabled={searchLoading}
+																className="w-full text-indigo-400 hover:text-indigo-300"
+															>
+																{searchLoading ? "Loading..." : "See more hashtags"}
+															</Button>
+														</div>
+													)}
+												</>
+											) : (
+												<p className="px-4 py-8 text-center text-muted-foreground">
+													No hashtags found for "{debouncedSearchQuery}"
+												</p>
+											)}
 										</div>
-									) : (
-										<p className="px-4 py-8 text-center text-muted-foreground">No users found</p>
 									)}
-								</div>
-							)}
 
-							{(activeFilter === "all" || activeFilter === "posts") && (
-								<div>
-									<div className="px-4 py-3">
-										<h2 className="font-semibold">Posts</h2>
-									</div>
-									<PostGrid posts={allPosts} onPostClick={handlePostClick} />
-								</div>
+									{/* Users Results */}
+									{(activeFilter === "all" || activeFilter === "users") && (
+										<div className="mb-6">
+											<div className="px-4 py-3">
+												<h2 className="font-semibold">Users</h2>
+											</div>
+											{displayUsers.length > 0 ? (
+												<>
+													<div className="space-y-3 px-4">
+														{displayUsers.map((user) => (
+															<UserSearchResult
+																key={user.id}
+																user={user}
+																onPostClick={handleUserPostClick}
+															/>
+														))}
+													</div>
+													{hasMoreSearchUsers && (
+														<div className="px-4 py-3">
+															<Button
+																variant="ghost"
+																onClick={handleLoadMoreUsers}
+																disabled={searchLoading}
+																className="w-full text-indigo-400 hover:text-indigo-300"
+															>
+																{searchLoading ? "Loading..." : "See more users"}
+															</Button>
+														</div>
+													)}
+												</>
+											) : (
+												<p className="px-4 py-8 text-center text-muted-foreground">
+													No users found for "{debouncedSearchQuery}"
+												</p>
+											)}
+										</div>
+									)}
+
+									{/* Posts Results */}
+									{(activeFilter === "all" || activeFilter === "posts") && (
+										<div>
+											<div className="px-4 py-3">
+												<h2 className="font-semibold">Posts</h2>
+											</div>
+											{displayPosts.length > 0 ? (
+												<>
+													<PostGrid posts={displayPosts} onPostClick={handlePostClick} />
+													{hasMoreSearchPosts && (
+														<div className="px-4 py-3">
+															<Button
+																variant="ghost"
+																onClick={handleLoadMorePosts}
+																disabled={searchLoading}
+																className="w-full text-indigo-400 hover:text-indigo-300"
+															>
+																{searchLoading ? "Loading..." : "See more posts"}
+															</Button>
+														</div>
+													)}
+												</>
+											) : (
+												<p className="px-4 py-8 text-center text-muted-foreground">
+													No posts found for "{debouncedSearchQuery}"
+												</p>
+											)}
+										</div>
+									)}
+								</PageFade>
 							)}
 						</>
 					)}
@@ -300,7 +592,11 @@ export function SearchPage() {
 						post={selectedPost}
 						onPostDeletion={() => {
 							setSelectedPost(null);
-							refetchPosts();
+							if (isSearching) {
+								refetchSearch();
+							} else {
+								refetchInitialPosts();
+							}
 						}}
 					/>
 				)}

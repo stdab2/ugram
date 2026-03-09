@@ -42,9 +42,11 @@ export const postResolvers = {
 		},
 		posts: async (_: unknown, args: { limit?: number; offset?: number }, context: UserContext) => {
 			authenticateUser(context.user);
+			const limit = Math.min(Math.max(args.limit ?? 20, 0), 100);
+			const offset = Math.max(args.offset ?? 0, 0);
 			return prisma.post.findMany({
-				take: args.limit,
-				skip: args.offset,
+				take: limit,
+				skip: offset,
 			});
 		},
 		postsByAuthor: async (
@@ -54,10 +56,12 @@ export const postResolvers = {
 		) => {
 			authenticateUser(context.user);
 			validateUserId(args.authorId);
+			const limit = Math.min(Math.max(args.limit ?? 20, 0), 100);
+			const offset = Math.max(args.offset ?? 0, 0);
 			return prisma.post.findMany({
 				where: { authorId: args.authorId },
-				take: args.limit,
-				skip: args.offset,
+				take: limit,
+				skip: offset,
 			});
 		},
 	},

@@ -1,6 +1,7 @@
 import { userResolvers } from "./user.resolver.js";
 import { postResolvers } from "./post.resolver.js";
 import { hashtagResolvers } from "./hashtag.resolver.js";
+import { searchResolvers } from "./search.resolver.js";
 import { DateTimeScalar, scalars } from "./scalars.js";
 import GraphQLUpload from "graphql-upload/GraphQLUpload.mjs";
 
@@ -13,6 +14,7 @@ export const resolvers = {
 		...userResolvers.Query,
 		...postResolvers.Query,
 		...hashtagResolvers.Query,
+		...searchResolvers.Query,
 	},
 
 	Mutation: {
