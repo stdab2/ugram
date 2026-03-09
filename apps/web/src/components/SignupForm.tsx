@@ -9,44 +9,183 @@ import {
 	FieldSeparator,
 } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { z } from "zod";
+import { signupSchema, type SignupFormData } from "@/lib/signupSchema";
+import { useCreateUserMutation } from "@/generated/graphql";
+import { toast } from "sonner";
 
 export function SignupForm({ className, ...props }: React.ComponentProps<"div">) {
+	const navigate = useNavigate();
+	const [createUser] = useCreateUserMutation();
+
+	const [firstName, setFirstName] = useState("");
+	const [lastName, setLastName] = useState("");
+	const [userName, setUserName] = useState("");
+	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
+	const [confirmPassword, setConfirmPassword] = useState("");
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [errors, setErrors] = useState<Partial<Record<keyof SignupFormData, string>>>({});
+
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+		setErrors({});
+		setIsSubmitting(true);
+
+		try {
+			const validatedData = signupSchema.parse({
+				firstName,
+				lastName,
+				userName,
+				email,
+				password,
+				confirmPassword,
+			});
+
+			await createUser({
+				variables: {
+					userName: validatedData.userName,
+					email: validatedData.email,
+					password: validatedData.password,
+					firstName: validatedData.firstName,
+					lastName: validatedData.lastName,
+				},
+			});
+
+			toast.success("Account created successfully! Please log in.");
+			navigate("/login");
+		} catch (err) {
+			if (err instanceof z.ZodError) {
+				const fieldErrors: Partial<Record<keyof SignupFormData, string>> = {};
+
+				err.issues.forEach((error) => {
+					const fieldName = error.path[0] as keyof SignupFormData;
+
+					if (fieldName) {
+						fieldErrors[fieldName] = error.message;
+					}
+				});
+
+				setErrors(fieldErrors);
+			} else {
+				toast.error("Failed to create account. Please try again.");
+			}
+		} finally {
+			setIsSubmitting(false);
+		}
+	};
+
 	return (
 		<div className={cn("flex flex-col gap-6", className)} {...props}>
 			<Card className="overflow-hidden p-0">
 				<CardContent className="grid p-0 md:grid-cols-2">
-					<form className="p-6 md:p-8">
+					<form className="p-6 md:p-8" onSubmit={handleSubmit}>
 						<FieldGroup>
 							<div className="flex flex-col items-center gap-2 text-center">
 								<h1 className="text-2xl font-bold">Create your account</h1>
 								<p className="text-muted-foreground text-sm text-balance">
-									Enter your email below to create your account
+									Enter your information below to create your account
 								</p>
 							</div>
+							<Field className="grid grid-cols-2 gap-4">
+								<Field>
+									<FieldLabel htmlFor="firstName">First Name</FieldLabel>
+									<Input
+										id="firstName"
+										type="text"
+										placeholder="John"
+										required
+										value={firstName}
+										onChange={(e) => setFirstName(e.target.value)}
+										className={errors.firstName ? "border-red-500" : ""}
+									/>
+									{errors.firstName && (
+										<p className="text-sm text-red-500 mt-1">{errors.firstName}</p>
+									)}
+								</Field>
+								<Field>
+									<FieldLabel htmlFor="lastName">Last Name</FieldLabel>
+									<Input
+										id="lastName"
+										type="text"
+										placeholder="Doe"
+										required
+										value={lastName}
+										onChange={(e) => setLastName(e.target.value)}
+										className={errors.lastName ? "border-red-500" : ""}
+									/>
+									{errors.lastName && (
+										<p className="text-sm text-red-500 mt-1">{errors.lastName}</p>
+									)}
+								</Field>
+							</Field>
+							<Field>
+								<FieldLabel htmlFor="userName">Username</FieldLabel>
+								<Input
+									id="userName"
+									type="text"
+									placeholder="johndoe"
+									required
+									value={userName}
+									onChange={(e) => setUserName(e.target.value)}
+									className={errors.userName ? "border-red-500" : ""}
+								/>
+								{errors.userName && <p className="text-sm text-red-500 mt-1">{errors.userName}</p>}
+							</Field>
 							<Field>
 								<FieldLabel htmlFor="email">Email</FieldLabel>
-								<Input id="email" type="email" placeholder="m@example.com" required />
+								<Input
+									id="email"
+									type="email"
+									placeholder="m@example.com"
+									required
+									value={email}
+									onChange={(e) => setEmail(e.target.value)}
+									className={errors.email ? "border-red-500" : ""}
+								/>
+								{errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
 								<FieldDescription>
-									We&apos;ll use this to contact you. We will not share your email with anyone else.
+									We'll use this to contact you. We will not share your email with anyone else.
 								</FieldDescription>
 							</Field>
 							<Field>
 								<Field className="grid grid-cols-2 gap-4">
 									<Field>
 										<FieldLabel htmlFor="password">Password</FieldLabel>
-										<Input id="password" type="password" required />
+										<Input
+											id="password"
+											type="password"
+											required
+											value={password}
+											onChange={(e) => setPassword(e.target.value)}
+											className={errors.password ? "border-red-500" : ""}
+										/>
+										{errors.password && (
+											<p className="text-sm text-red-500 mt-1">{errors.password}</p>
+										)}
 									</Field>
 									<Field>
 										<FieldLabel htmlFor="confirm-password">Confirm Password</FieldLabel>
-										<Input id="confirm-password" type="password" required />
+										<Input
+											id="confirm-password"
+											type="password"
+											required
+											value={confirmPassword}
+											onChange={(e) => setConfirmPassword(e.target.value)}
+											className={errors.confirmPassword ? "border-red-500" : ""}
+										/>
+										{errors.confirmPassword && (
+											<p className="text-sm text-red-500 mt-1">{errors.confirmPassword}</p>
+										)}
 									</Field>
 								</Field>
 								<FieldDescription>Must be at least 8 characters long.</FieldDescription>
 							</Field>
 							<Field>
-								<Button size="lg" type="submit">
-									Create Account
+								<Button size="lg" type="submit" disabled={isSubmitting}>
+									{isSubmitting ? "Creating Account..." : "Create Account"}
 								</Button>
 							</Field>
 							<FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
@@ -95,10 +234,6 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
 					</div>
 				</CardContent>
 			</Card>
-			<FieldDescription className="px-6 text-center">
-				By clicking continue, you agree to our <a href="#">Terms of Service</a> and{" "}
-				<a href="#">Privacy Policy</a>.
-			</FieldDescription>
 		</div>
 	);
 }

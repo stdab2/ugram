@@ -102,7 +102,10 @@ export const userResolvers = {
 			validatePassword(args.password);
 			validateNonEmptyString(args.firstName, "First name");
 			validateNonEmptyString(args.lastName, "Last name");
-			validatePhoneNumber(args.phoneNumber);
+
+			if (args.phoneNumber) {
+				validatePhoneNumber(args.phoneNumber);
+			}
 
 			// Handle profile picture upload
 			let pictureUrl: string | undefined;

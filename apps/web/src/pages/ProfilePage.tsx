@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/Empty";
 import { useUserByUserNameQuery, useDeletePostMutation } from "@/generated/graphql";
 import type { UserByUserNameQuery } from "@/generated/graphql";
-import { Mail, Phone, Calendar, UserX, AlertCircle } from "lucide-react";
+import { Calendar, UserX, AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { CURRENT_USERNAME } from "@/lib/constants";
 import { getImageUrl } from "@/lib/utils";
@@ -176,16 +176,8 @@ export function ProfilePage() {
 									</div>
 								</div>
 								<Separator />
-								{/* Contact Info */}
+								{/* Member Since Info */}
 								<div className="space-y-2">
-									<div className="flex items-center gap-2 text-sm">
-										<Mail className="h-4 w-4 text-muted-foreground" />
-										<span>{user.email}</span>
-									</div>
-									<div className="flex items-center gap-2 text-sm">
-										<Phone className="h-4 w-4 text-muted-foreground" />
-										<span>{user.phoneNumber}</span>
-									</div>
 									<div className="flex items-center gap-2 text-sm">
 										<Calendar className="h-4 w-4 text-muted-foreground" />
 										<span>Member since {timestampToDateString(+user.createdAt)}</span>

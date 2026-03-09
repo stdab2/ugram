@@ -12,7 +12,7 @@ export const settingsSchema = z.object({
 	email: z.string().nonempty("Email is required").email("Invalid email format"),
 	phoneNumber: z
 		.string()
-		.nonempty("Phone number is required")
+		.optional()
 		.refine(
 			// e.g. +12223334444
 			(value) => !value || /^\+?[1-9][0-9]{7,14}$/.test(value),

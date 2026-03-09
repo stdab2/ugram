@@ -13,7 +13,7 @@ model UserUgram {
   userName      String   @unique
   password      String
   email         String   @unique
-  phoneNumber   String   @unique
+  phoneNumber   String?  @unique
   firstName     String
   lastName      String
   picture       String?
