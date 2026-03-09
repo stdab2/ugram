@@ -89,3 +89,9 @@ export async function userExists(email: string): Promise<boolean> {
 
 	return !!user;
 }
+
+export async function getUserByEmail(email: string) {
+	return prisma.userUgram.findUnique({
+		where: { email: email },
+	});
+}

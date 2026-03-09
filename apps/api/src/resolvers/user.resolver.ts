@@ -103,7 +103,7 @@ export const userResolvers = {
 		 * @throws {BadRequestError} If input validation fails
 		 * @throws {ConflictError} If user already exists
 		 */
-		createUser: async (_: void, args: CreateUserInput): Promise<UserUgram> => {
+		createUser: async (_: void, args: CreateUserInput) => {
 			// Validate inputs
 			validateUserName(args.userName);
 			validateEmail(args.email);
@@ -141,11 +141,7 @@ export const userResolvers = {
 		 * @throws {NotFoundError} If user not found
 		 * @throws {ConflictError} If duplicate field
 		 */
-		updateUser: async (
-			_: void,
-			args: UpdateUserInput,
-			context: UserContext
-		): Promise<UserUgram> => {
+		updateUser: async (_: void, args: UpdateUserInput, context: UserContext) => {
 			authenticateUser(context.user);
 			validateUserId(args.id);
 
