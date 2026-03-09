@@ -24,7 +24,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 							</div>
 							<Field>
 								<FieldLabel htmlFor="email">Email</FieldLabel>
-								<Input id="email" type="email" placeholder="m@example.com" required />
+								<Input id="email" type="email" placeholder="email@example.com" required />
 							</Field>
 							<Field>
 								<div className="flex items-center">
@@ -79,7 +79,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 					</form>
 					<div className="bg-muted relative hidden md:block">
 						<img
-							src="/login.png"
+							src="/login.jpg"
 							alt="Image"
 							className="absolute inset-0 h-full w-full object-cover"
 						/>

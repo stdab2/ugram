@@ -139,7 +139,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
 								<Input
 									id="email"
 									type="email"
-									placeholder="m@example.com"
+									placeholder="email@example.com"
 									required
 									value={email}
 									onChange={(e) => setEmail(e.target.value)}
@@ -227,7 +227,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
 					</form>
 					<div className="bg-muted relative hidden md:block">
 						<img
-							src="/signup.png"
+							src="/signup.jpg"
 							alt="Image"
 							className="absolute inset-0 h-full w-full object-cover"
 						/>
