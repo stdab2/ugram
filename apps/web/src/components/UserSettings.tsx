@@ -11,12 +11,11 @@ import { z } from "zod";
 import { settingsSchema, type SettingsFormData } from "@/lib/settingsSchema";
 import { getImageUrl } from "@/lib/utils";
 import { toast } from "sonner";
-
-const USER_ID = 1; //TODO: Mettre vrai ID
+import { CURRENT_USER_ID } from "@/lib/constants";
 
 export function UserSettings({ className, ...props }: React.ComponentProps<"div">) {
 	const { data, loading, error } = useUserQuery({
-		variables: { id: USER_ID },
+		variables: { id: CURRENT_USER_ID },
 	});
 
 	const [updateUser] = useUpdateUserMutation();
@@ -52,7 +51,7 @@ export function UserSettings({ className, ...props }: React.ComponentProps<"div"
 
 			await updateUser({
 				variables: {
-					id: USER_ID,
+					id: CURRENT_USER_ID,
 					firstName: validatedData.firstName,
 					lastName: validatedData.lastName,
 					email: validatedData.email,
