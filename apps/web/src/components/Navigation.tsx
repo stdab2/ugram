@@ -33,6 +33,7 @@ export function Navigation() {
 	const location = useLocation();
 	const navigate = useNavigate();
 	const pathname = location.pathname;
+	const isProfileActive = pathname === "/profile/me" || pathname === `/profile/${CURRENT_USERNAME}`;
 
 	// Fetch current user data
 	const { data: userData } = useUserByUserNameQuery({
@@ -99,11 +100,10 @@ export function Navigation() {
 						</Link>
 
 						<Link
-							to={`/profile/${CURRENT_USERNAME}`}
+							to={`/profile/me`}
 							className={cn(
 								"flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-all duration-200 hover:scale-105",
-								pathname === `/profile/${CURRENT_USERNAME}` &&
-									"bg-accent text-accent-foreground font-medium"
+								isProfileActive && "bg-accent text-accent-foreground font-medium"
 							)}
 						>
 							<Avatar className="h-8 w-8 flex-shrink-0">
