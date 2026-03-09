@@ -24,15 +24,10 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 							</div>
 							<Field>
 								<FieldLabel htmlFor="email">Email</FieldLabel>
-								<Input id="email" type="email" placeholder="email@example.com" required />
+								<Input id="email" type="email" required />
 							</Field>
 							<Field>
-								<div className="flex items-center">
-									<FieldLabel htmlFor="password">Password</FieldLabel>
-									<a href="#" className="ml-auto text-sm underline-offset-2 hover:underline">
-										Forgot your password?
-									</a>
-								</div>
+								<FieldLabel htmlFor="password">Password</FieldLabel>
 								<Input id="password" type="password" required />
 							</Field>
 							<Field>

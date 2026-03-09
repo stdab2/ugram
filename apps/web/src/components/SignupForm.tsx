@@ -95,7 +95,6 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
 									<Input
 										id="firstName"
 										type="text"
-										placeholder="John"
 										required
 										value={firstName}
 										onChange={(e) => setFirstName(e.target.value)}
@@ -110,7 +109,6 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
 									<Input
 										id="lastName"
 										type="text"
-										placeholder="Doe"
 										required
 										value={lastName}
 										onChange={(e) => setLastName(e.target.value)}
@@ -126,7 +124,6 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
 								<Input
 									id="userName"
 									type="text"
-									placeholder="johndoe"
 									required
 									value={userName}
 									onChange={(e) => setUserName(e.target.value)}
@@ -139,16 +136,12 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
 								<Input
 									id="email"
 									type="email"
-									placeholder="email@example.com"
 									required
 									value={email}
 									onChange={(e) => setEmail(e.target.value)}
 									className={errors.email ? "border-red-500" : ""}
 								/>
 								{errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
-								<FieldDescription>
-									We'll use this to contact you. We will not share your email with anyone else.
-								</FieldDescription>
 							</Field>
 							<Field>
 								<Field className="grid grid-cols-2 gap-4">

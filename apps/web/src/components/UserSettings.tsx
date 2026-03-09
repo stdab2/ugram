@@ -112,7 +112,6 @@ export function UserSettings({ className, ...props }: React.ComponentProps<"div"
 								id="firstname"
 								type="text"
 								autoComplete="given-name"
-								placeholder="First Name"
 								value={firstName}
 								onChange={(e) => setFirstName(e.target.value)}
 								maxLength={20}
@@ -124,7 +123,6 @@ export function UserSettings({ className, ...props }: React.ComponentProps<"div"
 								id="lastname"
 								type="text"
 								autoComplete="family-name"
-								placeholder="Last Name"
 								value={lastName}
 								onChange={(e) => setLastName(e.target.value)}
 								maxLength={20}
@@ -138,7 +136,6 @@ export function UserSettings({ className, ...props }: React.ComponentProps<"div"
 								id="email"
 								type="email"
 								autoComplete="email"
-								placeholder="email@example.com"
 								value={email}
 								onChange={(e) => setEmail(e.target.value)}
 								className={errors.email ? "border-red-500" : ""}
