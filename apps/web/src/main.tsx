@@ -19,17 +19,17 @@ initSentry();
 createRoot(document.getElementById("root")!).render(
 	<StrictMode>
 		<ErrorBoundary>
-      <AuthProvider>
-        <ApolloProvider client={apolloClient}>
-          <ErrorProvider>
-            <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-              <OAuth2Listener />
-              <RouterProvider router={router} />
-              <Toaster />
-            </ThemeProvider>
-          </ErrorProvider>
-        </ApolloProvider>
-      <AuthProvider>
+			<AuthProvider>
+				<ApolloProvider client={apolloClient}>
+					<ErrorProvider>
+						<ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+							<OAuth2Listener />
+							<RouterProvider router={router} />
+							<Toaster />
+						</ThemeProvider>
+					</ErrorProvider>
+				</ApolloProvider>
+			</AuthProvider>
 		</ErrorBoundary>
 	</StrictMode>
 );
