@@ -35,6 +35,12 @@ export function FeedPage() {
 			await deletePost({ variables: { id: postId } });
 			toast.success("Your post has been successfully deleted !");
 		} catch (error) {
+			if (error instanceof Error && error.message.includes("User not authenticated")) {
+				localStorage.removeItem("token");
+				navigate("/login");
+				toast.error("You must be logged in to access this page.");
+				return;
+			}
 			console.error("Failed to delete post:", error);
 			toast.error("Failed to delete your post. Please try again.");
 		}

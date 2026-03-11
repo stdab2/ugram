@@ -5,7 +5,8 @@
 
 import { PrismaClient } from "../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { BadRequestError, NotFoundError } from "./errors.js";
+import { BadRequestError, NotFoundError, AuthenticationError } from "./errors.js";
+import { UserContext } from "../src/types/userContext.types.js";
 
 const adapter = new PrismaPg({
 	connectionString: process.env.DATABASE_URL,
@@ -118,5 +119,11 @@ export const validateUsersExist = async (userIds: number[]): Promise<void> => {
 
 	if (users.length !== userIds.length) {
 		throw new NotFoundError("One or more users do not exist");
+	}
+};
+
+export const authenticateUser = (user: UserContext["user"]) => {
+	if (!user) {
+		throw new AuthenticationError("User not authenticated");
 	}
 };

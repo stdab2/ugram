@@ -5,11 +5,13 @@ import {
 	validateUsersExist,
 	validateNonEmptyString,
 } from "../../Validators/validateUser.js";
-import { saveUploadedImage } from "../../services/image.service.js";
+import { saveUploadedImage } from "../services/image.service.js";
 import type { FileUpload } from "graphql-upload";
 import { Post } from "../../generated/prisma/client.js";
 import { handlePrismaError } from "../../Validators/errors.js";
 import { validatePostId } from "../../Validators/validatePost.js";
+import { authenticateUser } from "../../Validators/validateUser.js";
+import { UserContext } from "../types/userContext.types.js";
 
 const adapter = new PrismaPg({
 	connectionString: process.env.DATABASE_URL,
@@ -31,13 +33,15 @@ type CreatePostArgs = {
 
 export const postResolvers = {
 	Query: {
-		post: async (_: unknown, args: { id: number }) => {
+		post: async (_: unknown, args: { id: number }, context: UserContext) => {
+			authenticateUser(context.user);
 			validatePostId(args.id);
 			return prisma.post.findUnique({
 				where: { id: args.id },
 			});
 		},
-		posts: async (_: unknown, args: { limit?: number; offset?: number }) => {
+		posts: async (_: unknown, args: { limit?: number; offset?: number }, context: UserContext) => {
+			authenticateUser(context.user);
 			const limit = Math.min(Math.max(args.limit ?? 20, 0), 100);
 			const offset = Math.max(args.offset ?? 0, 0);
 			return prisma.post.findMany({
@@ -47,8 +51,10 @@ export const postResolvers = {
 		},
 		postsByAuthor: async (
 			_: unknown,
-			args: { authorId: number; limit?: number; offset?: number }
+			args: { authorId: number; limit?: number; offset?: number },
+			context: UserContext
 		) => {
+			authenticateUser(context.user);
 			validateUserId(args.authorId);
 			const limit = Math.min(Math.max(args.limit ?? 20, 0), 100);
 			const offset = Math.max(args.offset ?? 0, 0);
@@ -60,14 +66,16 @@ export const postResolvers = {
 		},
 	},
 	Post: {
-		author: async (parent: Post) => {
+		author: async (parent: Post, _: unknown, context: UserContext) => {
+			authenticateUser(context.user);
 			return prisma.userUgram.findUnique({
 				where: { id: parent.authorId },
 			});
 		},
 	},
 	Mutation: {
-		createPost: async (_: unknown, { data }: CreatePostArgs) => {
+		createPost: async (_: unknown, { data }: CreatePostArgs, context: UserContext) => {
+			authenticateUser(context.user);
 			const { description, image, authorId, hashtags, mentionedUsers } = data;
 			validateUserId(authorId);
 			validateNonEmptyString(description, "Post description");
@@ -129,7 +137,8 @@ export const postResolvers = {
 				handlePrismaError(error, "Post");
 			}
 		},
-		deletePost: async (_: unknown, args: { id: number }) => {
+		deletePost: async (_: unknown, args: { id: number }, context: UserContext) => {
+			authenticateUser(context.user);
 			validatePostId(args.id);
 			try {
 				return await prisma.post.delete({
@@ -139,7 +148,12 @@ export const postResolvers = {
 				handlePrismaError(error, "Post");
 			}
 		},
-		updatePost: async (_: unknown, args: { id: number; description: string }) => {
+		updatePost: async (
+			_: unknown,
+			args: { id: number; description: string },
+			context: UserContext
+		) => {
+			authenticateUser(context.user);
 			validatePostId(args.id);
 			validateNonEmptyString(args.description, "Post description");
 

@@ -104,7 +104,7 @@ services:
         condition: service_completed_successfully
       api:
         condition: service_healthy
-  
+
   # Prisma Studio - Optional database inspector
   # Usage:
   #   Start: docker compose --profile studio up

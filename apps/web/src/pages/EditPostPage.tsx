@@ -107,11 +107,10 @@ export function EditPostPage() {
 	const handlePostUpdate = async (description: string) => {
 		try {
 			await updatePost({ variables: { id: post.id, description } });
+			toast.success("Your post has been successfully updated!");
 			navigate(-1);
-			toast.success("Your post has been successfully updated !");
-		} catch (error) {
-			console.error("Failed to update post:", error);
-			toast.error("Failed to update your post. Please try again.");
+		} catch {
+			// Error already handled by errorLink
 		}
 	};
 
@@ -146,6 +145,12 @@ export function EditPostPage() {
 					</div>
 
 					<PostForm
+						user={{
+							userName: post.author.userName,
+							firstName: post.author.firstName,
+							lastName: post.author.lastName,
+							picture: post.author.picture,
+						}}
 						initialImage={getImageUrl(post.imageUrl)}
 						initialDescription={post.description}
 						onPostEdit={handlePostUpdate}

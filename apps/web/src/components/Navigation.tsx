@@ -21,6 +21,7 @@ import {
 import { Badge } from "@/components/ui/Badge";
 import { cn, getImageUrl } from "@/lib/utils";
 import { useUserByUserNameQuery } from "@/generated/graphql";
+import { useAuth } from "../AuthContext";
 
 const navItems = [
 	{ icon: Home, label: "Home", href: "/" },
@@ -34,6 +35,7 @@ export function Navigation() {
 	const navigate = useNavigate();
 	const pathname = location.pathname;
 	const isProfileActive = pathname === "/profile/me" || pathname === `/profile/${CURRENT_USERNAME}`;
+	const { logout } = useAuth();
 
 	// Fetch current user data
 	const { data: userData } = useUserByUserNameQuery({
@@ -43,6 +45,10 @@ export function Navigation() {
 	const user = userData?.userByUserName;
 	const avatarFallback = user ? user.firstName[0] + user.lastName[0] : "JD";
 	const avatarUrl = getImageUrl(user?.picture);
+
+	const handleLogout = () => {
+		logout();
+	};
 
 	return (
 		<>
@@ -132,7 +138,7 @@ export function Navigation() {
 						</Link>
 						<button
 							className="flex items-center gap-4 p-3 rounded-lg hover:bg-accent transition-all duration-200 hover:scale-105 text-left"
-							onClick={() => console.log("Déconnexion")}
+							onClick={handleLogout}
 						>
 							<LogOut className="w-6 h-6 flex-shrink-0" />
 							<span className="whitespace-nowrap opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">

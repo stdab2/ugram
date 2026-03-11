@@ -13,24 +13,91 @@ import { EditPostPage } from "@/pages/EditPostPage";
 import { MessagesPage } from "@/pages/MessagesPage";
 import { SettingsPage } from "@/pages/SettingsPage";
 import { NotificationsPage } from "@/pages/NotificationsPage";
+import { ProtectedRoute } from "./ProtectedRoute";
+import RouteErrorBoundary from "@/components/RouteErrorBoundary";
 
 export const router = createBrowserRouter([
 	{
 		element: <NavigationLayout />,
+		errorElement: <RouteErrorBoundary />,
 		children: [
-			{ path: "/", element: <FeedPage /> },
-			{ path: "/search", element: <SearchPage /> },
-			{ path: "/create", element: <CreatePostPage /> },
-			{ path: "/post/:id", element: <PostPage /> },
-			{ path: "/post/:id/edit", element: <EditPostPage /> },
-			{ path: "/messages", element: <MessagesPage /> },
-			{ path: "/notifications", element: <NotificationsPage /> },
-			{ path: "/settings", element: <SettingsPage /> },
-			{ path: "/profile/:username", element: <ProfilePage /> },
+			{
+				path: "/",
+				element: (
+					<ProtectedRoute>
+						<FeedPage />
+					</ProtectedRoute>
+				),
+			},
+			{
+				path: "/search",
+				element: (
+					<ProtectedRoute>
+						<SearchPage />
+					</ProtectedRoute>
+				),
+			},
+			{
+				path: "/create",
+				element: (
+					<ProtectedRoute>
+						<CreatePostPage />
+					</ProtectedRoute>
+				),
+			},
+			{
+				path: "/post/:id",
+				element: (
+					<ProtectedRoute>
+						<PostPage />
+					</ProtectedRoute>
+				),
+			},
+			{
+				path: "/post/:id/edit",
+				element: (
+					<ProtectedRoute>
+						<EditPostPage />
+					</ProtectedRoute>
+				),
+			},
+			{
+				path: "/messages",
+				element: (
+					<ProtectedRoute>
+						<MessagesPage />
+					</ProtectedRoute>
+				),
+			},
+			{
+				path: "/notifications",
+				element: (
+					<ProtectedRoute>
+						<NotificationsPage />
+					</ProtectedRoute>
+				),
+			},
+			{
+				path: "/settings",
+				element: (
+					<ProtectedRoute>
+						<SettingsPage />
+					</ProtectedRoute>
+				),
+			},
+			{
+				path: "/profile/:username",
+				element: (
+					<ProtectedRoute>
+						<ProfilePage />
+					</ProtectedRoute>
+				),
+			},
 		],
 	},
 	{
 		element: <EmptyLayout />,
+		errorElement: <RouteErrorBoundary />,
 		children: [
 			{ path: "/login", element: <LoginPage /> },
 			{ path: "/signup", element: <SignupPage /> },
