@@ -5,9 +5,10 @@ import type { UserContext } from "../types/userContext.types.js";
 export function generateToken(
 	email: string,
 	name: string,
+	id: number,
 	expiresIn: SignOptions["expiresIn"] = "7d"
 ) {
-	return jwt.sign({ email, name }, process.env.JWT_SECRET!, { expiresIn });
+	return jwt.sign({ email, name, id }, process.env.JWT_SECRET!, { expiresIn });
 }
 
 export function verifyToken(token: string): UserContext["user"] | null {

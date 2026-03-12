@@ -5,7 +5,7 @@
 
 import { PrismaClient } from "../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { BadRequestError, NotFoundError, AuthenticationError } from "./errors.js";
+import { BadRequestError, NotFoundError, AuthenticationError, PermissionError } from "./errors.js";
 import { UserContext } from "../src/types/userContext.types.js";
 
 const adapter = new PrismaPg({
@@ -121,5 +121,14 @@ export const validateUsersExist = async (userIds: number[]): Promise<void> => {
 export const authenticateUser = (user: UserContext["user"]) => {
 	if (!user) {
 		throw new AuthenticationError("User not authenticated");
+	}
+};
+
+export const authenticateUserModifiesSelf = (
+	ConnectedUser: UserContext["user"],
+	userToModifyId: number
+) => {
+	if (ConnectedUser?.id !== userToModifyId) {
+		throw new PermissionError("User cannot modify other users");
 	}
 };
