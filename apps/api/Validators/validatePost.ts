@@ -65,10 +65,10 @@ export const validatePostOwnership = async (
  * @param authorId - authorId of the post being created
  * @throws {PermissionError} If user is creating a post under another users id
  */
-export const validatePostCreationOwnership = async (
+export const validatePostCreationOwnership = (
 	authorId: number,
 	connectedUser: UserContext["user"]
-): Promise<void> => {
+): void => {
 	if (connectedUser?.id !== authorId) {
 		throw new PermissionError("User cannot create another user's posts");
 	}

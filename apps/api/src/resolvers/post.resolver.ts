@@ -13,6 +13,7 @@ import {
 	validatePostId,
 	validatePostCreationOwnership,
 	validatePostOwnership,
+	validatePostExists,
 } from "../../Validators/validatePost.js";
 import { authenticateUser } from "../../Validators/validateUser.js";
 import { UserContext } from "../types/userContext.types.js";
@@ -145,7 +146,8 @@ export const postResolvers = {
 		deletePost: async (_: unknown, args: { id: number }, context: UserContext) => {
 			authenticateUser(context.user);
 			validatePostId(args.id);
-			validatePostOwnership(args.id, context.user);
+			await validatePostExists(args.id);
+			await validatePostOwnership(args.id, context.user);
 			try {
 				return await prisma.post.delete({
 					where: { id: args.id },
@@ -161,7 +163,8 @@ export const postResolvers = {
 		) => {
 			authenticateUser(context.user);
 			validatePostId(args.id);
-			validatePostOwnership(args.id, context.user);
+			await validatePostExists(args.id);
+			await validatePostOwnership(args.id, context.user);
 			validateNonEmptyString(args.description, "Post description");
 
 			try {
