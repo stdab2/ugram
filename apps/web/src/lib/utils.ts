@@ -5,6 +5,24 @@ export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
 
+function getApiBaseUrl(): string {
+	const explicitApiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+	if (explicitApiBaseUrl) {
+		return explicitApiBaseUrl.replace(/\/+$/, "");
+	}
+
+	const graphqlUrl = import.meta.env.VITE_GRAPHQL_URL ?? "http://localhost:4001/graphql";
+
+	try {
+		const parsedUrl = new URL(graphqlUrl);
+		return `${parsedUrl.protocol}//${parsedUrl.host}`;
+	} catch {
+		return "http://localhost:4001";
+	}
+}
+
+const apiBaseUrl = getApiBaseUrl();
+
 /**
  * Converts a relative image URL from the API to an absolute URL for the frontend
  * @param imageUrl - The relative image URL from the API (e.g., "images/post/1.jpg")
@@ -12,16 +30,14 @@ export function cn(...inputs: ClassValue[]) {
  */
 export function getImageUrl(imageUrl: string | null | undefined): string | undefined {
 	if (!imageUrl) return undefined;
-	// If the URL already starts with /, http:// or https://, return as is
-	if (
-		imageUrl.startsWith("/") ||
-		imageUrl.startsWith("http://") ||
-		imageUrl.startsWith("https://")
-	) {
-		return "http://localhost:4001" + imageUrl;
+
+	// Keep already absolute/protocol-relative URLs as-is.
+	if (/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(imageUrl) || imageUrl.startsWith("//")) {
+		return imageUrl;
 	}
-	// Otherwise, prepend / to make it relative to the public folder
-	return "http://localhost:4001" + `/${imageUrl}`;
+
+	const normalizedPath = imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
+	return `${apiBaseUrl}${normalizedPath}`;
 }
 
 export function timestampToDateString(timestamp: number): string {
