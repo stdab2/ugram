@@ -124,11 +124,17 @@ export const authenticateUser = (user: UserContext["user"]) => {
 	}
 };
 
+/**
+ * Validate owner can only modifies their own data
+ * @param connectedUser - Currently authenticated user
+ * @param userToModifyId - User ID to check
+ * @throws {PermissionError} If user tries tomodify information from another user
+ */
 export const authenticateUserModifiesSelf = (
-	ConnectedUser: UserContext["user"],
+	connectedUser: UserContext["user"],
 	userToModifyId: number
 ) => {
-	if (ConnectedUser?.id !== userToModifyId) {
+	if (connectedUser?.id !== userToModifyId) {
 		throw new PermissionError("User cannot modify other users");
 	}
 };
