@@ -9,10 +9,8 @@ import { Button } from "@/components/ui/Button";
 import { Home, Search, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { PageFade } from "@/components/PageFade";
-import { useAuth } from "@/AuthContext";
 
 export function NotFoundPage() {
-	const { userAuth } = useAuth();
 	const navigate = useNavigate();
 
 	return (
@@ -35,7 +33,7 @@ export function NotFoundPage() {
 								<Search className="mr-2 h-4 w-4" />
 								Search
 							</Button>
-							<Button onClick={() => navigate(`/profile/${userAuth!.userName}`)} variant="outline">
+							<Button onClick={() => navigate(`/profile/me`)} variant="outline">
 								<User className="mr-2 h-4 w-4" />
 								My Profile
 							</Button>
