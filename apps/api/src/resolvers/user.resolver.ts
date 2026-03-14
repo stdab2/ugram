@@ -11,6 +11,7 @@ import {
 	validatePhoneNumber,
 	validateUserExists,
 	authenticateUser,
+	authenticateUserModifiesSelf,
 } from "../../Validators/validateUser.js";
 import { BadRequestError, handlePrismaError } from "../../Validators/errors.js";
 import { saveUploadedImage } from "../services/image.service.js";
@@ -146,9 +147,11 @@ export const userResolvers = {
 		 * @throws {BadRequestError} If update data is invalid
 		 * @throws {NotFoundError} If user not found
 		 * @throws {ConflictError} If duplicate field
+		 * @throws {PermissionError} If connected user tries to modify another user
 		 */
 		updateUser: async (_: void, args: UpdateUserInput, context: UserContext) => {
 			authenticateUser(context.user);
+			authenticateUserModifiesSelf(context.user, args.id);
 			validateUserId(args.id);
 
 			// Check if user exists before attempting update

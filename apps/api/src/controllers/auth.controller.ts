@@ -20,7 +20,7 @@ export async function signup(req: Request, res: Response) {
 		req.body.phone
 	);
 
-	const token = generateToken(user.email, `${user.firstName} ${user.lastName}`);
+	const token = generateToken(user.email, `${user.firstName} ${user.lastName}`, user.id);
 
 	const id = user.id;
 	const userName = user.userName;
@@ -43,7 +43,7 @@ export async function login(req: Request, res: Response) {
 		throw new AuthenticationError("Invalid email or password");
 	}
 
-	const token = generateToken(user.email, `${user.firstName} ${user.lastName}`);
+	const token = generateToken(user.email, `${user.firstName} ${user.lastName}`, user.id);
 
 	const id = user.id;
 	const userName = user.userName;

@@ -9,7 +9,12 @@ import { saveUploadedImage } from "../services/image.service.js";
 import type { FileUpload } from "graphql-upload";
 import { Post } from "../../generated/prisma/client.js";
 import { handlePrismaError } from "../../Validators/errors.js";
-import { validatePostId } from "../../Validators/validatePost.js";
+import {
+	validatePostId,
+	validatePostCreationOwnership,
+	validatePostOwnership,
+	validatePostExists,
+} from "../../Validators/validatePost.js";
 import { authenticateUser } from "../../Validators/validateUser.js";
 import { UserContext } from "../types/userContext.types.js";
 
@@ -78,6 +83,7 @@ export const postResolvers = {
 			authenticateUser(context.user);
 			const { description, image, authorId, hashtags, mentionedUsers } = data;
 			validateUserId(authorId);
+			validatePostCreationOwnership(authorId, context.user);
 			validateNonEmptyString(description, "Post description");
 
 			if (mentionedUsers && mentionedUsers.length > 0) {
@@ -140,6 +146,8 @@ export const postResolvers = {
 		deletePost: async (_: unknown, args: { id: number }, context: UserContext) => {
 			authenticateUser(context.user);
 			validatePostId(args.id);
+			await validatePostExists(args.id);
+			await validatePostOwnership(args.id, context.user);
 			try {
 				return await prisma.post.delete({
 					where: { id: args.id },
@@ -155,6 +163,8 @@ export const postResolvers = {
 		) => {
 			authenticateUser(context.user);
 			validatePostId(args.id);
+			await validatePostExists(args.id);
+			await validatePostOwnership(args.id, context.user);
 			validateNonEmptyString(args.description, "Post description");
 
 			try {

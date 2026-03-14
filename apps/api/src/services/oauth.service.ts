@@ -62,9 +62,9 @@ export async function completeGoogleOAuth({
 	const firstName = splittedName[0];
 	const lastName = splittedName.slice(1).join(" ") || firstName;
 
-	await findOrCreateOauthUser(googleSub, email, firstName, lastName);
+	const newUser = await findOrCreateOauthUser(googleSub, email, firstName, lastName);
 
-	return generateToken(email, name);
+	return generateToken(email, name, newUser.id);
 }
 
 export function generatePkce() {
