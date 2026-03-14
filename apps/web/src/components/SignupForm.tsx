@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/Input";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { z } from "zod";
-import { signupSchema, type SignupFormData } from "@/lib/signupSchema";
+import { userSignupSchema, type UserSignupFormData } from "@/lib/schemas/user.schema";
 import { useCreateUserMutation } from "@/generated/graphql";
 import { toast } from "sonner";
 
@@ -27,7 +27,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
 	const [password, setPassword] = useState("");
 	const [confirmPassword, setConfirmPassword] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [errors, setErrors] = useState<Partial<Record<keyof SignupFormData, string>>>({});
+	const [errors, setErrors] = useState<Partial<Record<keyof UserSignupFormData, string>>>({});
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -35,7 +35,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
 		setIsSubmitting(true);
 
 		try {
-			const validatedData = signupSchema.parse({
+			const validatedData = userSignupSchema.parse({
 				firstName,
 				lastName,
 				userName,
@@ -58,10 +58,10 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
 			navigate("/login");
 		} catch (err) {
 			if (err instanceof z.ZodError) {
-				const fieldErrors: Partial<Record<keyof SignupFormData, string>> = {};
+				const fieldErrors: Partial<Record<keyof UserSignupFormData, string>> = {};
 
 				err.issues.forEach((error) => {
-					const fieldName = error.path[0] as keyof SignupFormData;
+					const fieldName = error.path[0] as keyof UserSignupFormData;
 
 					if (fieldName) {
 						fieldErrors[fieldName] = error.message;
