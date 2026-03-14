@@ -4,10 +4,14 @@ import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client
 
 const s3 = new S3Client({
 	region: process.env.AWS_REGION ?? "ca-central-1",
-	credentials: {
-		accessKeyId: process.env.AWS_ACCESS_KEY_ID ?? "",
-		secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ?? "",
-	},
+	...(process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
+		? {
+				credentials: {
+					accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+					secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+				},
+		  }
+		: {}),
 });
 
 const BUCKET = process.env.S3_BUCKET ?? "ugram-media-s3";
