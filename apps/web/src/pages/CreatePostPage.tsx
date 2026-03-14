@@ -1,15 +1,16 @@
 import { useNavigate } from "react-router-dom";
 import { PostForm } from "@/components/PostForm";
 import { PageFade } from "@/components/PageFade";
-import { CURRENT_USER_ID, CURRENT_USERNAME } from "@/lib/constants";
 import {
 	useCreatePostMutation,
 	useUserByUserNameQuery,
 	useUsersByUserNamesLazyQuery,
 } from "../generated/graphql";
 import { toast } from "sonner";
+import { useAuth } from "@/AuthContext";
 
 export function CreatePostPage() {
+	const { userAuth } = useAuth();
 	const navigate = useNavigate();
 	const [createPost] = useCreatePostMutation();
 	const [fetchUsersByUserNames] = useUsersByUserNamesLazyQuery();
@@ -20,7 +21,7 @@ export function CreatePostPage() {
 		loading: userLoading,
 		error: userError,
 	} = useUserByUserNameQuery({
-		variables: { userName: CURRENT_USERNAME },
+		variables: { userName: userAuth!.userName },
 	});
 
 	const user = userData?.userByUserName;
@@ -66,7 +67,7 @@ export function CreatePostPage() {
 					data: {
 						description: data.description,
 						image: data.image,
-						authorId: CURRENT_USER_ID,
+						authorId: userAuth!.id,
 						hashtags,
 						mentionedUsers,
 					},

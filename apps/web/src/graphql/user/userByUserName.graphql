@@ -2,10 +2,8 @@ query UserByUserName($userName: String!) {
 	userByUserName(userName: $userName) {
 		id
 		userName
-		email
 		firstName
 		lastName
-		phoneNumber
 		picture
 		createdAt
 		posts {

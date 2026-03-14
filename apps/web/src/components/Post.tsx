@@ -6,10 +6,10 @@ import { formatDescription, formatDate } from "@/lib/postUtils";
 import { PostModal } from "@/components/PostModal";
 import { PostMenu } from "@/components/PostMenu";
 import { DeletePostDialog } from "@/components/DeletePostDialog";
-import { CURRENT_USERNAME } from "@/lib/constants";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import type { PostsQuery } from "@/generated/graphql";
+import { useAuth } from "@/AuthContext";
 
 type PostData = PostsQuery["posts"][0];
 
@@ -34,13 +34,14 @@ export function Post({
 	onComment,
 	onPostDeletion,
 }: PostProps) {
+	const { userAuth } = useAuth();
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
 	const navigate = useNavigate();
 
 	const avatarFallback = post.author.firstName[0] + post.author.lastName[0];
-	const isOwnPost = post.author.userName === CURRENT_USERNAME;
+	const isOwnPost = post.author.userName === userAuth!.userName;
 	const aspectRatioClasses = {
 		square: "aspect-square",
 		portrait: "aspect-[4/5]",

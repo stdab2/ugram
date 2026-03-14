@@ -17,23 +17,24 @@ import {
 } from "@/components/ui/Empty";
 import { useUserByUserNameQuery, useDeletePostMutation } from "@/generated/graphql";
 import type { UserByUserNameQuery } from "@/generated/graphql";
-import { Mail, Phone, Calendar, UserX, AlertCircle } from "lucide-react";
+import { Calendar, UserX, AlertCircle } from "lucide-react";
 import { useState } from "react";
-import { CURRENT_USERNAME } from "@/lib/constants";
 import { getImageUrl } from "@/lib/utils";
 import { PageFade } from "@/components/PageFade";
 import { toast } from "sonner";
+import { useAuth } from "@/AuthContext";
 
 export function ProfilePage() {
 	const { username } = useParams();
 	const navigate = useNavigate();
+	const { userAuth } = useAuth();
 
 	// Use username from URL or default to current user
 	// Treat "me" as a special keyword for the current user
-	const userNameToFetch = username === "me" || !username ? CURRENT_USERNAME : username;
+	const userNameToFetch = username === "me" || !username ? userAuth!.userName : username;
 
 	// Check if this is the current user's profile
-	const isOwnProfile = userNameToFetch === CURRENT_USERNAME;
+	const isOwnProfile = userNameToFetch === userAuth!.userName;
 
 	// Fetch user data by username
 	const {
@@ -175,16 +176,8 @@ export function ProfilePage() {
 									</div>
 								</div>
 								<Separator />
-								{/* Contact Info */}
+								{/* Member Since Info */}
 								<div className="space-y-2">
-									<div className="flex items-center gap-2 text-sm">
-										<Mail className="h-4 w-4 text-muted-foreground" />
-										<span>{user.email}</span>
-									</div>
-									<div className="flex items-center gap-2 text-sm">
-										<Phone className="h-4 w-4 text-muted-foreground" />
-										<span>{user.phoneNumber}</span>
-									</div>
 									<div className="flex items-center gap-2 text-sm">
 										<Calendar className="h-4 w-4 text-muted-foreground" />
 										<span>Member since {timestampToDateString(+user.createdAt)}</span>

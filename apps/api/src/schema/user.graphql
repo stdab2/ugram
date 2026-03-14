@@ -4,7 +4,7 @@ type UserUgram {
 	email: String!
 	firstName: String!
 	lastName: String!
-	phoneNumber: String!
+	phoneNumber: String
 	picture: String
 	createdAt: String!
 	posts: [Post!]
@@ -32,7 +32,7 @@ extend type Mutation {
 		password: String!
 		firstName: String!
 		lastName: String!
-		phoneNumber: String!
+		phoneNumber: String
 		picture: Upload
 	): UserUgram!
 
@@ -46,4 +46,6 @@ extend type Mutation {
 		phoneNumber: String
 		picture: Upload
 	): UserUgram!
+
+	deleteUser(password: String): Boolean!
 }
