@@ -1,0 +1,57 @@
+name: API CI
+
+on:
+  pull_request:
+    branches: [main, master, develop]
+    paths:
+      - "apps/api/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "package.json"
+      - "eslint.config.js"
+      - "tsconfig*.json"
+      - ".github/workflows/api-ci.yml"
+  push:
+    branches: [main, master, develop]
+    paths:
+      - "apps/api/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "package.json"
+      - "eslint.config.js"
+      - "tsconfig*.json"
+      - ".github/workflows/api-ci.yml"
+
+jobs:
+  lint-and-build-api:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.29.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        working-directory: ./apps/api
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+        run: pnpm exec prisma generate
+
+      - name: Lint API
+        run: pnpm exec eslint "apps/api/**/*.{ts,tsx}" --max-warnings=0
+
+      - name: Build API
+        run: pnpm --filter api build
