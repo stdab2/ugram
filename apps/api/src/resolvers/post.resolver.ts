@@ -5,7 +5,7 @@ import {
 	validateUsersExist,
 	validateNonEmptyString,
 } from "../../Validators/validateUser.js";
-import { saveUploadedImage } from "../services/image.service.js";
+import { saveUploadedImage, deleteImageFromStorage } from "../services/image.service.js";
 import type { FileUpload } from "graphql-upload";
 import { Post } from "../../generated/prisma/client.js";
 import { handlePrismaError } from "../../Validators/errors.js";
@@ -141,9 +141,21 @@ export const postResolvers = {
 			authenticateUser(context.user);
 			validatePostId(args.id);
 			try {
-				return await prisma.post.delete({
+				const deletedPost = await prisma.post.delete({
 					where: { id: args.id },
 				});
+
+				try {
+					await deleteImageFromStorage(deletedPost.imageUrl);
+				} catch (cleanupError) {
+					console.warn("Post deleted but image cleanup failed", {
+						postId: deletedPost.id,
+						imageUrl: deletedPost.imageUrl,
+						error: cleanupError,
+					});
+				}
+
+				return deletedPost;
 			} catch (error: unknown) {
 				handlePrismaError(error, "Post");
 			}

@@ -204,9 +204,17 @@ async function main() {
 		});
 	}
 	for (const uData of userData) {
+		const { userName, password, phoneNumber, firstName, lastName, picture, email } = uData;
 		await prisma.userUgram.upsert({
-			where: { email: uData.email },
-			update: {},
+			where: { email },
+			update: {
+				userName,
+				password,
+				phoneNumber,
+				firstName,
+				lastName,
+				picture,
+			},
 			create: uData,
 		});
 	}

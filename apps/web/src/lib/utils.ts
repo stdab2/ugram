@@ -6,22 +6,19 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
- * Converts a relative image URL from the API to an absolute URL for the frontend
- * @param imageUrl - The relative image URL from the API (e.g., "images/post/1.jpg")
- * @returns The absolute URL (e.g., "/images/post/1.jpg")
+ * Converts an image key/URL from the API to an absolute URL for the frontend.
+ * In dev, falls back to the API server. In prod, uses VITE_MEDIA_BASE_URL (S3 / CloudFront).
  */
 export function getImageUrl(imageUrl: string | null | undefined): string | undefined {
 	if (!imageUrl) return undefined;
-	// If the URL already starts with /, http:// or https://, return as is
-	if (
-		imageUrl.startsWith("/") ||
-		imageUrl.startsWith("http://") ||
-		imageUrl.startsWith("https://")
-	) {
-		return "http://localhost:4001" + imageUrl;
+	// Already an absolute URL — return as-is
+	if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
+		return imageUrl;
 	}
-	// Otherwise, prepend / to make it relative to the public folder
-	return "http://localhost:4001" + `/${imageUrl}`;
+	const mediaBase =
+		import.meta.env.VITE_MEDIA_BASE_URL ?? (import.meta.env.DEV ? "http://localhost:4001" : "");
+	const normalised = imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
+	return `${mediaBase}${normalised}`;
 }
 
 export function timestampToDateString(timestamp: number): string {
