@@ -1,3 +1,58 @@
+const mediaBaseUrl = (import.meta as any).env?.VITE_MEDIA_BASE_URL as string | undefined;
+const apiBaseUrl = (import.meta as any).env?.VITE_API_BASE_URL as string | undefined;
+
+function normalizeBaseUrl(url: string): string {
+  return url.replace(/\/+$/, '');
+}
+
+/**
+ * Resolve an image path to a fully-qualified URL.
+ *
+ * Behavior:
+ * - If `path` is falsy, returns null.
+ * - If `path` is already an absolute http(s) URL, returns it unchanged.
+ * - If `VITE_MEDIA_BASE_URL` is set, always uses it as the base for relative paths.
+ * - If `VITE_MEDIA_BASE_URL` is NOT set and the path looks like an S3 key
+ *   (e.g. starts with "uploads/"), throws an error to avoid generating a
+ *   broken URL like `http://<api>/uploads/...`.
+ * - Otherwise falls back to `VITE_API_BASE_URL` if available.
+ */
+export function getImageUrl(path: string | null | undefined): string | null {
+  if (!path) {
+    return null;
+  }
+
+  // Already an absolute URL
+  if (/^https?:\/\//i.test(path)) {
+    return path;
+  }
+
+  const trimmedPath = path.replace(/^\/+/, '');
+
+  if (mediaBaseUrl) {
+    return `${normalizeBaseUrl(mediaBaseUrl)}/${trimmedPath}`;
+  }
+
+  // Backend now returns S3 keys like "uploads/post/..." and no longer serves
+  // /uploads statically. In that case, we must have VITE_MEDIA_BASE_URL set;
+  // falling back to the API base URL would produce a 404.
+  if (trimmedPath.startsWith('uploads/')) {
+    throw new Error(
+      `VITE_MEDIA_BASE_URL is required to resolve media key "${path}". ` +
+        'The backend no longer serves /uploads statically, so configure ' +
+        'VITE_MEDIA_BASE_URL to point at your media/S3 base URL.',
+    );
+  }
+
+  if (apiBaseUrl) {
+    return `${normalizeBaseUrl(apiBaseUrl)}/${trimmedPath}`;
+  }
+
+  throw new Error(
+    `Unable to resolve image URL for "${path}": neither VITE_MEDIA_BASE_URL ` +
+      'nor VITE_API_BASE_URL is configured.',
+  );
+}
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
