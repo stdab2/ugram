@@ -223,7 +223,7 @@ export const userResolvers = {
 			authenticateUser(context.user);
 
 			const user = await prisma.userUgram.findUnique({
-				where: { email: context.user!.email },
+				where: { id: context.user!.id },
 			});
 
 			if (!user) {
