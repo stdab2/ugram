@@ -51,7 +51,7 @@ jobs:
         run: pnpm exec prisma generate
 
       - name: Lint API
-        run: pnpm exec eslint "apps/api/**/*.{ts,tsx}" --max-warnings=0
+        run: pnpm exec eslint "apps/api/**/*.{ts,tsx}" --ignore-pattern "apps/api/generated/**" --max-warnings=0
 
       - name: Build API
         run: pnpm --filter api build
