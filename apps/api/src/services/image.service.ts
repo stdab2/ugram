@@ -50,17 +50,12 @@ export async function saveUploadedImage(
 	const key = subfolder ? `uploads/${subfolder}/${storedName}` : `uploads/${storedName}`;
 
 	const stream = createReadStream();
-	const chunks: Buffer[] = [];
-	for await (const chunk of stream) {
-		chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
-	}
-	const body = Buffer.concat(chunks);
 
 	await s3.send(
 		new PutObjectCommand({
 			Bucket: BUCKET,
 			Key: key,
-			Body: body,
+			Body: stream,
 			ContentType: mimetype,
 		})
 	);
