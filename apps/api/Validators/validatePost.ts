@@ -7,9 +7,10 @@ import { PrismaClient } from "../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { BadRequestError, NotFoundError, PermissionError } from "./errors.js";
 import { UserContext } from "../src/types/userContext.types.js";
+import { getDatabaseUrl } from "../src/database-url.js";
 
 const adapter = new PrismaPg({
-	connectionString: process.env.DATABASE_URL,
+	connectionString: getDatabaseUrl(),
 });
 
 const prisma = new PrismaClient({

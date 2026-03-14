@@ -17,9 +17,10 @@ import {
 } from "../../Validators/validatePost.js";
 import { authenticateUser } from "../../Validators/validateUser.js";
 import { UserContext } from "../types/userContext.types.js";
+import { getDatabaseUrl } from "../database-url.js";
 
 const adapter = new PrismaPg({
-	connectionString: process.env.DATABASE_URL,
+	connectionString: getDatabaseUrl(),
 });
 
 const prisma = new PrismaClient({
