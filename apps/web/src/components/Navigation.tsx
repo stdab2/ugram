@@ -9,7 +9,6 @@ import {
 	LogOut,
 	User,
 } from "lucide-react";
-import { CURRENT_USERNAME } from "@/lib/constants";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 import {
 	DropdownMenu,
@@ -31,15 +30,18 @@ const navItems = [
 ];
 
 export function Navigation() {
+	const { logout, userAuth } = useAuth();
 	const location = useLocation();
 	const navigate = useNavigate();
 	const pathname = location.pathname;
-	const isProfileActive = pathname === "/profile/me" || pathname === `/profile/${CURRENT_USERNAME}`;
-	const { logout } = useAuth();
+	const currentUserName = userAuth?.userName;
+	const profilePath = currentUserName ? `/profile/${currentUserName}` : "/profile/me";
+	const isProfileActive = pathname === "/profile/me" || pathname === profilePath;
 
 	// Fetch current user data
 	const { data: userData } = useUserByUserNameQuery({
-		variables: { userName: CURRENT_USERNAME },
+		variables: { userName: currentUserName ?? "" },
+		skip: !currentUserName,
 	});
 
 	const user = userData?.userByUserName;
@@ -192,7 +194,7 @@ export function Navigation() {
 									3
 								</Badge>
 							</DropdownMenuItem>
-							<DropdownMenuItem onClick={() => navigate(`/profile/${CURRENT_USERNAME}`)}>
+							<DropdownMenuItem onClick={() => navigate(profilePath)}>
 								<User className="mr-2 h-4 w-4" />
 								Profile
 							</DropdownMenuItem>
@@ -201,7 +203,7 @@ export function Navigation() {
 								Settings
 							</DropdownMenuItem>
 							<DropdownMenuSeparator />
-							<DropdownMenuItem>Log Out</DropdownMenuItem>
+							<DropdownMenuItem onClick={handleLogout}>Log Out</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
 				</div>

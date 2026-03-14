@@ -209,5 +209,40 @@ export const userResolvers = {
 				throw handlePrismaError(error, "User");
 			}
 		},
+
+		/**
+		 * Delete the authenticated user's account
+		 * Requires password verification for password-based accounts
+		 * @throws {AuthenticationError} If password is wrong or user is not authenticated
+		 * @throws {NotFoundError} If user not found
+		 */
+		deleteUser: async (_: void, args: { password?: string }, context: UserContext) => {
+			authenticateUser(context.user);
+
+			const user = await prisma.userUgram.findUnique({
+				where: { email: context.user!.email },
+			});
+
+			if (!user) {
+				throw handlePrismaError(new Error("User not found"), "User");
+			}
+
+			if (user.password) {
+				if (!args.password) {
+					throw new BadRequestError("Password is required to delete your account");
+				}
+				const isValid = await bcrypt.compare(args.password, user.password);
+				if (!isValid) {
+					throw new BadRequestError("Incorrect password");
+				}
+			}
+
+			try {
+				await prisma.userUgram.delete({ where: { id: user.id } });
+				return true;
+			} catch (error: unknown) {
+				throw handlePrismaError(error, "User");
+			}
+		},
 	},
 };

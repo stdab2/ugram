@@ -5,20 +5,33 @@ import { FieldSeparator } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Button } from "@/components/ui/Button";
-import { useUserQuery, useUpdateUserMutation } from "@/generated/graphql";
+import { useUserQuery, useUpdateUserMutation, useDeleteUserMutation } from "@/generated/graphql";
 import { useState, useEffect } from "react";
 import { z } from "zod";
 import { userSettingsSchema, type UserSettingsFormData } from "@/lib/schemas";
 import { getImageUrl } from "@/lib/utils";
 import { toast } from "sonner";
-import { CURRENT_USER_ID } from "@/lib/constants";
+import { useAuth } from "@/AuthContext";
+import {
+	AlertDialog,
+	AlertDialogContent,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogCancel,
+	AlertDialogAction,
+} from "@/components/ui/AlertDialog";
 
 export function UserSettings({ className, ...props }: React.ComponentProps<"div">) {
+	const { logout, userAuth } = useAuth();
+
 	const { data, loading, error } = useUserQuery({
-		variables: { id: CURRENT_USER_ID },
+		variables: { id: userAuth!.id },
 	});
 
 	const [updateUser] = useUpdateUserMutation();
+	const [deleteUser] = useDeleteUserMutation();
 
 	const [firstName, setFirstName] = useState("");
 	const [lastName, setLastName] = useState("");
@@ -27,6 +40,10 @@ export function UserSettings({ className, ...props }: React.ComponentProps<"div"
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [isAddingPhone, setIsAddingPhone] = useState(false);
 	const [errors, setErrors] = useState<Partial<Record<keyof UserSettingsFormData, string>>>({});
+
+	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+	const [deletePassword, setDeletePassword] = useState("");
+	const [isDeleting, setIsDeleting] = useState(false);
 
 	useEffect(() => {
 		if (data?.user) {
@@ -56,7 +73,7 @@ export function UserSettings({ className, ...props }: React.ComponentProps<"div"
 
 			await updateUser({
 				variables: {
-					id: CURRENT_USER_ID,
+					id: userAuth!.id,
 					firstName: validatedData.firstName,
 					lastName: validatedData.lastName,
 					email: validatedData.email,
@@ -90,6 +107,21 @@ export function UserSettings({ className, ...props }: React.ComponentProps<"div"
 	if (error) return <p>{error.message}</p>;
 
 	const user = data?.user;
+
+	const handleDeleteAccount = async () => {
+		setIsDeleting(true);
+		try {
+			await deleteUser({ variables: { password: deletePassword || undefined } });
+			toast.success("Account deleted successfully.");
+			logout();
+		} catch {
+			// Apollo mutation errors are already handled by errorLink
+		} finally {
+			setIsDeleting(false);
+			setDeleteDialogOpen(false);
+			setDeletePassword("");
+		}
+	};
 
 	return (
 		<div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -174,6 +206,66 @@ export function UserSettings({ className, ...props }: React.ComponentProps<"div"
 							</Button>
 						</div>
 					</form>
+					<FieldSeparator className="mt-6" />
+					<div className="mt-4">
+						<h2 className="text-lg font-semibold text-red-600">Danger Zone</h2>
+						<p className="text-sm text-muted-foreground mt-1 mb-3">
+							Permanently delete your account and all associated data. This action cannot be undone.
+						</p>
+						<AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+							<Button
+								type="button"
+								variant="outline"
+								className="border-red-500 text-red-600 hover:bg-red-50"
+								onClick={() => setDeleteDialogOpen(true)}
+							>
+								Delete Account
+							</Button>
+							<AlertDialogContent>
+								<AlertDialogHeader>
+									<AlertDialogTitle>Delete your account?</AlertDialogTitle>
+									<AlertDialogDescription>
+										This will permanently delete your account and all your posts. This action cannot
+										be undone.
+									</AlertDialogDescription>
+								</AlertDialogHeader>
+								<div className="space-y-2 py-2">
+									<Label htmlFor="delete-password">
+										Confirm your password
+										<span className="text-muted-foreground font-normal">
+											{" "}
+											(leave blank if you signed in with Google)
+										</span>
+									</Label>
+									<Input
+										id="delete-password"
+										type="password"
+										placeholder="Your current password"
+										value={deletePassword}
+										onChange={(e) => setDeletePassword(e.target.value)}
+										autoComplete="current-password"
+									/>
+								</div>
+								<AlertDialogFooter>
+									<AlertDialogCancel
+										onClick={() => {
+											setDeleteDialogOpen(false);
+											setDeletePassword("");
+										}}
+									>
+										Cancel
+									</AlertDialogCancel>
+									<AlertDialogAction
+										onClick={handleDeleteAccount}
+										disabled={isDeleting}
+										className="bg-red-600 hover:bg-red-700 text-white"
+									>
+										{isDeleting ? "Deleting..." : "Delete Account"}
+									</AlertDialogAction>
+								</AlertDialogFooter>
+							</AlertDialogContent>
+						</AlertDialog>
+					</div>
 				</CardContent>
 			</Card>
 		</div>

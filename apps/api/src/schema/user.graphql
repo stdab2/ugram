@@ -46,4 +46,6 @@ extend type Mutation {
 		phoneNumber: String
 		picture: Upload
 	): UserUgram!
+
+	deleteUser(password: String): Boolean!
 }

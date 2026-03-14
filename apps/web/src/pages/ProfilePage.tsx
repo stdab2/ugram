@@ -19,21 +19,22 @@ import { useUserByUserNameQuery, useDeletePostMutation } from "@/generated/graph
 import type { UserByUserNameQuery } from "@/generated/graphql";
 import { Calendar, UserX, AlertCircle } from "lucide-react";
 import { useState } from "react";
-import { CURRENT_USERNAME } from "@/lib/constants";
 import { getImageUrl } from "@/lib/utils";
 import { PageFade } from "@/components/PageFade";
 import { toast } from "sonner";
+import { useAuth } from "@/AuthContext";
 
 export function ProfilePage() {
 	const { username } = useParams();
 	const navigate = useNavigate();
+	const { userAuth } = useAuth();
 
 	// Use username from URL or default to current user
 	// Treat "me" as a special keyword for the current user
-	const userNameToFetch = username === "me" || !username ? CURRENT_USERNAME : username;
+	const userNameToFetch = username === "me" || !username ? userAuth!.userName : username;
 
 	// Check if this is the current user's profile
-	const isOwnProfile = userNameToFetch === CURRENT_USERNAME;
+	const isOwnProfile = userNameToFetch === userAuth!.userName;
 
 	// Fetch user data by username
 	const {
