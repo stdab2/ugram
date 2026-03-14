@@ -10,7 +10,7 @@ const s3 = new S3Client({
 					accessKeyId: process.env.AWS_ACCESS_KEY_ID,
 					secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
 				},
-		  }
+			}
 		: {}),
 });
 
@@ -50,12 +50,22 @@ export async function saveUploadedImage(
 	const key = subfolder ? `uploads/${subfolder}/${storedName}` : `uploads/${storedName}`;
 
 	const stream = createReadStream();
-			Body: stream,
+	const chunks: Buffer[] = [];
+	for await (const chunk of stream) {
+		chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+	}
+	const body = Buffer.concat(chunks);
+
+	await s3.send(
+		new PutObjectCommand({
+			Bucket: BUCKET,
+			Key: key,
+			Body: body,
 			ContentType: mimetype,
 		})
 	);
 
-			Body: stream,
+	return key;
 }
 
 export async function deleteImageFromStorage(
