@@ -50,17 +50,12 @@ export async function saveUploadedImage(
 	const key = subfolder ? `uploads/${subfolder}/${storedName}` : `uploads/${storedName}`;
 
 	const stream = createReadStream();
-
-	await s3.send(
-		new PutObjectCommand({
-			Bucket: BUCKET,
-			Key: key,
 			Body: stream,
 			ContentType: mimetype,
 		})
 	);
 
-	return key;
+			Body: stream,
 }
 
 export async function deleteImageFromStorage(
