@@ -69,8 +69,6 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
 				});
 
 				setErrors(fieldErrors);
-			} else {
-				toast.error("Failed to create account. Please try again.");
 			}
 		} finally {
 			setIsSubmitting(false);
