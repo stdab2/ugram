@@ -76,6 +76,8 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
 		}
 	};
 
+	const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:4001";
+
 	const signUpWithGoogle = () => {
 		const w = 500,
 			h = 600;

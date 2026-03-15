@@ -23,6 +23,8 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 
 	const navigate = useNavigate();
 
+	const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:4001";
+
 	const loginWithGoogle = () => {
 		const w = 500,
 			h = 600;
