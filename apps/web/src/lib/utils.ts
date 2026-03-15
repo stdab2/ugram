@@ -22,7 +22,7 @@ export function getGraphqlUrl(): string {
 }
 
 export function getApiBaseUrl(): string {
-	const explicitApiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+	const explicitApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
 	if (explicitApiBaseUrl) {
 		return explicitApiBaseUrl.replace(/\/+$/, "");
 	}
