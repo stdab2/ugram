@@ -62,19 +62,13 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 								<Input
 									id="email"
 									type="email"
-									placeholder="m@example.com"
 									value={email}
 									onChange={(event) => setEmail(event.target.value)}
 									required
 								/>
 							</Field>
 							<Field>
-								<div className="flex items-center">
-									<FieldLabel htmlFor="password">Password</FieldLabel>
-									<a href="#" className="ml-auto text-sm underline-offset-2 hover:underline">
-										Forgot your password?
-									</a>
-								</div>
+								<FieldLabel htmlFor="password">Password</FieldLabel>
 								<Input
 									id="password"
 									type="password"
@@ -132,17 +126,13 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 					</form>
 					<div className="bg-muted relative hidden md:block">
 						<img
-							src="/placeholder.svg"
+							src="/login.jpg"
 							alt="Image"
-							className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+							className="absolute inset-0 h-full w-full object-cover"
 						/>
 					</div>
 				</CardContent>
 			</Card>
-			<FieldDescription className="px-6 text-center">
-				By clicking continue, you agree to our <a href="#">Terms of Service</a> and{" "}
-				<a href="#">Privacy Policy</a>.
-			</FieldDescription>
 		</div>
 	);
 }

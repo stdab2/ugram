@@ -69,6 +69,10 @@ export const validatePassword = (password: string): void => {
  * @throws {BadRequestError} If invalid
  */
 export const validatePhoneNumber = (phoneNumber: string): void => {
+	if (!phoneNumber || phoneNumber.trim() === "") {
+		return;
+	}
+
 	// e.g. +12223334444
 	const phoneRegex = /^\+?[1-9][0-9]{7,14}$/;
 	if (!phoneRegex.test(phoneNumber)) {

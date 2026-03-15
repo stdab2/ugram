@@ -11,13 +11,14 @@ import {
 } from "@/components/ui/Empty";
 import { Button } from "@/components/ui/Button";
 import { getImageUrl } from "@/lib/utils";
-import { CURRENT_USERNAME } from "@/lib/constants";
 import { AlertCircle, Lock } from "lucide-react";
 import { PageFade } from "@/components/PageFade";
 import { useUpdatePostMutation, PostDocument } from "@/generated/graphql";
 import { toast } from "sonner";
+import { useAuth } from "@/AuthContext";
 
 export function EditPostPage() {
+	const { userAuth } = useAuth();
 	const { id } = useParams();
 	const navigate = useNavigate();
 
@@ -115,7 +116,7 @@ export function EditPostPage() {
 	};
 
 	// Check if user owns this post
-	if (post.author.userName !== CURRENT_USERNAME) {
+	if (post.author.userName !== userAuth!.userName) {
 		return (
 			<PageFade key="forbidden">
 				<div className="w-full min-h-screen bg-background pb-20 md:pb-0 flex items-center justify-center p-4">
