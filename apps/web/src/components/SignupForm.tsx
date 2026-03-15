@@ -15,6 +15,7 @@ import { z } from "zod";
 import { userSignupSchema, type UserSignupFormData } from "@/lib/schemas/user.schema";
 import { useCreateUserMutation } from "@/generated/graphql";
 import { toast } from "sonner";
+import { getGoogleOAuthUrl } from "@/lib/utils";
 
 export function SignupForm({ className, ...props }: React.ComponentProps<"div">) {
 	const navigate = useNavigate();
@@ -82,7 +83,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
 		const top = window.screenY + (window.outerHeight - h) / 2;
 
 		window.open(
-			"http://localhost:4001/oauth2/google",
+			getGoogleOAuthUrl(),
 			"google_oauth",
 			`width=${w},height=${h},left=${left},top=${top}`
 		);
