@@ -22,6 +22,8 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 
 	const navigate = useNavigate();
 
+	const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:4001";
+
 	const loginWithGoogle = () => {
 		const w = 500,
 			h = 600;
@@ -29,7 +31,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 		const top = window.screenY + (window.outerHeight - h) / 2;
 
 		window.open(
-			"http://localhost:4001/oauth2/google",
+			baseUrl + "/oauth2/google",
 			"google_oauth",
 			`width=${w},height=${h},left=${left},top=${top}`
 		);
