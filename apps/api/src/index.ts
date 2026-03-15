@@ -1,4 +1,6 @@
 import "dotenv/config";
+import "../instrument.js";
+import * as Sentry from "@sentry/node";
 import express, { Express } from "express";
 import cors from "cors";
 import http from "http";
@@ -46,6 +48,8 @@ async function startServer() {
 			},
 		})
 	);
+
+	Sentry.setupExpressErrorHandler(app);
 
 	const port = Number(process.env.PORT) || 4000;
 	await new Promise<void>((resolve) => httpServer.listen({ port, host: "0.0.0.0" }, resolve));
