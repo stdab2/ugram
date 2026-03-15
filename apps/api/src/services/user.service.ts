@@ -29,9 +29,11 @@ export async function findOrCreateOauthUser(
 		return user;
 	}
 
+	const userName = email.split("@")[0];
+
 	user = await prisma.userUgram.create({
 		data: {
-			userName: email,
+			userName: userName,
 			email: email,
 			googleSub: googleSub,
 			firstName: firstName,
