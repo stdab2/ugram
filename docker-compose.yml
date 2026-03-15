@@ -62,6 +62,10 @@ services:
       NODE_ENV: development
       CHOKIDAR_USEPOLLING: "true"
       HUSKY: "0"
+      AWS_REGION: ${AWS_REGION:-ca-central-1}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      S3_BUCKET: ${S3_BUCKET:-ugram-media-s3}
     ports:
       - "4001:4000"
     depends_on:
@@ -97,6 +101,7 @@ services:
       VITE_SENTRY_DSN: ${VITE_SENTRY_DSN:-}
       VITE_APP_VERSION: ${VITE_APP_VERSION:-dev}
       VITE_GRAPHQL_URL: "http://localhost:4001/graphql"
+      VITE_MEDIA_BASE_URL: ${VITE_MEDIA_BASE_URL:-}
     ports:
       - "5173:5173"
     depends_on:

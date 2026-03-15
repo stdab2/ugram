@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { buildGoogleAuthorizationUrl, completeGoogleOAuth } from "../services/oauth.service.js";
 
-export async function startGoogleOAuth(req: Request, res: Response) {
+export async function startGoogleOAuth(_req: Request, res: Response) {
 	const { authorizationUrl, state, codeVerifier } = buildGoogleAuthorizationUrl();
 
 	res.cookie("state", state, {

@@ -3,4 +3,11 @@ packages:
   - packages/*
 
 ignoredBuiltDependencies:
+  - '@apollo/protobufjs'
+  - '@swc/core'
   - bcrypt
+  - esbuild
+
+onlyBuiltDependencies:
+  - '@prisma/engines'
+  - prisma

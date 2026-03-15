@@ -2,9 +2,10 @@ import { PrismaClient, Prisma } from "../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 import "dotenv/config";
 import bcrypt from "bcrypt";
+import { getDatabaseUrl } from "../src/database-url.js";
 
 const adapter = new PrismaPg({
-	connectionString: process.env.DATABASE_URL,
+	connectionString: getDatabaseUrl(),
 });
 
 const prisma = new PrismaClient({
@@ -204,9 +205,17 @@ async function main() {
 		});
 	}
 	for (const uData of userData) {
+		const { userName, password, phoneNumber, firstName, lastName, picture, email } = uData;
 		await prisma.userUgram.upsert({
-			where: { email: uData.email },
-			update: {},
+			where: { email },
+			update: {
+				userName,
+				password,
+				phoneNumber,
+				firstName,
+				lastName,
+				picture,
+			},
 			create: uData,
 		});
 	}
