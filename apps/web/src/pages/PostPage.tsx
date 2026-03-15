@@ -195,7 +195,6 @@ export function PostPage() {
 
 	// Extract author info for convenience
 	const author = post.author;
-	const avatarFallback = author.firstName[0] + author.lastName[0];
 	const isOwnPost = author.userName === userAuth!.userName;
 
 	const { description: formattedDescription, hashtags } = formatDescription(post.description);
@@ -228,7 +227,7 @@ export function PostPage() {
 										<Link to={`/profile/${author.userName}`}>
 											<Avatar className="h-10 w-10">
 												<AvatarImage src={getImageUrl(author.picture)} />
-												<AvatarFallback>{avatarFallback}</AvatarFallback>
+												<AvatarFallback>{author.firstName[0] + author.lastName[0]}</AvatarFallback>
 											</Avatar>
 										</Link>
 										<div>
@@ -252,7 +251,7 @@ export function PostPage() {
 										<Link to={`/profile/${author.userName}`}>
 											<Avatar className="h-8 w-8 flex-shrink-0">
 												<AvatarImage src={getImageUrl(author.picture)} />
-												<AvatarFallback>{avatarFallback}</AvatarFallback>
+												<AvatarFallback>{author.firstName[0] + author.lastName[0]}</AvatarFallback>
 											</Avatar>
 										</Link>
 										<div className="flex-1">

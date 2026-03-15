@@ -55,7 +55,6 @@ export function PostModal({
 
 	// Extract author info for convenience
 	const author = post.author;
-	const avatarFallback = author.firstName[0] + author.lastName[0];
 	const isOwnPost = author.userName === userAuth!.userName;
 
 	// Mock comments - use lazy initialization to avoid calling Date.now() during render
@@ -142,7 +141,7 @@ export function PostModal({
 									<Link to={`/profile/${author.userName}`}>
 										<Avatar className="h-10 w-10">
 											<AvatarImage src={getImageUrl(author.picture)} />
-											<AvatarFallback>{avatarFallback}</AvatarFallback>
+											<AvatarFallback>{author.firstName[0] + author.lastName[0]}</AvatarFallback>
 										</Avatar>
 									</Link>
 									<div>
@@ -172,7 +171,7 @@ export function PostModal({
 									<Link to={`/profile/${author.userName}`}>
 										<Avatar className="h-8 w-8 flex-shrink-0">
 											<AvatarImage src={getImageUrl(author.picture)} />
-											<AvatarFallback>{avatarFallback}</AvatarFallback>
+											<AvatarFallback>{author.firstName[0] + author.lastName[0]}</AvatarFallback>
 										</Avatar>
 									</Link>
 									<div className="flex-1">

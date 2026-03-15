@@ -40,7 +40,6 @@ export function Post({
 	const [isDeleting, setIsDeleting] = useState(false);
 	const navigate = useNavigate();
 
-	const avatarFallback = post.author.firstName[0] + post.author.lastName[0];
 	const isOwnPost = post.author.userName === userAuth!.userName;
 	const aspectRatioClasses = {
 		square: "aspect-square",
@@ -66,7 +65,9 @@ export function Post({
 						<Link to={`/profile/${post.author.userName}`}>
 							<Avatar className="h-8 w-8">
 								<AvatarImage src={getImageUrl(post.author.picture)} />
-								<AvatarFallback>{avatarFallback}</AvatarFallback>
+								<AvatarFallback>
+									{post.author.firstName[0] + post.author.lastName[0]}
+								</AvatarFallback>
 							</Avatar>
 						</Link>
 						<div className="flex items-center gap-2">

@@ -126,8 +126,6 @@ export function ProfilePage() {
 	const userPosts = [...(user.posts || [])].sort(
 		(a, b) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime()
 	);
-	const avatarFallback =
-		`${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase() || "??";
 
 	return (
 		<PageFade key="content">
@@ -140,7 +138,9 @@ export function ProfilePage() {
 							<div className="flex justify-center md:justify-start">
 								<Avatar className="h-32 w-32 md:h-40 md:w-40">
 									<AvatarImage src={user.picture ? getImageUrl(user.picture) : undefined} />
-									<AvatarFallback className="text-3xl">{avatarFallback}</AvatarFallback>
+									<AvatarFallback className="text-3xl">
+										{user.firstName[0] + user.lastName[0]}
+									</AvatarFallback>
 								</Avatar>
 							</div>
 
