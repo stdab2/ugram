@@ -45,6 +45,7 @@ export const errorLink = onError(({ graphQLErrors, networkError, operation }) =>
 			statusCode === 401 ||
 			statusCode === 403 ||
 			normalizedErrorCode === "UNAUTHENTICATED" ||
+			normalizedErrorCode === "AUTHENTICATION_ERROR" ||
 			normalizedErrorCode === "FORBIDDEN"
 		) {
 			handleAuthError(message, currentContext);
@@ -153,12 +154,7 @@ function handleAuthError(message: string, context: ErrorContext): void {
  */
 function clearAuthAndRedirect(): void {
 	// Clear localStorage
-	localStorage.removeItem("authToken");
-	localStorage.removeItem("refreshToken");
-
-	// Clear sessionStorage
-	sessionStorage.removeItem("authToken");
-	sessionStorage.removeItem("refreshToken");
+	localStorage.removeItem("token");
 
 	// Redirect after a short delay to allow toast to display
 	setTimeout(() => {
