@@ -37,8 +37,6 @@ jobs:
 
       - name: Generate GraphQL types
         run: pnpm --filter web codegen
-        env:
-          GRAPHQL_SCHEMA_URL: ${{ secrets.GRAPHQL_SCHEMA_URL }}
 
       - name: Set version
         id: version
