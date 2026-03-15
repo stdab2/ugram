@@ -11,6 +11,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import type { PostsQuery, PostsByAuthorQuery } from "@/generated/graphql";
 import { useAuth } from "@/AuthContext";
+import { toast } from "sonner";
 
 type PostData = PostsQuery["posts"][0] | PostsByAuthorQuery["postsByAuthor"][0];
 
@@ -112,6 +113,17 @@ export function PostModal({
 		onPostDeletion(postId);
 		setIsDeleting(false);
 		setShowDeleteDialog(false);
+	}
+
+	async function handleShare() {
+		const postUrl = `${window.location.origin}/post/${post.id}`;
+
+		try {
+			await navigator.clipboard.writeText(postUrl);
+			toast.success("Post link copied to clipboard.");
+		} catch {
+			toast.error("Unable to copy post link.");
+		}
 	}
 
 	const { description: formattedDescription, hashtags } = formatDescription(post.description);
@@ -257,7 +269,9 @@ export function PostModal({
 										)}
 									</button>
 									<button
-										className="hover:text-muted-foreground transition-colors"
+										type="button"
+										onClick={handleShare}
+										className="hover:text-muted-foreground transition-all duration-200 hover:scale-110"
 										aria-label="Share"
 									>
 										<Send className="w-6 h-6" strokeWidth={2} />
