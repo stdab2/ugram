@@ -5,8 +5,8 @@ on:
   push:
     branches:
       - main
-      - develop
       - feature/deploy-api-to-beanstalk
+      - feature/environment-variables
 
 jobs:
   deploy:
