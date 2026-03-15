@@ -52,7 +52,6 @@ export const userResolvers = {
 
 		userByUserName: async (_: void, args: { userName: string }, context: UserContext) => {
 			authenticateUser(context.user);
-			validateUserName(args.userName);
 			return prisma.userUgram.findUnique({
 				where: { userName: args.userName },
 			});
