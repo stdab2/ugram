@@ -6,10 +6,6 @@ import { fileURLToPath } from "url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const getSchema = (): string | string[] => {
-	if (process.env.GRAPHQL_SCHEMA_URL) {
-		return process.env.GRAPHQL_SCHEMA_URL;
-	}
-
 	// Use source schema files from API to avoid duplication
 	const apiSchemaDir = resolvePath(__dirname, "../api/src/schema");
 	if (existsSync(apiSchemaDir)) {
@@ -22,6 +18,10 @@ const getSchema = (): string | string[] => {
 		}
 
 		return schemaFiles;
+	}
+
+	if (process.env.GRAPHQL_SCHEMA_URL) {
+		return process.env.GRAPHQL_SCHEMA_URL;
 	}
 
 	throw new Error("No GraphQL schema source found");

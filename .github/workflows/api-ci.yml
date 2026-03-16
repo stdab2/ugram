@@ -54,4 +54,20 @@ jobs:
         run: pnpm exec eslint "apps/api/**/*.{ts,tsx}" --ignore-pattern "apps/api/generated/**" --max-warnings=0
 
       - name: Build API
+        working-directory: ./apps/api
+        env:
+          # Variables minimales pour le build CI
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+          PORT: 4000
+          JWT_SECRET: ci-jwt-secret-for-build-only
+          CLIENT_ID: ci-client-id
+          CLIENT_SECRET: ci-client-secret
+          GOOGLE_REDIRECT_URI: http://localhost:4000/oauth2/callback/google
+          GOOGLE_CLIENT_ID: ci-client-id
+          AWS_REGION: ca-central-1
+          AWS_ACCESS_KEY_ID: ci-access-key
+          AWS_SECRET_ACCESS_KEY: ci-secret-key
+          S3_BUCKET: ci-bucket
+          ENV: ci
+          FRONTEND_ORIGIN: http://localhost:3000
         run: pnpm --filter api build

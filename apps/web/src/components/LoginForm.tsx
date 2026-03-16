@@ -14,6 +14,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
+import { getGoogleOAuthUrl } from "@/lib/utils";
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
 	const [email, setEmail] = useState("");
@@ -22,8 +23,6 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 
 	const navigate = useNavigate();
 
-	const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:4001";
-
 	const loginWithGoogle = () => {
 		const w = 500,
 			h = 600;
@@ -31,7 +30,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 		const top = window.screenY + (window.outerHeight - h) / 2;
 
 		window.open(
-			baseUrl + "/oauth2/google",
+			getGoogleOAuthUrl(),
 			"google_oauth",
 			`width=${w},height=${h},left=${left},top=${top}`
 		);

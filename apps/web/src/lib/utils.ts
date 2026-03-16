@@ -5,20 +5,48 @@ export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
 
-function getApiBaseUrl(): string {
-	const explicitApiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+const DEFAULT_DEV_API_BASE_URL = "http://localhost:4001";
+const DEFAULT_DEV_GRAPHQL_URL = `${DEFAULT_DEV_API_BASE_URL}/graphql`;
+
+export function getGraphqlUrl(): string {
+	const explicitGraphqlUrl = import.meta.env.VITE_GRAPHQL_URL?.trim();
+	if (explicitGraphqlUrl) {
+		return explicitGraphqlUrl;
+	}
+
+	if (import.meta.env.DEV) {
+		return DEFAULT_DEV_GRAPHQL_URL;
+	}
+
+	return "/graphql";
+}
+
+export function getApiBaseUrl(): string {
+	const explicitApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
 	if (explicitApiBaseUrl) {
 		return explicitApiBaseUrl.replace(/\/+$/, "");
 	}
 
-	const graphqlUrl = import.meta.env.VITE_GRAPHQL_URL ?? "http://localhost:4001/graphql";
+	const graphqlUrl = getGraphqlUrl();
 
 	try {
-		const parsedUrl = new URL(graphqlUrl);
+		const parsedUrl = new URL(graphqlUrl, window.location.origin);
 		return `${parsedUrl.protocol}//${parsedUrl.host}`;
 	} catch {
-		return "http://localhost:4001";
+		return import.meta.env.DEV ? DEFAULT_DEV_API_BASE_URL : window.location.origin;
 	}
+}
+
+export function getApiOrigin(): string {
+	try {
+		return new URL(getApiBaseUrl(), window.location.origin).origin;
+	} catch {
+		return window.location.origin;
+	}
+}
+
+export function getGoogleOAuthUrl(): string {
+	return `${getApiBaseUrl()}/oauth2/google`;
 }
 
 const apiBaseUrl = getApiBaseUrl();
