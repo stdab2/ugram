@@ -1,9 +1,10 @@
 import { ApolloClient, InMemoryCache, ApolloLink } from "@apollo/client";
 import createUploadLink from "apollo-upload-client/createUploadLink.mjs";
 import { createErrorLink } from "./errorLink";
+import { getGraphqlUrl } from "@/lib/utils";
 
 const httpLink = createUploadLink({
-	uri: import.meta.env.VITE_GRAPHQL_URL ?? "http://localhost:4001/graphql",
+	uri: getGraphqlUrl(),
 });
 
 const authLink = new ApolloLink((operation, forward) => {

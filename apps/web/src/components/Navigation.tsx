@@ -45,7 +45,6 @@ export function Navigation() {
 	});
 
 	const user = userData?.userByUserName;
-	const avatarFallback = user ? user.firstName[0] + user.lastName[0] : "JD";
 	const avatarUrl = getImageUrl(user?.picture);
 
 	const handleLogout = () => {
@@ -116,7 +115,9 @@ export function Navigation() {
 						>
 							<Avatar className="h-8 w-8 flex-shrink-0">
 								<AvatarImage src={avatarUrl} />
-								<AvatarFallback>{avatarFallback}</AvatarFallback>
+								<AvatarFallback>
+									{user ? user.firstName[0] + user.lastName[0] : "??"}
+								</AvatarFallback>
 							</Avatar>
 							<span className="whitespace-nowrap opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">
 								Profile
@@ -177,7 +178,9 @@ export function Navigation() {
 						>
 							<Avatar className="h-9 w-9">
 								<AvatarImage src={avatarUrl} />
-								<AvatarFallback>{avatarFallback}</AvatarFallback>
+								<AvatarFallback>
+									{user ? user.firstName[0] + user.lastName[0] : "??"}
+								</AvatarFallback>
 							</Avatar>
 							<Badge
 								variant="destructive"

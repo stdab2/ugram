@@ -158,10 +158,7 @@ export function PostForm({
 						<div className="flex items-center gap-3 pb-4 border-b">
 							<Avatar className="h-10 w-10">
 								<AvatarImage src={getImageUrl(user.picture)} />
-								<AvatarFallback>
-									{user.firstName[0]}
-									{user.lastName[0]}
-								</AvatarFallback>
+								<AvatarFallback>{user.firstName[0] + user.lastName[0]}</AvatarFallback>
 							</Avatar>
 							<div>
 								<p className="font-semibold text-sm">{user.userName}</p>

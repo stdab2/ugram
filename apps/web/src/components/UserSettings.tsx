@@ -132,6 +132,7 @@ export function UserSettings({ className, ...props }: React.ComponentProps<"div"
 					<UserDetails
 						className="mt-2"
 						pictureUrl={getImageUrl(user?.picture) ?? ""}
+						avatarFallback={`${user?.firstName[0] ?? ""}${user?.lastName[0] ?? ""}`}
 						username={user?.userName ?? ""}
 						fullname={`${user?.firstName} ${user?.lastName}`}
 						memberSince={user?.createdAt ?? ""}

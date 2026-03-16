@@ -15,9 +15,6 @@ export function UserSearchResult({ user, onPostClick }: UserSearchResultProps) {
 		return null;
 	}
 
-	// Safely compute derived values with fallbacks
-	const avatarFallback =
-		`${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase() || "??";
 	const fullName = [user.firstName, user.lastName].filter(Boolean).join(" ") || "Unknown User";
 
 	// Get user's recent posts (up to 3)
@@ -31,7 +28,7 @@ export function UserSearchResult({ user, onPostClick }: UserSearchResultProps) {
 					<div className="flex items-center gap-4 md:flex-1">
 						<Avatar className="h-12 w-12">
 							<AvatarImage src={user.picture ? getImageUrl(user.picture) : undefined} />
-							<AvatarFallback>{avatarFallback}</AvatarFallback>
+							<AvatarFallback>{user.firstName[0] + user.lastName[0]}</AvatarFallback>
 						</Avatar>
 						<div className="flex-1 min-w-0">
 							<p className="font-semibold text-sm truncate">{user.userName}</p>

@@ -13,8 +13,7 @@ import { Toaster } from "@/components/ui/Sonner";
 import { OAuth2Listener } from "./OAuth2Listener";
 import { AuthProvider } from "./AuthContext";
 
-// Initialize Sentry for error tracking and performance monitoring
-initSentry();
+initSentry(); // Initialize Sentry for error tracking and performance monitoring.
 
 createRoot(document.getElementById("root")!).render(
 	<StrictMode>
