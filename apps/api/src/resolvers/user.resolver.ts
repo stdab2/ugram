@@ -115,8 +115,10 @@ export const userResolvers = {
 			validateNonEmptyString(args.firstName, "First name");
 			validateNonEmptyString(args.lastName, "Last name");
 
-			if (args.phoneNumber) {
-				validatePhoneNumber(args.phoneNumber);
+			const normalizedPhoneNumber = args.phoneNumber?.trim() ? args.phoneNumber.trim() : null;
+
+			if (normalizedPhoneNumber) {
+				validatePhoneNumber(normalizedPhoneNumber);
 			}
 
 			// Handle profile picture upload
@@ -136,7 +138,7 @@ export const userResolvers = {
 						password: hashedPassword,
 						firstName: args.firstName,
 						lastName: args.lastName,
-						phoneNumber: args.phoneNumber,
+						phoneNumber: normalizedPhoneNumber,
 						picture: pictureUrl,
 					},
 				});
@@ -190,8 +192,11 @@ export const userResolvers = {
 			}
 
 			if (args.phoneNumber !== undefined) {
-				validatePhoneNumber(args.phoneNumber);
-				data.phoneNumber = args.phoneNumber;
+				const normalizedPhoneNumber = args.phoneNumber.trim() ? args.phoneNumber.trim() : null;
+				if (normalizedPhoneNumber) {
+					validatePhoneNumber(normalizedPhoneNumber);
+				}
+				data.phoneNumber = normalizedPhoneNumber;
 			}
 
 			if (args.picture !== undefined) {

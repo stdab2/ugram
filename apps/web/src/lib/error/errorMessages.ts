@@ -68,6 +68,13 @@ export function getUserFriendlyMessage(error: AppError | unknown): string {
 		message = appErr.message || "";
 		errorType = appErr.type;
 
+		if (code === "CONFLICT") {
+			const conflictMessage = getConflictMessage(message);
+			if (conflictMessage) {
+				return conflictMessage;
+			}
+		}
+
 		// First try to find by code
 		const codeMessage = ERROR_MESSAGES[code];
 		if (codeMessage) {
@@ -77,6 +84,13 @@ export function getUserFriendlyMessage(error: AppError | unknown): string {
 		const err = error as Record<string, unknown>;
 		code = (err.code as string) || "";
 		message = extractErrorMessage(error);
+
+		if (code === "CONFLICT") {
+			const conflictMessage = getConflictMessage(message);
+			if (conflictMessage) {
+				return conflictMessage;
+			}
+		}
 	} else if (typeof error === "string") {
 		message = error;
 	}
@@ -142,6 +156,28 @@ export function getUserFriendlyMessage(error: AppError | unknown): string {
 	}
 
 	return ERROR_MESSAGES.UNKNOWN_ERROR;
+}
+
+function getConflictMessage(message: string): string | undefined {
+	const lowerMessage = message.toLowerCase();
+
+	if (lowerMessage.includes("phone")) {
+		return "This phone number is already used by another account.";
+	}
+
+	if (lowerMessage.includes("email")) {
+		return "This email is already used by another account.";
+	}
+
+	if (lowerMessage.includes("username") || lowerMessage.includes("user name")) {
+		return "This username is already taken.";
+	}
+
+	if (lowerMessage.includes("already exists")) {
+		return "This value is already used by another account.";
+	}
+
+	return undefined;
 }
 
 /**
