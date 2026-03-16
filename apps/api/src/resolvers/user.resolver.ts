@@ -192,9 +192,7 @@ export const userResolvers = {
 			}
 
 			if (args.phoneNumber !== undefined) {
-				const normalizedPhoneNumber = args.phoneNumber.trim()
-					? args.phoneNumber.trim()
-					: null;
+				const normalizedPhoneNumber = args.phoneNumber.trim() ? args.phoneNumber.trim() : null;
 				if (normalizedPhoneNumber) {
 					validatePhoneNumber(normalizedPhoneNumber);
 				}
