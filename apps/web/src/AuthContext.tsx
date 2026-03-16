@@ -1,8 +1,9 @@
 import React, { createContext, useState, useEffect } from "react";
 import type { User, AuthContextType } from "./types/auth";
 import { toast } from "sonner";
+import { getApiBaseUrl } from "@/lib/utils";
 
-const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:4001";
+const baseUrl = getApiBaseUrl();
 
 const AuthContext = createContext<AuthContextType>({
 	userAuth: null,
@@ -36,8 +37,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 			return;
 		}
 		try {
-			const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:4001";
-
 			const response = await fetch(`${baseUrl}/auth/me`, {
 				method: "GET",
 				headers: {

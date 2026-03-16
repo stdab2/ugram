@@ -2,7 +2,7 @@ name: Deploy Web to S3
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, feature/environment-variables]
     paths:
       - "apps/web/**"
       - "pnpm-lock.yaml"
@@ -37,8 +37,6 @@ jobs:
 
       - name: Generate GraphQL types
         run: pnpm --filter web codegen
-        env:
-          GRAPHQL_SCHEMA_URL: ${{ secrets.GRAPHQL_SCHEMA_URL }}
 
       - name: Set version
         id: version
@@ -83,8 +81,19 @@ jobs:
             exit 1
           fi
 
+      - name: Determine AWS auth method
+        id: auth_method
+        run: |
+          if [[ -n "$AWS_ROLE_ARN" ]]; then
+            echo "method=oidc" >> $GITHUB_OUTPUT
+          else
+            echo "method=key" >> $GITHUB_OUTPUT
+          fi
+        env:
+          AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+
       - name: Configure AWS credentials (OIDC)
-        if: ${{ secrets.AWS_ROLE_ARN != '' }}
+        if: steps.auth_method.outputs.method == 'oidc'
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ca-central-1
@@ -92,7 +101,7 @@ jobs:
           role-session-name: github-actions-web-deploy
 
       - name: Configure AWS credentials (Access key fallback)
-        if: ${{ secrets.AWS_ROLE_ARN == '' }}
+        if: steps.auth_method.outputs.method == 'key'
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ca-central-1
