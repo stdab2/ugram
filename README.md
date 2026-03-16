@@ -1,3 +1,140 @@
+# UGRAM - Quick Start
+
+This project includes:
+
+- web: Vite/React
+- api: Node/GraphQL
+- db: Postgres
+
+## Local Development (Docker Compose)
+
+1. Install and run Docker Desktop (includes Docker Compose v2).
+2. Create the local environment files used by the repo.
+3. If you run the app with Docker Compose, make sure the root `.env` file exists beside `docker-compose.yml`.
+4. From the repo root, run:
+
+```bash
+docker compose up --build
+```
+
+5. Open the app: http://localhost:5173
+
+### Useful Local Endpoints
+
+- Web: http://localhost:5173
+- GraphQL API: http://localhost:4001/graphql
+- DB: localhost:5432
+
+## Production
+
+- Web application: http://ugram-h2026-team17-web.s3-website.ca-central-1.amazonaws.com/
+
+## Local Environment Files
+
+This repo currently uses three local environment files:
+
+- Root `.env`: values consumed by `docker-compose.yml`, especially AWS/S3 and shared frontend media configuration.
+- `apps/api/.env`: values consumed when running the API directly outside Docker.
+- `apps/web/.env.local`: values consumed by the Vite frontend in local development.
+
+All of these files are ignored by git.
+
+### Root `.env`
+
+Used by Docker Compose for S3-related configuration and media URL setup:
+
+```dotenv
+# AWS S3 / CloudFront Configuration
+AWS_REGION="ca-central-1"
+AWS_ACCESS_KEY_ID="your-aws-access-key-id"
+AWS_SECRET_ACCESS_KEY="your-aws-secret-access-key"
+S3_BUCKET="ugram-media-s3"
+
+# CloudFront media base URL (no trailing slash)
+VITE_MEDIA_BASE_URL="https://d206wqa79jnx1m.cloudfront.net"
+```
+
+### API: `apps/api/.env`
+
+Used for local API development:
+
+```dotenv
+# Database connection
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/ugram"
+
+# API Configuration
+PORT=4000
+NODE_ENV=development
+
+# Google OAuth
+CLIENT_ID="..."
+CLIENT_SECRET="..."
+GOOGLE_REDIRECT_URI="http://localhost:4001/oauth2/callback/google"
+GOOGLE_CLIENT_ID="..."
+
+# JWT
+JWT_SECRET="..."
+
+ENV='dev'
+FRONTEND_ORIGIN="http://localhost:5173"
+```
+
+Note: the API code reads both `CLIENT_ID` and `GOOGLE_CLIENT_ID`, so keep them aligned.
+
+### Frontend: `apps/web/.env.local`
+
+Used for local web development:
+
+```dotenv
+# Sentry DSN - Get yours at https://sentry.io
+VITE_SENTRY_DSN=
+
+# Sentry release version (e.g., "1.0.0", git tag, or commit hash)
+# Used to track deployments in Sentry. Should be set in CI/CD pipeline.
+# Falls back to "dev" if not set.
+VITE_APP_VERSION=
+
+# GraphQL URL
+VITE_GRAPHQL_URL="http://localhost:4001/graphql"
+
+# S3 / CloudFront media base URL (no trailing slash)
+VITE_MEDIA_BASE_URL=
+
+# API base URL
+VITE_API_BASE_URL="http://localhost:4001"
+```
+
+`VITE_APP_VERSION` is optional in local development and falls back to `dev` if not set.
+
+If you already have these files locally, you do not need to request the values again unless they change.
+
+**Demo walkthrough**
+Start by creating an account from the sign-up page (http://localhost:5173/signup), or sign in from the login page (http://localhost:5173/login). Standard email/password authentication is available, and Google OAuth is also supported for sign-up and sign-in.
+
+Once authenticated, you arrive on the main feed (http://localhost:5173), which displays posts from all users ordered by date.
+
+From there, you can open the search page (http://localhost:5173/search). The search experience is one of the stronger parts of the app: it lets you explore users, posts, and hashtags from a single place, and you can narrow the results by type. You can run broad searches across all content, search for specific users, look up posts by text in their descriptions, or search hashtags directly. Hashtag search is especially useful because it also surfaces related posts and hashtag result counts.
+
+You can then navigate to the create post page (http://localhost:5173/create) and upload an image. When writing the description, you can add hashtags directly in the text, for example \#nature, and mention other users with \@username.
+
+After publishing, you can visit your own profile page (http://localhost:5173/profile/me) to view your posts, open a post to see its full description and tags, and edit or delete it from the post actions menu. You can also navigate to other users' profiles from the feed or from search results.
+
+In the settings page (http://localhost:5173/settings), you can edit your profile information. You can also delete your account there if needed.
+
+Finally, you can log out from the navigation menu.
+
+**Stop**
+
+```bash
+docker compose down
+```
+
+**Full reset (optional)**
+
+```bash
+docker compose down -v
+```
+
 # Design (Architecture & Technologies)
 
 This document describes the target architecture and the main technologies we plan to use for development and deployment.
@@ -194,51 +331,3 @@ Goal: keep the stack **simple, standard, and course-aligned**, while leaving roo
 ## Notes
 
 - Exact infrastructure details may evolve as the course progresses.
-
-# UGRAM - Quick Start (Docker Compose)
-
-This project includes:
-
-- web: Vite/React
-- api: Node/GraphQL
-- db: Postgres
-
-**Quick start (for grading)**
-
-1. Install and run Docker Desktop (includes Docker Compose v2).
-2. From the repo root, run:
-
-```bash
-docker compose up --build
-```
-
-3. Open the app: http://localhost:5173
-
-**Useful endpoints**
-
-- Web: http://localhost:5173
-- GraphQL API: http://localhost:4001/graphql
-- DB: localhost:5432
-
-**Demo walkthrough**
-Starting from the main page (http://localhost:5173), you can see a list of posts from all users, ordered by date.
-
-Then, you can navigate to the search page (http://localhost:5173/search) to see the list of users, then you can view a user's profile (http://localhost:5173/profile/:username) by clicking on them.
-
-After that, you can navigate to the create post page (http://localhost:5173/create) and upload an image you want to post. You can also add a description to your post, add tags directly from the description (e.g. \#nature) and also tag other users also from the description (e.g. \@jane_smith).
-
-After creating your post, you can navigate to your own profile page (http://localhost:5173/profile/me) and view your own posts. You can click on a post to view it's description and tags. You can also choose to either edit or delete a post that you made by clicking on the three dots at the top right of that view.
-
-Finally, you can navigate to the settings page to access and update your profile's informations.
-
-**Stop**
-
-```bash
-docker compose down
-```
-
-**Full reset (optional)**
-
-```bash
-docker compose down -v
-```
