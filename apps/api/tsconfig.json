@@ -20,6 +20,7 @@
 		"generated/**/*",
 		"src/services",
 		"*.ts",
+		"utils/**/*",
 		"Validators/**/*"
 	],
 	"exclude": ["node_modules", "dist"]

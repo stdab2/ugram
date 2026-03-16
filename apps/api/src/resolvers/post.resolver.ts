@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/node";
 import { PrismaClient } from "../../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 import {
@@ -157,10 +158,23 @@ export const postResolvers = {
 				try {
 					await deleteImageFromStorage(deletedPost.imageUrl);
 				} catch (cleanupError) {
+					const error =
+						cleanupError instanceof Error ? cleanupError : new Error(String(cleanupError));
+
+					Sentry.withScope((scope) => {
+						scope.setTag("resolver", "deletePost");
+						scope.setContext("cleanup", {
+							postId: deletedPost.id,
+							imageUrl: deletedPost.imageUrl,
+						});
+
+						Sentry.captureException(error);
+					});
+
 					console.warn("Post deleted but image cleanup failed", {
 						postId: deletedPost.id,
 						imageUrl: deletedPost.imageUrl,
-						error: cleanupError,
+						error,
 					});
 				}
 
