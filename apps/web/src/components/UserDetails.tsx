@@ -4,6 +4,7 @@ import { timestampToDateString } from "@/lib/utils";
 
 interface UserDetailsProps {
 	pictureUrl: string;
+	avatarFallback: string;
 	username: string;
 	fullname: string;
 	memberSince: string;
@@ -12,6 +13,7 @@ interface UserDetailsProps {
 
 export function UserDetails({
 	pictureUrl,
+	avatarFallback,
 	username,
 	fullname,
 	memberSince,
@@ -21,7 +23,7 @@ export function UserDetails({
 		<div className={cn("flex items-center gap-4", className)}>
 			<Avatar className="h-24 w-24 flex-shrink-0">
 				<AvatarImage src={pictureUrl} />
-				<AvatarFallback>JD</AvatarFallback>
+				<AvatarFallback>{avatarFallback}</AvatarFallback>
 			</Avatar>
 			<div>
 				<p className="font-bold text-lg">{username}</p>

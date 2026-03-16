@@ -9,7 +9,6 @@ import {
 	LogOut,
 	User,
 } from "lucide-react";
-import { CURRENT_USERNAME } from "@/lib/constants";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 import {
 	DropdownMenu,
@@ -21,6 +20,7 @@ import {
 import { Badge } from "@/components/ui/Badge";
 import { cn, getImageUrl } from "@/lib/utils";
 import { useUserByUserNameQuery } from "@/generated/graphql";
+import { useAuth } from "../AuthContext";
 
 const navItems = [
 	{ icon: Home, label: "Home", href: "/" },
@@ -30,18 +30,26 @@ const navItems = [
 ];
 
 export function Navigation() {
+	const { logout, userAuth } = useAuth();
 	const location = useLocation();
 	const navigate = useNavigate();
 	const pathname = location.pathname;
+	const currentUserName = userAuth?.userName;
+	const profilePath = currentUserName ? `/profile/${currentUserName}` : "/profile/me";
+	const isProfileActive = pathname === "/profile/me" || pathname === profilePath;
 
 	// Fetch current user data
 	const { data: userData } = useUserByUserNameQuery({
-		variables: { userName: CURRENT_USERNAME },
+		variables: { userName: currentUserName ?? "" },
+		skip: !currentUserName,
 	});
 
 	const user = userData?.userByUserName;
-	const avatarFallback = user ? user.firstName[0] + user.lastName[0] : "JD";
 	const avatarUrl = getImageUrl(user?.picture);
+
+	const handleLogout = () => {
+		logout();
+	};
 
 	return (
 		<>
@@ -99,16 +107,17 @@ export function Navigation() {
 						</Link>
 
 						<Link
-							to={`/profile/${CURRENT_USERNAME}`}
+							to={`/profile/me`}
 							className={cn(
 								"flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-all duration-200 hover:scale-105",
-								pathname === `/profile/${CURRENT_USERNAME}` &&
-									"bg-accent text-accent-foreground font-medium"
+								isProfileActive && "bg-accent text-accent-foreground font-medium"
 							)}
 						>
 							<Avatar className="h-8 w-8 flex-shrink-0">
 								<AvatarImage src={avatarUrl} />
-								<AvatarFallback>{avatarFallback}</AvatarFallback>
+								<AvatarFallback>
+									{user ? user.firstName[0] + user.lastName[0] : "??"}
+								</AvatarFallback>
 							</Avatar>
 							<span className="whitespace-nowrap opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">
 								Profile
@@ -132,7 +141,7 @@ export function Navigation() {
 						</Link>
 						<button
 							className="flex items-center gap-4 p-3 rounded-lg hover:bg-accent transition-all duration-200 hover:scale-105 text-left"
-							onClick={() => console.log("Déconnexion")}
+							onClick={handleLogout}
 						>
 							<LogOut className="w-6 h-6 flex-shrink-0" />
 							<span className="whitespace-nowrap opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">
@@ -169,7 +178,9 @@ export function Navigation() {
 						>
 							<Avatar className="h-9 w-9">
 								<AvatarImage src={avatarUrl} />
-								<AvatarFallback>{avatarFallback}</AvatarFallback>
+								<AvatarFallback>
+									{user ? user.firstName[0] + user.lastName[0] : "??"}
+								</AvatarFallback>
 							</Avatar>
 							<Badge
 								variant="destructive"
@@ -186,7 +197,7 @@ export function Navigation() {
 									3
 								</Badge>
 							</DropdownMenuItem>
-							<DropdownMenuItem onClick={() => navigate(`/profile/${CURRENT_USERNAME}`)}>
+							<DropdownMenuItem onClick={() => navigate(profilePath)}>
 								<User className="mr-2 h-4 w-4" />
 								Profile
 							</DropdownMenuItem>
@@ -195,7 +206,7 @@ export function Navigation() {
 								Settings
 							</DropdownMenuItem>
 							<DropdownMenuSeparator />
-							<DropdownMenuItem>Log Out</DropdownMenuItem>
+							<DropdownMenuItem onClick={handleLogout}>Log Out</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
 				</div>

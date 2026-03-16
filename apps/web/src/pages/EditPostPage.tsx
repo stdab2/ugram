@@ -11,13 +11,14 @@ import {
 } from "@/components/ui/Empty";
 import { Button } from "@/components/ui/Button";
 import { getImageUrl } from "@/lib/utils";
-import { CURRENT_USERNAME } from "@/lib/constants";
 import { AlertCircle, Lock } from "lucide-react";
 import { PageFade } from "@/components/PageFade";
 import { useUpdatePostMutation, PostDocument } from "@/generated/graphql";
 import { toast } from "sonner";
+import { useAuth } from "@/AuthContext";
 
 export function EditPostPage() {
+	const { userAuth } = useAuth();
 	const { id } = useParams();
 	const navigate = useNavigate();
 
@@ -107,16 +108,15 @@ export function EditPostPage() {
 	const handlePostUpdate = async (description: string) => {
 		try {
 			await updatePost({ variables: { id: post.id, description } });
+			toast.success("Your post has been successfully updated!");
 			navigate(-1);
-			toast.success("Your post has been successfully updated !");
-		} catch (error) {
-			console.error("Failed to update post:", error);
-			toast.error("Failed to update your post. Please try again.");
+		} catch {
+			// Error already handled by errorLink
 		}
 	};
 
 	// Check if user owns this post
-	if (post.author.userName !== CURRENT_USERNAME) {
+	if (post.author.userName !== userAuth!.userName) {
 		return (
 			<PageFade key="forbidden">
 				<div className="w-full min-h-screen bg-background pb-20 md:pb-0 flex items-center justify-center p-4">
@@ -146,6 +146,12 @@ export function EditPostPage() {
 					</div>
 
 					<PostForm
+						user={{
+							userName: post.author.userName,
+							firstName: post.author.firstName,
+							lastName: post.author.lastName,
+							picture: post.author.picture,
+						}}
 						initialImage={getImageUrl(post.imageUrl)}
 						initialDescription={post.description}
 						onPostEdit={handlePostUpdate}

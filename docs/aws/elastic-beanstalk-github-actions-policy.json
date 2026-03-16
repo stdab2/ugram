@@ -1,0 +1,30 @@
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Sid": "ElasticBeanstalkDeploy",
+			"Effect": "Allow",
+			"Action": [
+				"elasticbeanstalk:CreateStorageLocation",
+				"elasticbeanstalk:CreateApplicationVersion",
+				"elasticbeanstalk:DescribeApplicationVersions",
+				"elasticbeanstalk:DescribeEnvironments",
+				"elasticbeanstalk:DescribeEvents",
+				"elasticbeanstalk:UpdateEnvironment"
+			],
+			"Resource": "*"
+		},
+		{
+			"Sid": "ElasticBeanstalkArtifactBucket",
+			"Effect": "Allow",
+			"Action": ["s3:GetBucketLocation", "s3:ListBucket"],
+			"Resource": "arn:aws:s3:::elasticbeanstalk-ca-central-1-*"
+		},
+		{
+			"Sid": "ElasticBeanstalkArtifactObjects",
+			"Effect": "Allow",
+			"Action": ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
+			"Resource": "arn:aws:s3:::elasticbeanstalk-ca-central-1-*/*"
+		}
+	]
+}

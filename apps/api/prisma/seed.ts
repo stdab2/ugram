@@ -1,9 +1,11 @@
 import { PrismaClient, Prisma } from "../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 import "dotenv/config";
+import bcrypt from "bcrypt";
+import { getDatabaseUrl } from "../src/database-url.js";
 
 const adapter = new PrismaPg({
-	connectionString: process.env.DATABASE_URL,
+	connectionString: getDatabaseUrl(),
 });
 
 const prisma = new PrismaClient({
@@ -33,10 +35,12 @@ const hashtags: Prisma.HashtagCreateInput[] = [
 	{ name: "#nightphotography" },
 ];
 
+const encryptedPassword = await bcrypt.hash("qwerty", 10);
+
 const userData: Prisma.UserUgramCreateInput[] = [
 	{
 		userName: "john_doe",
-		password: "qwerty",
+		password: encryptedPassword,
 		email: "john.doe@example.com",
 		phoneNumber: "+15145550001",
 		firstName: "John",
@@ -78,7 +82,7 @@ const userData: Prisma.UserUgramCreateInput[] = [
 
 	{
 		userName: "jane_smith",
-		password: "qwerty",
+		password: encryptedPassword,
 		email: "jane.smith@example.com",
 		phoneNumber: "+15145550002",
 		firstName: "Jane",
@@ -103,7 +107,7 @@ const userData: Prisma.UserUgramCreateInput[] = [
 
 	{
 		userName: "travel_explorer",
-		password: "qwerty",
+		password: encryptedPassword,
 		email: "travel.explorer@example.com",
 		phoneNumber: "+15145550003",
 		firstName: "John",
@@ -133,7 +137,7 @@ const userData: Prisma.UserUgramCreateInput[] = [
 
 	{
 		userName: "foodie_lover",
-		password: "qwerty",
+		password: encryptedPassword,
 		email: "foodie.lover@example.com",
 		phoneNumber: "+15145550004",
 		firstName: "Maria",
@@ -163,7 +167,7 @@ const userData: Prisma.UserUgramCreateInput[] = [
 
 	{
 		userName: "urban_photographer",
-		password: "qwerty",
+		password: encryptedPassword,
 		email: "urban.photographer@example.com",
 		phoneNumber: "+15145550005",
 		firstName: "John",
@@ -201,9 +205,17 @@ async function main() {
 		});
 	}
 	for (const uData of userData) {
+		const { userName, password, phoneNumber, firstName, lastName, picture, email } = uData;
 		await prisma.userUgram.upsert({
-			where: { email: uData.email },
-			update: {},
+			where: { email },
+			update: {
+				userName,
+				password,
+				phoneNumber,
+				firstName,
+				lastName,
+				picture,
+			},
 			create: uData,
 		});
 	}

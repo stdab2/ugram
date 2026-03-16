@@ -1,8 +1,10 @@
 import { ApolloClient, InMemoryCache, ApolloLink } from "@apollo/client";
-import UploadHttpLink from "apollo-upload-client/UploadHttpLink.mjs";
+import createUploadLink from "apollo-upload-client/createUploadLink.mjs";
+import { createErrorLink } from "./errorLink";
+import { getGraphqlUrl } from "@/lib/utils";
 
-const httpLink = new UploadHttpLink({
-	uri: import.meta.env.VITE_GRAPHQL_URL ?? "http://localhost:4001/graphql",
+const httpLink = createUploadLink({
+	uri: getGraphqlUrl(),
 });
 
 const authLink = new ApolloLink((operation, forward) => {
@@ -19,8 +21,11 @@ const authLink = new ApolloLink((operation, forward) => {
 	return forward(operation);
 });
 
+// Create error link for handling GraphQL and network errors
+const errorLink = createErrorLink();
+
 export const apolloClient = new ApolloClient({
-	link: authLink.concat(httpLink),
+	link: errorLink.concat(authLink).concat(httpLink),
 	cache: new InMemoryCache(),
 	defaultOptions: {
 		watchQuery: {

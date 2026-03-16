@@ -11,9 +11,10 @@ model UserUgram {
   id            Int      @id @default(autoincrement())
   createdAt     DateTime @default(now())
   userName      String   @unique
-  password      String
+  password      String?
+  googleSub     String?  @unique
   email         String   @unique
-  phoneNumber   String   @unique
+  phoneNumber   String?  @unique
   firstName     String
   lastName      String
   picture       String?

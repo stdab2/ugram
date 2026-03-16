@@ -6,10 +6,11 @@ import { formatDescription, formatDate } from "@/lib/postUtils";
 import { PostModal } from "@/components/PostModal";
 import { PostMenu } from "@/components/PostMenu";
 import { DeletePostDialog } from "@/components/DeletePostDialog";
-import { CURRENT_USERNAME } from "@/lib/constants";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import type { PostsQuery } from "@/generated/graphql";
+import { useAuth } from "@/AuthContext";
+import { toast } from "sonner";
 
 type PostData = PostsQuery["posts"][0];
 
@@ -34,13 +35,13 @@ export function Post({
 	onComment,
 	onPostDeletion,
 }: PostProps) {
+	const { userAuth } = useAuth();
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
 	const navigate = useNavigate();
 
-	const avatarFallback = post.author.firstName[0] + post.author.lastName[0];
-	const isOwnPost = post.author.userName === CURRENT_USERNAME;
+	const isOwnPost = post.author.userName === userAuth!.userName;
 	const aspectRatioClasses = {
 		square: "aspect-square",
 		portrait: "aspect-[4/5]",
@@ -56,6 +57,17 @@ export function Post({
 		setShowDeleteDialog(false);
 	}
 
+	async function handleShare() {
+		const postUrl = `${window.location.origin}/post/${post.id}`;
+
+		try {
+			await navigator.clipboard.writeText(postUrl);
+			toast.success("Post link copied to clipboard.");
+		} catch {
+			toast.error("Unable to copy post link.");
+		}
+	}
+
 	return (
 		<>
 			<Card className="w-full max-w-[630px] border-0 border-b rounded-none">
@@ -65,7 +77,9 @@ export function Post({
 						<Link to={`/profile/${post.author.userName}`}>
 							<Avatar className="h-8 w-8">
 								<AvatarImage src={getImageUrl(post.author.picture)} />
-								<AvatarFallback>{avatarFallback}</AvatarFallback>
+								<AvatarFallback>
+									{post.author.firstName[0] + post.author.lastName[0]}
+								</AvatarFallback>
 							</Avatar>
 						</Link>
 						<div className="flex items-center gap-2">
@@ -129,13 +143,14 @@ export function Post({
 							<span className="text-sm font-semibold">{comments.toLocaleString()}</span>
 						)}
 					</button>
-					<Link
-						to={`/post/${post.id}`}
+					<button
+						type="button"
+						onClick={handleShare}
 						className="hover:text-muted-foreground transition-all duration-200 hover:scale-110"
 						aria-label="Share"
 					>
 						<Send className="w-6 h-6" strokeWidth={2} />
-					</Link>
+					</button>
 				</div>
 
 				{/* Description */}

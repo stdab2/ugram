@@ -62,6 +62,16 @@ export class InternalServerError extends ValidationError {
 }
 
 /**
+ * 401 Authentication Error - Request requires user authentication
+ */
+export class AuthenticationError extends ValidationError {
+	constructor(message: string) {
+		super(message, "AUTHENTICATION_ERROR", 401);
+		this.name = "AuthenticationError";
+	}
+}
+
+/**
  * Handle Prisma errors and map them to appropriate HTTP error codes
  * Can be used by any entity (User, Post, Hashtag, etc.)
  * @param error - The error caught from Prisma operation
@@ -70,6 +80,7 @@ export class InternalServerError extends ValidationError {
  * @throws {NotFoundError} For record not found (P2025)
  * @throws {BadRequestError} For foreign key violations (P2003)
  * @throws {InternalServerError} For other database errors
+ * @throws {AuthenticationError} For authentication/authorization errors (if applicable)
  */
 export const handlePrismaError = (error: unknown, resourceName: string = "Resource"): never => {
 	// Check if it's a Prisma error with a code
@@ -104,3 +115,14 @@ export const handlePrismaError = (error: unknown, resourceName: string = "Resour
 	console.error("Unexpected error:", error);
 	throw new InternalServerError();
 };
+
+/**
+ * 403 Forbidden - User does not have permission to perform the action
+ */
+
+export class PermissionError extends ValidationError {
+	constructor(message: string) {
+		super(message, "FORBIDDEN", 403);
+		this.name = "PermissionError";
+	}
+}

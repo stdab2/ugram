@@ -1,5 +1,6 @@
 import { PrismaClient, UserUgram, Prisma } from "../../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
+import bcrypt from "bcrypt";
 import { CreateUserInput, UpdateUserInput, QueryUsersInput } from "../types/user.types.js";
 import {
 	validateEmail,
@@ -9,12 +10,18 @@ import {
 	validateNonEmptyString,
 	validatePhoneNumber,
 	validateUserExists,
+	authenticateUser,
+	authenticateUserModifiesSelf,
 } from "../../Validators/validateUser.js";
 import { BadRequestError, handlePrismaError } from "../../Validators/errors.js";
-import { saveUploadedImage } from "../../services/image.service.js";
+import { saveUploadedImage } from "../services/image.service.js";
+import { UserContext } from "../types/userContext.types.js";
+import { getDatabaseUrl } from "../database-url.js";
+
+const SALT_ROUNDS = 10;
 
 const adapter = new PrismaPg({
-	connectionString: process.env.DATABASE_URL,
+	connectionString: getDatabaseUrl(),
 });
 
 const prisma = new PrismaClient({
@@ -32,21 +39,27 @@ export const userResolvers = {
 		 * @param id - User ID
 		 * @throws {Error} If user not found
 		 */
-		user: async (_: void, args: { id: number }): Promise<UserUgram | null> => {
+		user: async (
+			_: void,
+			args: { id: number },
+			context: UserContext
+		): Promise<UserUgram | null> => {
+			authenticateUser(context.user);
 			validateUserId(args.id);
 			return prisma.userUgram.findUnique({
 				where: { id: args.id },
 			});
 		},
 
-		userByUserName: async (_: void, args: { userName: string }) => {
-			validateUserName(args.userName);
+		userByUserName: async (_: void, args: { userName: string }, context: UserContext) => {
+			authenticateUser(context.user);
 			return prisma.userUgram.findUnique({
 				where: { userName: args.userName },
 			});
 		},
 
-		usersByUserNames: async (_: void, args: { userNames: string[] }) => {
+		usersByUserNames: async (_: void, args: { userNames: string[] }, context: UserContext) => {
+			authenticateUser(context.user);
 			const requested = Array.from(new Set(args.userNames.map((u) => u.trim()).filter(Boolean)));
 
 			const users = await prisma.userUgram.findMany({
@@ -64,7 +77,8 @@ export const userResolvers = {
 		 * @param limit - Max number of users to return
 		 * @param offset - Number of users to skip
 		 */
-		users: async (_: void, args: QueryUsersInput): Promise<UserUgram[]> => {
+		users: async (_: void, args: QueryUsersInput, context: UserContext): Promise<UserUgram[]> => {
+			authenticateUser(context.user);
 			const limit = Math.min(args.limit || 10, 100); // Cap at 100
 			const offset = Math.max(args.offset || 0, 0);
 
@@ -79,7 +93,8 @@ export const userResolvers = {
 		/**
 		 * Get posts for a user
 		 */
-		posts: async (parent: UserUgram) => {
+		posts: async (parent: UserUgram, _: unknown, context: UserContext) => {
+			authenticateUser(context.user);
 			return prisma.post.findMany({
 				where: { authorId: parent.id },
 			});
@@ -92,14 +107,17 @@ export const userResolvers = {
 		 * @throws {BadRequestError} If input validation fails
 		 * @throws {ConflictError} If user already exists
 		 */
-		createUser: async (_: void, args: CreateUserInput): Promise<UserUgram> => {
+		createUser: async (_: void, args: CreateUserInput) => {
 			// Validate inputs
 			validateUserName(args.userName);
 			validateEmail(args.email);
 			validatePassword(args.password);
 			validateNonEmptyString(args.firstName, "First name");
 			validateNonEmptyString(args.lastName, "Last name");
-			validatePhoneNumber(args.phoneNumber);
+
+			if (args.phoneNumber) {
+				validatePhoneNumber(args.phoneNumber);
+			}
 
 			// Handle profile picture upload
 			let pictureUrl: string | undefined;
@@ -107,12 +125,15 @@ export const userResolvers = {
 				pictureUrl = await saveUploadedImage(args.picture, "profile");
 			}
 
+			// Hash password before storing
+			const hashedPassword = await bcrypt.hash(args.password, SALT_ROUNDS);
+
 			try {
 				return await prisma.userUgram.create({
 					data: {
 						userName: args.userName,
 						email: args.email,
-						password: args.password,
+						password: hashedPassword,
 						firstName: args.firstName,
 						lastName: args.lastName,
 						phoneNumber: args.phoneNumber,
@@ -120,7 +141,7 @@ export const userResolvers = {
 					},
 				});
 			} catch (error: unknown) {
-				handlePrismaError(error, "User");
+				throw handlePrismaError(error, "User");
 			}
 		},
 
@@ -129,8 +150,11 @@ export const userResolvers = {
 		 * @throws {BadRequestError} If update data is invalid
 		 * @throws {NotFoundError} If user not found
 		 * @throws {ConflictError} If duplicate field
+		 * @throws {PermissionError} If connected user tries to modify another user
 		 */
-		updateUser: async (_: void, args: UpdateUserInput): Promise<UserUgram> => {
+		updateUser: async (_: void, args: UpdateUserInput, context: UserContext) => {
+			authenticateUser(context.user);
+			authenticateUserModifiesSelf(context.user, args.id);
 			validateUserId(args.id);
 
 			// Check if user exists before attempting update
@@ -151,7 +175,8 @@ export const userResolvers = {
 
 			if (args.password !== undefined) {
 				validatePassword(args.password);
-				data.password = args.password;
+				// Hash password before storing
+				data.password = await bcrypt.hash(args.password, SALT_ROUNDS);
 			}
 
 			if (args.firstName !== undefined) {
@@ -184,7 +209,42 @@ export const userResolvers = {
 					data,
 				});
 			} catch (error: unknown) {
-				handlePrismaError(error, "User");
+				throw handlePrismaError(error, "User");
+			}
+		},
+
+		/**
+		 * Delete the authenticated user's account
+		 * Requires password verification for password-based accounts
+		 * @throws {AuthenticationError} If password is wrong or user is not authenticated
+		 * @throws {NotFoundError} If user not found
+		 */
+		deleteUser: async (_: void, args: { password?: string }, context: UserContext) => {
+			authenticateUser(context.user);
+
+			const user = await prisma.userUgram.findUnique({
+				where: { id: context.user!.id },
+			});
+
+			if (!user) {
+				throw handlePrismaError(new Error("User not found"), "User");
+			}
+
+			if (user.password) {
+				if (!args.password) {
+					throw new BadRequestError("Password is required to delete your account");
+				}
+				const isValid = await bcrypt.compare(args.password, user.password);
+				if (!isValid) {
+					throw new BadRequestError("Incorrect password");
+				}
+			}
+
+			try {
+				await prisma.userUgram.delete({ where: { id: user.id } });
+				return true;
+			} catch (error: unknown) {
+				throw handlePrismaError(error, "User");
 			}
 		},
 	},

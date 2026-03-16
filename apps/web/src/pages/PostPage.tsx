@@ -7,7 +7,6 @@ import { PostMenu } from "@/components/PostMenu";
 import { DeletePostDialog } from "@/components/DeletePostDialog";
 import { cn, getImageUrl } from "@/lib/utils";
 import { formatDescription, formatDate } from "@/lib/postUtils";
-import { CURRENT_USERNAME } from "@/lib/constants";
 import { useState } from "react";
 import { usePostQuery, useDeletePostMutation } from "@/generated/graphql";
 import { PageFade } from "@/components/PageFade";
@@ -21,6 +20,7 @@ import {
 import { AlertCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { toast } from "sonner";
+import { useAuth } from "@/AuthContext";
 
 interface Comment {
 	id: string;
@@ -34,6 +34,7 @@ interface Comment {
 }
 
 export function PostPage() {
+	const { userAuth } = useAuth();
 	const { id } = useParams();
 	const navigate = useNavigate();
 
@@ -122,12 +123,12 @@ export function PostPage() {
 			await deletePost({ variables: { id: postId } });
 			toast.success("Your post has been successfully deleted!");
 			navigate("/");
-		} catch (error) {
-			console.error("Failed to delete post:", error);
-			toast.error("Failed to delete your post. Please try again.");
+		} catch {
+			// Error already handled by errorLink
 			setIsDeleting(false);
+		} finally {
+			setShowDeleteDialog(false);
 		}
-		setShowDeleteDialog(false);
 	};
 
 	// Handle loading state
@@ -194,8 +195,7 @@ export function PostPage() {
 
 	// Extract author info for convenience
 	const author = post.author;
-	const avatarFallback = author.firstName[0] + author.lastName[0];
-	const isOwnPost = author.userName === CURRENT_USERNAME;
+	const isOwnPost = author.userName === userAuth!.userName;
 
 	const { description: formattedDescription, hashtags } = formatDescription(post.description);
 
@@ -227,7 +227,7 @@ export function PostPage() {
 										<Link to={`/profile/${author.userName}`}>
 											<Avatar className="h-10 w-10">
 												<AvatarImage src={getImageUrl(author.picture)} />
-												<AvatarFallback>{avatarFallback}</AvatarFallback>
+												<AvatarFallback>{author.firstName[0] + author.lastName[0]}</AvatarFallback>
 											</Avatar>
 										</Link>
 										<div>
@@ -251,7 +251,7 @@ export function PostPage() {
 										<Link to={`/profile/${author.userName}`}>
 											<Avatar className="h-8 w-8 flex-shrink-0">
 												<AvatarImage src={getImageUrl(author.picture)} />
-												<AvatarFallback>{avatarFallback}</AvatarFallback>
+												<AvatarFallback>{author.firstName[0] + author.lastName[0]}</AvatarFallback>
 											</Avatar>
 										</Link>
 										<div className="flex-1">

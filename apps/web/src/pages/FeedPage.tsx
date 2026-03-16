@@ -36,7 +36,6 @@ export function FeedPage() {
 			toast.success("Your post has been successfully deleted !");
 		} catch (error) {
 			console.error("Failed to delete post:", error);
-			toast.error("Failed to delete your post. Please try again.");
 		}
 	};
 

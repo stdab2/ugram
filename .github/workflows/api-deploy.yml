@@ -1,0 +1,87 @@
+name: Deploy API to Elastic Beanstalk
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - feature/deploy-api-to-beanstalk
+      - feature/environment-variables
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: |
+          pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        working-directory: ./apps/api
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+        run: |
+          pnpm exec prisma generate
+
+      - name: Build API
+        run: |
+          pnpm run build:api
+
+      - name: Prepare deployment package
+        run: |
+          mkdir -p deploy
+          cd apps/api
+
+          # Copier les fichiers essentiels
+          cp -r dist ../../deploy/
+          cp -r generated ../../deploy/
+          cp -r prisma ../../deploy/
+          cp -r .ebextensions ../../deploy/
+          cp dist/prisma.config.js ../../deploy/prisma.config.js
+          cp package.json ../../deploy/
+          cp Procfile ../../deploy/
+
+          # Créer les dossiers uploads
+          mkdir -p ../../deploy/uploads/post
+          mkdir -p ../../deploy/uploads/profile
+          mkdir -p ../../deploy/src
+          cp dist/src/database-url.js ../../deploy/src/database-url.js
+
+          # Laisser Elastic Beanstalk installer les dependances via npm
+
+      - name: Generate deployment package
+        run: |
+          cd deploy
+          zip -r ../deploy.zip . -x '*.git*'
+          cd ..
+          ls -lh deploy.zip
+
+      - name: Get timestamp
+        id: timestamp
+        run: echo "timestamp=$(date +'%Y%m%d_%H%M%S')" >> $GITHUB_OUTPUT
+
+      - name: Deploy to Elastic Beanstalk
+        uses: einaregilsson/beanstalk-deploy@v22
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: ugram-h2026-team17-api
+          environment_name: production
+          version_label: "v-${{ steps.timestamp.outputs.timestamp }}-${{ github.sha }}"
+          region: ca-central-1
+          deployment_package: deploy.zip
+          wait_for_deployment: true
+          wait_for_environment_recovery: 300

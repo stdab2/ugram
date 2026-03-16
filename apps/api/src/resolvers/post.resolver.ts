@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/node";
 import { PrismaClient } from "../../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 import {
@@ -5,14 +6,22 @@ import {
 	validateUsersExist,
 	validateNonEmptyString,
 } from "../../Validators/validateUser.js";
-import { saveUploadedImage } from "../../services/image.service.js";
+import { saveUploadedImage, deleteImageFromStorage } from "../services/image.service.js";
 import type { FileUpload } from "graphql-upload";
 import { Post } from "../../generated/prisma/client.js";
 import { handlePrismaError } from "../../Validators/errors.js";
-import { validatePostId } from "../../Validators/validatePost.js";
+import {
+	validatePostId,
+	validatePostCreationOwnership,
+	validatePostOwnership,
+	validatePostExists,
+} from "../../Validators/validatePost.js";
+import { authenticateUser } from "../../Validators/validateUser.js";
+import { UserContext } from "../types/userContext.types.js";
+import { getDatabaseUrl } from "../database-url.js";
 
 const adapter = new PrismaPg({
-	connectionString: process.env.DATABASE_URL,
+	connectionString: getDatabaseUrl(),
 });
 
 const prisma = new PrismaClient({
@@ -31,41 +40,52 @@ type CreatePostArgs = {
 
 export const postResolvers = {
 	Query: {
-		post: async (_: unknown, args: { id: number }) => {
+		post: async (_: unknown, args: { id: number }, context: UserContext) => {
+			authenticateUser(context.user);
 			validatePostId(args.id);
 			return prisma.post.findUnique({
 				where: { id: args.id },
 			});
 		},
-		posts: async (_: unknown, args: { limit?: number; offset?: number }) => {
+		posts: async (_: unknown, args: { limit?: number; offset?: number }, context: UserContext) => {
+			authenticateUser(context.user);
+			const limit = Math.min(Math.max(args.limit ?? 20, 0), 100);
+			const offset = Math.max(args.offset ?? 0, 0);
 			return prisma.post.findMany({
-				take: args.limit,
-				skip: args.offset,
+				take: limit,
+				skip: offset,
 			});
 		},
 		postsByAuthor: async (
 			_: unknown,
-			args: { authorId: number; limit?: number; offset?: number }
+			args: { authorId: number; limit?: number; offset?: number },
+			context: UserContext
 		) => {
+			authenticateUser(context.user);
 			validateUserId(args.authorId);
+			const limit = Math.min(Math.max(args.limit ?? 20, 0), 100);
+			const offset = Math.max(args.offset ?? 0, 0);
 			return prisma.post.findMany({
 				where: { authorId: args.authorId },
-				take: args.limit,
-				skip: args.offset,
+				take: limit,
+				skip: offset,
 			});
 		},
 	},
 	Post: {
-		author: async (parent: Post) => {
+		author: async (parent: Post, _: unknown, context: UserContext) => {
+			authenticateUser(context.user);
 			return prisma.userUgram.findUnique({
 				where: { id: parent.authorId },
 			});
 		},
 	},
 	Mutation: {
-		createPost: async (_: unknown, { data }: CreatePostArgs) => {
+		createPost: async (_: unknown, { data }: CreatePostArgs, context: UserContext) => {
+			authenticateUser(context.user);
 			const { description, image, authorId, hashtags, mentionedUsers } = data;
 			validateUserId(authorId);
+			validatePostCreationOwnership(authorId, context.user);
 			validateNonEmptyString(description, "Post description");
 
 			if (mentionedUsers && mentionedUsers.length > 0) {
@@ -125,18 +145,53 @@ export const postResolvers = {
 				handlePrismaError(error, "Post");
 			}
 		},
-		deletePost: async (_: unknown, args: { id: number }) => {
+		deletePost: async (_: unknown, args: { id: number }, context: UserContext) => {
+			authenticateUser(context.user);
 			validatePostId(args.id);
+			await validatePostExists(args.id);
+			await validatePostOwnership(args.id, context.user);
 			try {
-				return await prisma.post.delete({
+				const deletedPost = await prisma.post.delete({
 					where: { id: args.id },
 				});
+
+				try {
+					await deleteImageFromStorage(deletedPost.imageUrl);
+				} catch (cleanupError) {
+					const error =
+						cleanupError instanceof Error ? cleanupError : new Error(String(cleanupError));
+
+					Sentry.withScope((scope) => {
+						scope.setTag("resolver", "deletePost");
+						scope.setContext("cleanup", {
+							postId: deletedPost.id,
+							imageUrl: deletedPost.imageUrl,
+						});
+
+						Sentry.captureException(error);
+					});
+
+					console.warn("Post deleted but image cleanup failed", {
+						postId: deletedPost.id,
+						imageUrl: deletedPost.imageUrl,
+						error,
+					});
+				}
+
+				return deletedPost;
 			} catch (error: unknown) {
 				handlePrismaError(error, "Post");
 			}
 		},
-		updatePost: async (_: unknown, args: { id: number; description: string }) => {
+		updatePost: async (
+			_: unknown,
+			args: { id: number; description: string },
+			context: UserContext
+		) => {
+			authenticateUser(context.user);
 			validatePostId(args.id);
+			await validatePostExists(args.id);
+			await validatePostOwnership(args.id, context.user);
 			validateNonEmptyString(args.description, "Post description");
 
 			try {

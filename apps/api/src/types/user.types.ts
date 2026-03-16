@@ -10,7 +10,7 @@ export interface CreateUserInput {
 	password: string;
 	firstName: string;
 	lastName: string;
-	phoneNumber: string;
+	phoneNumber?: string;
 	picture?: Promise<FileUpload>;
 }
 

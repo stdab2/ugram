@@ -1,14 +1,22 @@
+import "dotenv/config";
+import "../instrument.js";
+import * as Sentry from "@sentry/node";
+import { ValidationError } from "../Validators/errors.js";
+import { GraphQLError } from "graphql";
 import express, { Express } from "express";
 import cors from "cors";
 import http from "http";
-import path from "node:path";
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@as-integrations/express5";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.mjs";
 import { typeDefs } from "./schema/index.js";
 import { resolvers } from "./resolvers/index.js";
-
+import "dotenv/config";
+import { verifyToken } from "./services/jwt.service.js";
+import cookieParser from "cookie-parser";
+import oauthRouter from "./routes/oauth.route.js";
+import authRouter from "./routes/auth.route.js";
 async function startServer() {
 	const app: Express = express();
 	const httpServer = http.createServer(app);
@@ -18,19 +26,41 @@ async function startServer() {
 		typeDefs,
 		resolvers,
 		plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+		//catch all unhandled errors to log them and report to Sentry if needed
+		formatError: (formattedError, error: unknown) => {
+			const originalError = error instanceof GraphQLError ? (error.originalError ?? error) : error;
+
+			if (!(originalError instanceof ValidationError)) {
+				Sentry.captureException(originalError);
+			}
+
+			return formattedError;
+		},
 	});
 
 	app.use(cors());
-	app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+	app.use(cookieParser());
+	app.use(express.json());
+	app.use("/oauth2", oauthRouter);
+
+	app.use("/auth", authRouter);
 
 	app.use("/graphql", graphqlUploadExpress({ maxFileSize: 10_000_000, maxFiles: 1 }));
-	// Start Apollo server
-	// Basic middleware
-	app.use(express.json());
+
 	await server.start();
 
-	// Mount GraphQL endpoint
-	app.use("/graphql", expressMiddleware(server));
+	app.use(
+		"/graphql",
+		expressMiddleware(server, {
+			context: async ({ req }) => {
+				const token = req.headers.authorization || "";
+				const user = verifyToken(token);
+				return { user };
+			},
+		})
+	);
+
+	Sentry.setupExpressErrorHandler(app);
 
 	const port = Number(process.env.PORT) || 4000;
 	await new Promise<void>((resolve) => httpServer.listen({ port, host: "0.0.0.0" }, resolve));

@@ -2,13 +2,14 @@
  * User input validators
  * Centralized validation logic for user operations
  */
-
 import { PrismaClient } from "../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { BadRequestError, NotFoundError } from "./errors.js";
+import { BadRequestError, NotFoundError, AuthenticationError, PermissionError } from "./errors.js";
+import { UserContext } from "../src/types/userContext.types.js";
+import { getDatabaseUrl } from "../src/database-url.js";
 
 const adapter = new PrismaPg({
-	connectionString: process.env.DATABASE_URL,
+	connectionString: getDatabaseUrl(),
 });
 
 const prisma = new PrismaClient({
@@ -68,6 +69,10 @@ export const validatePassword = (password: string): void => {
  * @throws {BadRequestError} If invalid
  */
 export const validatePhoneNumber = (phoneNumber: string): void => {
+	if (!phoneNumber || phoneNumber.trim() === "") {
+		return;
+	}
+
 	// e.g. +12223334444
 	const phoneRegex = /^\+?[1-9][0-9]{7,14}$/;
 	if (!phoneRegex.test(phoneNumber)) {
@@ -114,5 +119,31 @@ export const validateUsersExist = async (userIds: number[]): Promise<void> => {
 
 	if (users.length !== userIds.length) {
 		throw new NotFoundError("One or more users do not exist");
+	}
+};
+
+export const authenticateUser = (user: UserContext["user"]) => {
+	if (!user) {
+		throw new AuthenticationError("User not authenticated");
+	}
+};
+
+/**
+ * Validate owner can only modifies their own data
+ * @param connectedUser - Currently authenticated user
+ * @param userToModifyId - User ID to check
+ * @throws {PermissionError} If user tries tomodify information from another user
+ */
+export const authenticateUserModifiesSelf = (
+	connectedUser: UserContext["user"],
+	userToModifyId: number
+) => {
+	if (connectedUser?.id !== userToModifyId) {
+		console.warn("User attempted to modify another user", {
+			authenticatedUserId: connectedUser?.id,
+			targetUserId: userToModifyId,
+			resolver: "updateUser",
+		});
+		throw new PermissionError("User cannot modify other users");
 	}
 };
