@@ -50,6 +50,7 @@ jobs:
           cp -r generated ../../deploy/
           cp -r prisma ../../deploy/
           cp -r .ebextensions ../../deploy/
+          cp -r .platform ../../deploy/
           cp dist/prisma.config.js ../../deploy/prisma.config.js
           cp package.json ../../deploy/
           cp Procfile ../../deploy/
