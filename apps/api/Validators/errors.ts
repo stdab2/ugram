@@ -83,6 +83,21 @@ export class AuthenticationError extends ValidationError {
  * @throws {AuthenticationError} For authentication/authorization errors (if applicable)
  */
 export const handlePrismaError = (error: unknown, resourceName: string = "Resource"): never => {
+	const getConflictFieldName = (target?: string[]): string => {
+		const normalizedTarget = (target ?? []).join(",").toLowerCase();
+
+		if (normalizedTarget.includes("phone")) return "phone number";
+		if (normalizedTarget.includes("email")) return "email";
+		if (normalizedTarget.includes("username") || normalizedTarget.includes("user_name")) {
+			return "username";
+		}
+		if (normalizedTarget.includes("google") && normalizedTarget.includes("sub")) {
+			return "Google account";
+		}
+
+		return target?.[0] || "field";
+	};
+
 	// Check if it's a Prisma error with a code
 	if (typeof error === "object" && error !== null && "code" in error) {
 		const prismaError = error as { code: string; meta?: { target?: string[] } };
@@ -90,7 +105,7 @@ export const handlePrismaError = (error: unknown, resourceName: string = "Resour
 		switch (prismaError.code) {
 			case "P2002": {
 				// Unique constraint violation
-				const field = prismaError.meta?.target?.[0] || "field";
+				const field = getConflictFieldName(prismaError.meta?.target);
 				throw new ConflictError(`${resourceName} with this ${field} already exists`);
 			}
 			case "P2025": {
