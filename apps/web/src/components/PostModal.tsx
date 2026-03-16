@@ -11,6 +11,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import type { PostsQuery, PostsByAuthorQuery } from "@/generated/graphql";
 import { useAuth } from "@/AuthContext";
+import { toast } from "sonner";
 
 type PostData = PostsQuery["posts"][0] | PostsByAuthorQuery["postsByAuthor"][0];
 
@@ -55,7 +56,6 @@ export function PostModal({
 
 	// Extract author info for convenience
 	const author = post.author;
-	const avatarFallback = author.firstName[0] + author.lastName[0];
 	const isOwnPost = author.userName === userAuth!.userName;
 
 	// Mock comments - use lazy initialization to avoid calling Date.now() during render
@@ -115,6 +115,17 @@ export function PostModal({
 		setShowDeleteDialog(false);
 	}
 
+	async function handleShare() {
+		const postUrl = `${window.location.origin}/post/${post.id}`;
+
+		try {
+			await navigator.clipboard.writeText(postUrl);
+			toast.success("Post link copied to clipboard.");
+		} catch {
+			toast.error("Unable to copy post link.");
+		}
+	}
+
 	const { description: formattedDescription, hashtags } = formatDescription(post.description);
 
 	return (
@@ -142,7 +153,7 @@ export function PostModal({
 									<Link to={`/profile/${author.userName}`}>
 										<Avatar className="h-10 w-10">
 											<AvatarImage src={getImageUrl(author.picture)} />
-											<AvatarFallback>{avatarFallback}</AvatarFallback>
+											<AvatarFallback>{author.firstName[0] + author.lastName[0]}</AvatarFallback>
 										</Avatar>
 									</Link>
 									<div>
@@ -172,7 +183,7 @@ export function PostModal({
 									<Link to={`/profile/${author.userName}`}>
 										<Avatar className="h-8 w-8 flex-shrink-0">
 											<AvatarImage src={getImageUrl(author.picture)} />
-											<AvatarFallback>{avatarFallback}</AvatarFallback>
+											<AvatarFallback>{author.firstName[0] + author.lastName[0]}</AvatarFallback>
 										</Avatar>
 									</Link>
 									<div className="flex-1">
@@ -258,7 +269,9 @@ export function PostModal({
 										)}
 									</button>
 									<button
-										className="hover:text-muted-foreground transition-colors"
+										type="button"
+										onClick={handleShare}
+										className="hover:text-muted-foreground transition-all duration-200 hover:scale-110"
 										aria-label="Share"
 									>
 										<Send className="w-6 h-6" strokeWidth={2} />
