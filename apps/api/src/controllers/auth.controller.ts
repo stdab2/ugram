@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getUserByEmail, validateUserCredentials } from "../services/user.service.js";
+import { validateUserCredentials, getUserById } from "../services/user.service.js";
 import { generateToken, verifyToken } from "../services/jwt.service.js";
 import { NotFoundError, AuthenticationError } from "../../Validators/errors.js";
 
@@ -35,7 +35,7 @@ export async function me(req: Request, res: Response) {
 		throw new AuthenticationError("Unauthorized");
 	}
 
-	const user = await getUserByEmail(jwtUser.email);
+	const user = await getUserById(jwtUser.id);
 
 	if (user === null) {
 		throw new NotFoundError("User not found");

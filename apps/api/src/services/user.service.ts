@@ -97,3 +97,9 @@ export async function getUserByEmail(email: string) {
 		where: { email: email },
 	});
 }
+
+export async function getUserById(id: number) {
+	return prisma.userUgram.findUnique({
+		where: { id: id },
+	});
+}
