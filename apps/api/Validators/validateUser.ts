@@ -2,7 +2,6 @@
  * User input validators
  * Centralized validation logic for user operations
  */
-import logger from "../utils/logger.js";
 import { PrismaClient } from "../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { BadRequestError, NotFoundError, AuthenticationError, PermissionError } from "./errors.js";
@@ -140,7 +139,7 @@ export const authenticateUserModifiesSelf = (
 	userToModifyId: number
 ) => {
 	if (connectedUser?.id !== userToModifyId) {
-		logger.warn("User attempted to modify another user", {
+		console.warn("User attempted to modify another user", {
 			authenticatedUserId: connectedUser?.id,
 			targetUserId: userToModifyId,
 			resolver: "updateUser",

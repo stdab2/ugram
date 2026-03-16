@@ -1,5 +1,4 @@
 import * as Sentry from "@sentry/node";
-import logger from "../../utils/logger.js";
 import { PrismaClient } from "../../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 import {
@@ -172,7 +171,7 @@ export const postResolvers = {
 						Sentry.captureException(error);
 					});
 
-					logger.warn("Post deleted but image cleanup failed", {
+					console.warn("Post deleted but image cleanup failed", {
 						postId: deletedPost.id,
 						imageUrl: deletedPost.imageUrl,
 						error,

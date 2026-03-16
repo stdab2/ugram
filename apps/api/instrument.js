@@ -5,6 +5,11 @@ Sentry.init({
 
   // Send structured logs to Sentry
   enableLogs: true,
+    integrations: [
+      Sentry.consoleLoggingIntegration({
+        levels: ["log", "warn", "error"]
+      }),
+    ],
   // Setting this option to true will send default PII data to Sentry.
   // For example, automatic IP address collection on events
   sendDefaultPii: true,

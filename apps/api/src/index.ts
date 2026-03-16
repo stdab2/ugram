@@ -17,7 +17,6 @@ import { verifyToken } from "./services/jwt.service.js";
 import cookieParser from "cookie-parser";
 import oauthRouter from "./routes/oauth.route.js";
 import authRouter from "./routes/auth.route.js";
-console.log("BOOT API", process.pid);
 async function startServer() {
 	const app: Express = express();
 	const httpServer = http.createServer(app);
