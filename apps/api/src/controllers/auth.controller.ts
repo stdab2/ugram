@@ -53,5 +53,4 @@ export async function me(req: Request, res: Response) {
 		success: true,
 		user: { id, userName, email, firstName, lastName, profilePictureUrl, phoneNumber },
 	});
-	//ajout de commentaire inutile pour trigger le redeploy du frontend
 }
