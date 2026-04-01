@@ -114,7 +114,6 @@ export function CustomCursor() {
 					</div>
 				)}
 			</div>
-			{/* ajout de commentaire inutile pour trigger le redeploy du frontend */}
 		</>
 	);
 }
