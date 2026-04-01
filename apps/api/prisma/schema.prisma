@@ -20,6 +20,7 @@ model UserUgram {
   picture       String?
   posts         Post[]   @relation("UserPosts")
   mentions      Post[]   @relation("UserMentions")
+  messages      Message[] @relation("UserMessages")
 }
 
 model Post {
@@ -34,6 +35,7 @@ model Post {
   mentionedUsers UserUgram[] @relation("UserMentions")
 
   hashtags       Hashtag[]   @relation("PostHashtags")
+  messages       Message[]   @relation("PostMessages")
 }
 
 model Hashtag {
@@ -42,3 +44,16 @@ model Hashtag {
 
   posts Post[] @relation("PostHashtags")
 }
+
+model Message {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  content   String
+
+  authorId  Int
+  author    UserUgram @relation("UserMessages", fields: [authorId], references: [id], onDelete: Cascade)
+
+  postId    Int
+  post      Post      @relation("PostMessages", fields: [postId], references: [id], onDelete: Cascade)
+}
+
