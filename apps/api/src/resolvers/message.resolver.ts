@@ -13,7 +13,7 @@ import {
 	validateMessageExists,
 	validateMessageOwnership,
 	validateMessageCreationOwnership,
-} from "../../Validators/ValidateMessage.js";
+} from "../../Validators/validateMessage.js";
 import { UserContext } from "../types/userContext.types.js";
 import { getDatabaseUrl } from "../database-url.js";
 

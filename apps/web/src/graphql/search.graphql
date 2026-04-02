@@ -25,6 +25,7 @@ query Search(
 			posts {
 				id
 				imageUrl
+				messageCount
 			}
 		}
 		posts {
@@ -36,6 +37,7 @@ query Search(
 				picture
 				userName
 			}
+			messageCount
 			description
 			imageUrl
 			createdAt

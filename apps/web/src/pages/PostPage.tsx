@@ -105,8 +105,8 @@ export function PostPage() {
 		const comment: Comment = {
 			id: Date.now().toString(),
 			author: {
-				username: "current_user",
-				avatarUrl: "https://i.pravatar.cc/150?img=10",
+				username: userAuth!.userName,
+				avatarUrl: userAuth!.profilePictureUrl,
 				avatarFallback: "CU",
 			},
 			text: newComment,

@@ -4,6 +4,7 @@ query PostsByAuthor($authorId: Int!, $limit: Int, $offset: Int) {
 		description
 		imageUrl
 		createdAt
+		messageCount
 		author {
 			id
 			userName

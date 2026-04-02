@@ -3,6 +3,7 @@ query Posts($limit: Int, $offset: Int) {
 		id
 		description
 		imageUrl
+		messageCount
 		author {
 			firstName
 			lastName

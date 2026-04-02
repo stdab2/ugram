@@ -3,6 +3,7 @@ import { postResolvers } from "./post.resolver.js";
 import { hashtagResolvers } from "./hashtag.resolver.js";
 import { searchResolvers } from "./search.resolver.js";
 import { DateTimeScalar, scalars } from "./scalars.js";
+import { messageResolvers } from "./message.resolver.js";
 import GraphQLUpload from "graphql-upload/GraphQLUpload.mjs";
 
 export const resolvers = {
@@ -15,12 +16,14 @@ export const resolvers = {
 		...postResolvers.Query,
 		...hashtagResolvers.Query,
 		...searchResolvers.Query,
+		...messageResolvers.Query,
 	},
 
 	Mutation: {
 		...userResolvers.Mutation,
 		...postResolvers.Mutation,
 		...hashtagResolvers.Mutation,
+		...messageResolvers.Mutation,
 	},
 
 	Post: {
@@ -29,5 +32,9 @@ export const resolvers = {
 
 	UserUgram: {
 		...userResolvers.UserUgram,
+	},
+
+	Message: {
+		...messageResolvers.Message,
 	},
 };

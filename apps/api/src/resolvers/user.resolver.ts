@@ -97,6 +97,11 @@ export const userResolvers = {
 			authenticateUser(context.user);
 			return prisma.post.findMany({
 				where: { authorId: parent.id },
+				include: {
+					_count: {
+						select: { messages: true },
+					},
+				},
 			});
 		},
 	},

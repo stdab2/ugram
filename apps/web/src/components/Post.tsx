@@ -188,7 +188,6 @@ export function Post({
 				post={post}
 				aspectRatio={aspectRatio}
 				likes={likes}
-				comments={comments}
 				isLiked={isLiked}
 				onPostDeletion={() => handlePostDeletion(post.id)}
 			/>

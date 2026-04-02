@@ -12,6 +12,7 @@ query Users($limit: Int, $offset: Int) {
 			imageUrl
 			description
 			createdAt
+			messageCount
 		}
 		createdAt
 	}

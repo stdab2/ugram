@@ -13,6 +13,7 @@ query User($id: Int!) {
 			imageUrl
 			description
 			createdAt
+			messageCount
 		}
 	}
 }

@@ -126,7 +126,6 @@ export function ProfilePage() {
 	const userPosts = [...(user.posts || [])].sort(
 		(a, b) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime()
 	);
-
 	return (
 		<PageFade key="content">
 			<div className="w-full min-h-screen bg-background pb-20 md:pb-0">
@@ -198,7 +197,7 @@ export function ProfilePage() {
 								id: post.id,
 								imageUrl: post.imageUrl || "",
 								likes: 0, // TODO: Add likes count to GraphQL schema
-								comments: 0, // TODO: Add comments count to GraphQL schema
+								messageCount: post.messageCount,
 							}))}
 							onPostClick={(postPreview) => {
 								const fullPost = userPosts.find((p) => p.id === postPreview.id);

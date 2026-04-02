@@ -100,7 +100,7 @@ export function FeedPage() {
 							post={post}
 							aspectRatio={"square"}
 							likes={100} // Replace with actual like count from API
-							comments={20} // Replace with actual comment count from API
+							comments={post.messageCount}
 							isLiked={false} // Replace with actual like status from API
 							onLike={() => console.log("Like", post.id)}
 							onComment={() => console.log("Comment", post.id)}
