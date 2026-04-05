@@ -9,6 +9,7 @@ import { DeletePostDialog } from "@/components/DeletePostDialog";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import type { PostsQuery } from "@/generated/graphql";
+import { useLikePostMutation, useUnlikePostMutation } from "@/generated/graphql";
 import { useAuth } from "@/AuthContext";
 import { toast } from "sonner";
 
@@ -31,7 +32,6 @@ export function Post({
 	likes = 0,
 	comments = 0,
 	isLiked = false,
-	onLike,
 	onComment,
 	onPostDeletion,
 }: PostProps) {
@@ -40,7 +40,8 @@ export function Post({
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
 	const navigate = useNavigate();
-
+	const [likePost] = useLikePostMutation();
+	const [unlikePost] = useUnlikePostMutation();
 	const isOwnPost = post.author.userName === userAuth!.userName;
 	const aspectRatioClasses = {
 		square: "aspect-square",
@@ -67,6 +68,18 @@ export function Post({
 			toast.error("Unable to copy post link.");
 		}
 	}
+
+	const onLike = async () => {
+		if (post.isLikedByCurrentUser) {
+			await unlikePost({
+				variables: { postId: post.id },
+			});
+		} else {
+			await likePost({
+				variables: { postId: post.id },
+			});
+		}
+	};
 
 	return (
 		<>

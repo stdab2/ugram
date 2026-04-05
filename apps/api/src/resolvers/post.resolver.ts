@@ -79,6 +79,28 @@ export const postResolvers = {
 				where: { id: parent.authorId },
 			});
 		},
+		likeCount: async (parent: Post, _: unknown, context: UserContext) => {
+			authenticateUser(context.user);
+
+			return prisma.like.count({
+				where: { postId: parent.id },
+			});
+		},
+
+		isLikedByCurrentUser: async (parent: Post, _: unknown, context: UserContext) => {
+			authenticateUser(context.user);
+
+			const like = await prisma.like.findUnique({
+				where: {
+					userId_postId: {
+						userId: context.user!.id,
+						postId: parent.id,
+					},
+				},
+			});
+
+			return !!like;
+		},
 	},
 	Mutation: {
 		createPost: async (_: unknown, { data }: CreatePostArgs, context: UserContext) => {

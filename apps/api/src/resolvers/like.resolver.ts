@@ -18,7 +18,7 @@ const prisma = new PrismaClient({
 	adapter,
 });
 
-export const likesResolver = {
+export const likesResolvers = {
 	Query: {
 		isPostLiked: async (_: unknown, { postId }: { postId: number }, context: UserContext) => {
 			authenticateUser(context.user);

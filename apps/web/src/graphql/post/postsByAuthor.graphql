@@ -4,6 +4,8 @@ query PostsByAuthor($authorId: Int!, $limit: Int, $offset: Int) {
 		description
 		imageUrl
 		createdAt
+		likeCount
+		isLikedByCurrentUser
 		author {
 			id
 			userName

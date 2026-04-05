@@ -25,6 +25,7 @@ query Search(
 			posts {
 				id
 				imageUrl
+				likeCount
 			}
 		}
 		posts {
@@ -36,6 +37,8 @@ query Search(
 				picture
 				userName
 			}
+			likeCount
+			isLikedByCurrentUser
 			description
 			imageUrl
 			createdAt

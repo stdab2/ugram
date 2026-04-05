@@ -11,6 +11,8 @@ query UserByUserName($userName: String!) {
 			imageUrl
 			description
 			createdAt
+			likeCount
+			isLikedByCurrentUser
 		}
 	}
 }
