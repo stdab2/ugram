@@ -5,7 +5,7 @@ import { z } from "zod";
 import { userSettingsSchema, type UserSettingsFormData } from "@/lib/schemas";
 import { useState, useEffect } from "react";
 
-interface UserProfileFormProps {
+interface UserSettingsFormProps {
 	firstName: string;
 	lastName: string;
 	email: string;
@@ -19,7 +19,7 @@ interface UserProfileFormProps {
 	errors?: Partial<Record<keyof UserSettingsFormData, string>>;
 }
 
-export function UserProfileForm({
+export function UserSettingsForm({
 	firstName,
 	lastName,
 	email,
@@ -31,7 +31,7 @@ export function UserProfileForm({
 	onSubmit,
 	isSubmitting = false,
 	errors = {},
-}: UserProfileFormProps) {
+}: UserSettingsFormProps) {
 	const [isAddingPhone, setIsAddingPhone] = useState(!!phoneNumber);
 	const [localErrors, setLocalErrors] = useState<
 		Partial<Record<keyof UserSettingsFormData, string>>

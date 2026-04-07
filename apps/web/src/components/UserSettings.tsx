@@ -8,7 +8,7 @@ import { type UserSettingsFormData } from "@/lib/schemas";
 import { getImageUrl } from "@/lib/utils";
 import { toast } from "sonner";
 import { useAuth } from "@/AuthContext";
-import { UserProfileForm } from "@/components/UserSettingsForm";
+import { UserSettingsForm } from "@/components/UserSettingsForm";
 import { AccountDeletionDialog } from "@/components/AccountDeletionDialog";
 
 export function UserSettings({ className, ...props }: React.ComponentProps<"div">) {
@@ -94,7 +94,7 @@ export function UserSettings({ className, ...props }: React.ComponentProps<"div"
 						fullname={`${user?.firstName} ${user?.lastName}`}
 						memberSince={user?.createdAt ?? ""}
 					/>
-					<UserProfileForm
+					<UserSettingsForm
 						firstName={firstName}
 						lastName={lastName}
 						email={email}
