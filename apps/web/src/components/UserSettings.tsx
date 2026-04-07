@@ -26,7 +26,6 @@ export function UserSettings({ className, ...props }: React.ComponentProps<"div"
 	const [email, setEmail] = useState("");
 	const [phoneNumber, setPhoneNumber] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [errors, setErrors] = useState<Partial<Record<keyof UserSettingsFormData, string>>>({});
 	const [isDeleting, setIsDeleting] = useState(false);
 
 	useEffect(() => {
@@ -39,7 +38,6 @@ export function UserSettings({ className, ...props }: React.ComponentProps<"div"
 	}, [data]);
 
 	const handleProfileSubmit = async (validatedData: UserSettingsFormData) => {
-		setErrors({});
 		setIsSubmitting(true);
 
 		try {
@@ -105,7 +103,6 @@ export function UserSettings({ className, ...props }: React.ComponentProps<"div"
 						onPhoneNumberChange={setPhoneNumber}
 						onSubmit={handleProfileSubmit}
 						isSubmitting={isSubmitting}
-						errors={errors}
 					/>
 					<AccountDeletionDialog onConfirmDelete={handleDeleteAccount} isDeleting={isDeleting} />
 				</CardContent>

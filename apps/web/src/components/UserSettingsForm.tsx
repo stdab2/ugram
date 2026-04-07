@@ -3,7 +3,7 @@ import { Label } from "@/components/ui/Label";
 import { Button } from "@/components/ui/Button";
 import { z } from "zod";
 import { userSettingsSchema, type UserSettingsFormData } from "@/lib/schemas";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 interface UserSettingsFormProps {
 	firstName: string;
@@ -16,7 +16,6 @@ interface UserSettingsFormProps {
 	onPhoneNumberChange: (value: string) => void;
 	onSubmit: (data: UserSettingsFormData) => Promise<void>;
 	isSubmitting?: boolean;
-	errors?: Partial<Record<keyof UserSettingsFormData, string>>;
 }
 
 export function UserSettingsForm({
@@ -30,20 +29,13 @@ export function UserSettingsForm({
 	onPhoneNumberChange,
 	onSubmit,
 	isSubmitting = false,
-	errors = {},
 }: UserSettingsFormProps) {
 	const [isAddingPhone, setIsAddingPhone] = useState(!!phoneNumber);
-	const [localErrors, setLocalErrors] = useState<
-		Partial<Record<keyof UserSettingsFormData, string>>
-	>({});
-
-	useEffect(() => {
-		setLocalErrors(errors);
-	}, [errors]);
+	const [errors, setErrors] = useState<Partial<Record<keyof UserSettingsFormData, string>>>({});
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		setLocalErrors({});
+		setErrors({});
 
 		try {
 			const validatedData = userSettingsSchema.parse({
@@ -65,7 +57,7 @@ export function UserSettingsForm({
 					}
 				});
 
-				setLocalErrors(fieldErrors);
+				setErrors(fieldErrors);
 			}
 		}
 	};
@@ -81,9 +73,9 @@ export function UserSettingsForm({
 					value={firstName}
 					onChange={(e) => onFirstNameChange(e.target.value)}
 					maxLength={20}
-					className={localErrors.firstName ? "border-red-500" : ""}
+					className={errors.firstName ? "border-red-500" : ""}
 				/>
-				{localErrors.firstName && <p className="text-sm text-red-500">{localErrors.firstName}</p>}
+				{errors.firstName && <p className="text-sm text-red-500">{errors.firstName}</p>}
 				<Label htmlFor="lastname">Last Name</Label>
 				<Input
 					id="lastname"
@@ -92,9 +84,9 @@ export function UserSettingsForm({
 					value={lastName}
 					onChange={(e) => onLastNameChange(e.target.value)}
 					maxLength={20}
-					className={localErrors.lastName ? "border-red-500" : ""}
+					className={errors.lastName ? "border-red-500" : ""}
 				/>
-				{localErrors.lastName && <p className="text-sm text-red-500">{localErrors.lastName}</p>}
+				{errors.lastName && <p className="text-sm text-red-500">{errors.lastName}</p>}
 			</div>
 			<div className="space-y-2">
 				<Label htmlFor="email">Email</Label>
@@ -104,9 +96,9 @@ export function UserSettingsForm({
 					autoComplete="email"
 					value={email}
 					onChange={(e) => onEmailChange(e.target.value)}
-					className={localErrors.email ? "border-red-500" : ""}
+					className={errors.email ? "border-red-500" : ""}
 				/>
-				{localErrors.email && <p className="text-sm text-red-500">{localErrors.email}</p>}
+				{errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
 			</div>
 			<div className="space-y-2">
 				<Label htmlFor="telephone">Phone Number</Label>
@@ -127,11 +119,9 @@ export function UserSettingsForm({
 							placeholder="e.g. +12223334444"
 							value={phoneNumber}
 							onChange={(e) => onPhoneNumberChange(e.target.value)}
-							className={localErrors.phoneNumber ? "border-red-500" : ""}
+							className={errors.phoneNumber ? "border-red-500" : ""}
 						/>
-						{localErrors.phoneNumber && (
-							<p className="text-sm text-red-500">{localErrors.phoneNumber}</p>
-						)}
+						{errors.phoneNumber && <p className="text-sm text-red-500">{errors.phoneNumber}</p>}
 					</>
 				)}
 			</div>
