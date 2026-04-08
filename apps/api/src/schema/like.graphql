@@ -1,0 +1,8 @@
+extend type Query {
+  isPostLiked(postId: Int!): Boolean!
+}
+
+extend type Mutation {
+  likePost(postId: Int!): Post!
+  unlikePost(postId: Int!): Post!
+}

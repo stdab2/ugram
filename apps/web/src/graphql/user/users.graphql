@@ -12,6 +12,8 @@ query Users($limit: Int, $offset: Int) {
 			imageUrl
 			description
 			createdAt
+			likeCount
+			isLikedByCurrentUser
 		}
 		createdAt
 	}

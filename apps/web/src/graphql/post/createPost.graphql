@@ -4,6 +4,8 @@ mutation CreatePost($data: CreatePostInput!) {
 		description
 		imageUrl
 		createdAt
+		likeCount
+		isLikedByCurrentUser
 		author {
 			id
 			userName

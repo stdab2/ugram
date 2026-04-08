@@ -8,7 +8,9 @@ type Post {
 	author: UserUgram!
 	createdAt: DateTime!
 	hashtags: [Hashtag!]
-	mentionedUsers: [UserUgram!]
+	mentionedUsers: [UserUgram!]	
+	likeCount: Int!
+	isLikedByCurrentUser: Boolean!
 }
 
 extend type Query {

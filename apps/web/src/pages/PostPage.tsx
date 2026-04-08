@@ -8,7 +8,12 @@ import { DeletePostDialog } from "@/components/DeletePostDialog";
 import { cn, getImageUrl } from "@/lib/utils";
 import { formatDescription, formatDate } from "@/lib/postUtils";
 import { useState } from "react";
-import { usePostQuery, useDeletePostMutation } from "@/generated/graphql";
+import {
+	usePostQuery,
+	useDeletePostMutation,
+	useUnlikePostMutation,
+	useLikePostMutation,
+} from "@/generated/graphql";
 import { PageFade } from "@/components/PageFade";
 import {
 	Empty,
@@ -64,10 +69,10 @@ export function PostPage() {
 	});
 
 	const [newComment, setNewComment] = useState("");
-	const [isLiked, setIsLiked] = useState(false);
-	const [likesCount, setLikesCount] = useState(0);
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
+	const [likePost] = useLikePostMutation();
+	const [unlikePost] = useUnlikePostMutation();
 
 	// Mock comments - use lazy initialization to avoid calling Date.now() during render
 	const [comments, setComments] = useState<Comment[]>(() => [
@@ -93,9 +98,18 @@ export function PostPage() {
 		},
 	]);
 
-	const handleLike = () => {
-		setIsLiked((prev) => !prev);
-		setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
+	const handleLike = async () => {
+		if (post?.isLikedByCurrentUser) {
+			await unlikePost({
+				variables: { postId: post.id },
+			});
+		} else {
+			if (post) {
+				await likePost({
+					variables: { postId: post.id },
+				});
+			}
+		}
 	};
 
 	const handleAddComment = (e: React.FormEvent) => {
@@ -320,11 +334,16 @@ export function PostPage() {
 											aria-label="Like"
 										>
 											<Heart
-												className={cn("w-7 h-7", isLiked && "fill-red-500 text-red-500")}
+												className={cn(
+													"w-7 h-7",
+													post?.isLikedByCurrentUser && "fill-red-500 text-red-500"
+												)}
 												strokeWidth={2}
 											/>
-											{likesCount > 0 && (
-												<span className="text-sm font-semibold">{likesCount.toLocaleString()}</span>
+											{post?.likeCount > 0 && (
+												<span className="text-sm font-semibold">
+													{post.likeCount.toLocaleString()}
+												</span>
 											)}
 										</button>
 										<button

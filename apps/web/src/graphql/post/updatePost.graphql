@@ -4,6 +4,8 @@ mutation UpdatePost($id: Int!, $description: String!) {
 		description
 		imageUrl
 		authorId
+		likeCount
+		isLikedByCurrentUser
 		author {
 			id
 		}

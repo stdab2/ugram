@@ -3,6 +3,8 @@ query Post($id: Int!) {
 		id
 		description
 		imageUrl
+		likeCount
+		isLikedByCurrentUser
 		author {
 			id
 			firstName
