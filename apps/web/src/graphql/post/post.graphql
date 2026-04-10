@@ -4,6 +4,8 @@ query Post($id: Int!) {
 		description
 		imageUrl
 		messageCount
+		likeCount
+		isLikedByCurrentUser
 		author {
 			id
 			firstName

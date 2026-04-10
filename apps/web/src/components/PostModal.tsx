@@ -9,8 +9,13 @@ import { cn, getImageUrl } from "@/lib/utils";
 import { formatDescription, formatDate } from "@/lib/postUtils";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useMessagesByPostQuery, useCreateMessageMutation } from "@/generated/graphql";
 import type { PostsQuery, PostsByAuthorQuery } from "@/generated/graphql";
+import {
+	useUnlikePostMutation,
+	useLikePostMutation,
+	useMessagesByPostQuery,
+	useCreateMessageMutation,
+} from "@/generated/graphql";
 import { useAuth } from "@/AuthContext";
 import { toast } from "sonner";
 
@@ -27,23 +32,15 @@ interface PostModalProps {
 	onPostDeletion: (postId: number) => void;
 }
 
-export function PostModal({
-	open,
-	onOpenChange,
-	post,
-	likes = 0,
-	isLiked: initialIsLiked = false,
-	onPostDeletion,
-}: PostModalProps) {
+export function PostModal({ open, onOpenChange, post, onPostDeletion }: PostModalProps) {
 	const { userAuth } = useAuth();
 	const navigate = useNavigate();
 
 	const [newComment, setNewComment] = useState("");
-	const [isLiked, setIsLiked] = useState(initialIsLiked);
-	const [likesCount, setLikesCount] = useState(likes);
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
-
+	const [likePost] = useLikePostMutation();
+	const [unlikePost] = useUnlikePostMutation();
 	// Extract author info for convenience
 	const author = post.author;
 	const isOwnPost = author.userName === userAuth!.userName;
@@ -54,9 +51,16 @@ export function PostModal({
 		skip: !post,
 	});
 
-	const handleLike = () => {
-		setIsLiked((prev) => !prev);
-		setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
+	const handleLike = async () => {
+		if (post.isLikedByCurrentUser) {
+			await unlikePost({
+				variables: { postId: post.id },
+			});
+		} else {
+			await likePost({
+				variables: { postId: post.id },
+			});
+		}
 	};
 
 	const handleAddComment = async (e: React.FormEvent) => {
@@ -223,11 +227,16 @@ export function PostModal({
 										aria-label="Like"
 									>
 										<Heart
-											className={cn("w-7 h-7", isLiked && "fill-red-500 text-red-500")}
+											className={cn(
+												"w-7 h-7",
+												post.isLikedByCurrentUser && "fill-red-500 text-red-500"
+											)}
 											strokeWidth={2}
 										/>
-										{likesCount > 0 && (
-											<span className="text-sm font-semibold">{likesCount.toLocaleString()}</span>
+										{post.likeCount > 0 && (
+											<span className="text-sm font-semibold">
+												{post.likeCount.toLocaleString()}
+											</span>
 										)}
 									</button>
 									<button

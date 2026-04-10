@@ -26,6 +26,7 @@ query Search(
 				id
 				imageUrl
 				messageCount
+				likeCount
 			}
 		}
 		posts {
@@ -38,6 +39,8 @@ query Search(
 				userName
 			}
 			messageCount
+			likeCount
+			isLikedByCurrentUser
 			description
 			imageUrl
 			createdAt

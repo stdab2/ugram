@@ -4,6 +4,8 @@ query Posts($limit: Int, $offset: Int) {
 		description
 		imageUrl
 		messageCount
+		likeCount
+		isLikedByCurrentUser
 		author {
 			firstName
 			lastName

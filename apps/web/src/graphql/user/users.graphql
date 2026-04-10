@@ -13,6 +13,8 @@ query Users($limit: Int, $offset: Int) {
 			description
 			createdAt
 			messageCount
+			likeCount
+			isLikedByCurrentUser
 		}
 		createdAt
 	}

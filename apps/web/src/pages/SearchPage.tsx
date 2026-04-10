@@ -22,7 +22,6 @@ import {
 	useSearchQuery,
 	useHashtagsQuery,
 } from "@/generated/graphql";
-import type { PostsQuery } from "@/generated/graphql";
 import { PageFade } from "@/components/PageFade";
 import { useDebounce } from "@/hooks/use-debounce";
 
@@ -38,7 +37,8 @@ const SEARCH_DEBOUNCE_MS = 300;
 export function SearchPage() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [activeFilter, setActiveFilter] = useState<SearchType>("all");
-	const [selectedPost, setSelectedPost] = useState<PostsQuery["posts"][0] | null>(null);
+	// const [selectedPost, setSelectedPost] = useState<PostsQuery["posts"][0] | null>(null);
+	const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
 
 	// Track pagination state
 	const [hasMoreHashtags, setHasMoreHashtags] = useState(true);
@@ -117,7 +117,6 @@ export function SearchPage() {
 	const allHashtags = isSearching
 		? searchData?.search.hashtags || []
 		: hashtagsData?.hashtags || [];
-
 	const isLoading = isSearching
 		? searchLoading
 		: initialUsersLoading || initialPostsLoading || hashtagsLoading;
@@ -184,18 +183,13 @@ export function SearchPage() {
 		imageUrl: string;
 		likes?: number;
 		comments?: number;
+		isLikedByCurrentUser?: boolean;
 	}) => {
-		const fullPost = allPosts.find((p) => p.id === post.id);
-		if (fullPost) {
-			setSelectedPost(fullPost);
-		}
+		setSelectedPostId(Number(post.id));
 	};
 
 	const handleUserPostClick = (postId: string | number) => {
-		const fullPost = allPosts.find((p) => p.id === postId);
-		if (fullPost) {
-			setSelectedPost(fullPost);
-		}
+		setSelectedPostId(Number(postId));
 	};
 
 	const handleHashtagClick = (hashtagName: string) => {
@@ -250,7 +244,8 @@ export function SearchPage() {
 			});
 		}
 	};
-
+	const selectedPost =
+		selectedPostId !== null ? (allPosts.find((p) => p.id === selectedPostId) ?? null) : null;
 	const handleLoadMoreUsers = () => {
 		if (isSearching) {
 			// For search, use fetchMore with offset
@@ -586,12 +581,12 @@ export function SearchPage() {
 						open={!!selectedPost}
 						onOpenChange={(open) => {
 							if (!open) {
-								setSelectedPost(null);
+								setSelectedPostId(null);
 							}
 						}}
 						post={selectedPost}
 						onPostDeletion={() => {
-							setSelectedPost(null);
+							setSelectedPostId(null);
 							if (isSearching) {
 								refetchSearch();
 							} else {

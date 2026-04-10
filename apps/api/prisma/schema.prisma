@@ -21,6 +21,7 @@ model UserUgram {
   posts         Post[]   @relation("UserPosts")
   mentions      Post[]   @relation("UserMentions")
   messages      Message[] @relation("UserMessages")
+  likes          Like[]
 }
 
 model Post {
@@ -36,6 +37,7 @@ model Post {
 
   hashtags       Hashtag[]   @relation("PostHashtags")
   messages       Message[]   @relation("PostMessages")
+  likes          Like[]
 }
 
 model Hashtag {
@@ -57,3 +59,14 @@ model Message {
   post      Post      @relation("PostMessages", fields: [postId], references: [id], onDelete: Cascade)
 }
 
+
+model Like {
+  userId    Int
+  postId    Int
+  createdAt DateTime @default(now())
+
+  user      UserUgram @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@id([userId, postId])
+}

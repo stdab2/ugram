@@ -16,7 +16,6 @@ import {
 	EmptyTitle,
 } from "@/components/ui/Empty";
 import { useUserByUserNameQuery, useDeletePostMutation } from "@/generated/graphql";
-import type { UserByUserNameQuery } from "@/generated/graphql";
 import { Calendar, UserX, AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { getImageUrl } from "@/lib/utils";
@@ -45,11 +44,8 @@ export function ProfilePage() {
 		variables: { userName: userNameToFetch },
 	});
 
-	type UserPostType = NonNullable<
-		NonNullable<UserByUserNameQuery["userByUserName"]>["posts"]
-	>[number];
-
-	const [selectedPost, setSelectedPost] = useState<UserPostType | null>(null);
+	// const [selectedPost, setSelectedPost] = useState<UserPostType | null>(null);
+	const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
 
 	const [deletePost] = useDeletePostMutation({
 		update(cache, { data }) {
@@ -63,7 +59,7 @@ export function ProfilePage() {
 	const handlePostDeletion = async (postId: number) => {
 		try {
 			await deletePost({ variables: { id: postId } });
-			setSelectedPost(null);
+			setSelectedPostId(null);
 			toast.success("Your post has been successfully deleted!");
 		} catch {
 			// Error already handled by errorLink
@@ -126,6 +122,9 @@ export function ProfilePage() {
 	const userPosts = [...(user.posts || [])].sort(
 		(a, b) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime()
 	);
+
+	const selectedPost =
+		selectedPostId !== null ? (userPosts.find((p) => p.id === selectedPostId) ?? null) : null;
 	return (
 		<PageFade key="content">
 			<div className="w-full min-h-screen bg-background pb-20 md:pb-0">
@@ -196,12 +195,13 @@ export function ProfilePage() {
 							posts={userPosts.map((post) => ({
 								id: post.id,
 								imageUrl: post.imageUrl || "",
-								likes: 0, // TODO: Add likes count to GraphQL schema
+								likeCount: post.likeCount,
+								isLikedByCurrentUser: post.isLikedByCurrentUser,
 								messageCount: post.messageCount,
 							}))}
 							onPostClick={(postPreview) => {
 								const fullPost = userPosts.find((p) => p.id === postPreview.id);
-								if (fullPost) setSelectedPost(fullPost);
+								if (fullPost) setSelectedPostId(fullPost.id);
 							}}
 						/>
 					</div>
@@ -211,7 +211,7 @@ export function ProfilePage() {
 						<PostModal
 							key={selectedPost.id}
 							open={!!selectedPost}
-							onOpenChange={(open) => !open && setSelectedPost(null)}
+							onOpenChange={(open) => !open && setSelectedPostId(null)}
 							post={{
 								...selectedPost,
 								author: user,
