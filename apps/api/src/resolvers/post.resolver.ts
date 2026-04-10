@@ -19,6 +19,7 @@ import {
 import { authenticateUser } from "../../Validators/validateUser.js";
 import { UserContext } from "../types/userContext.types.js";
 import { getDatabaseUrl } from "../database-url.js";
+import { Prisma } from "../../generated/prisma/client.js";
 
 const adapter = new PrismaPg({
 	connectionString: getDatabaseUrl(),
@@ -27,6 +28,14 @@ const adapter = new PrismaPg({
 const prisma = new PrismaClient({
 	adapter,
 });
+
+type PostWithCount = Prisma.PostGetPayload<{
+	include: {
+		_count: {
+			select: { messages: true };
+		};
+	};
+}>;
 
 type CreatePostArgs = {
 	data: {
@@ -45,6 +54,11 @@ export const postResolvers = {
 			validatePostId(args.id);
 			return prisma.post.findUnique({
 				where: { id: args.id },
+				include: {
+					_count: {
+						select: { messages: true },
+					},
+				},
 			});
 		},
 		posts: async (_: unknown, args: { limit?: number; offset?: number }, context: UserContext) => {
@@ -54,6 +68,11 @@ export const postResolvers = {
 			return prisma.post.findMany({
 				take: limit,
 				skip: offset,
+				include: {
+					_count: {
+						select: { messages: true },
+					},
+				},
 			});
 		},
 		postsByAuthor: async (
@@ -69,6 +88,11 @@ export const postResolvers = {
 				where: { authorId: args.authorId },
 				take: limit,
 				skip: offset,
+				include: {
+					_count: {
+						select: { messages: true },
+					},
+				},
 			});
 		},
 	},
@@ -78,6 +102,15 @@ export const postResolvers = {
 			return prisma.userUgram.findUnique({
 				where: { id: parent.authorId },
 			});
+		},
+
+		messageCount: (parent: PostWithCount) => {
+			if (!parent._count) {
+				console.warn("messageCount called without _count in parent", {
+					postId: parent.id,
+				});
+			}
+			return parent._count?.messages ?? 0;
 		},
 		likeCount: async (parent: Post, _: unknown, context: UserContext) => {
 			authenticateUser(context.user);

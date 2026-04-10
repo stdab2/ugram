@@ -11,6 +11,8 @@ import { useState } from "react";
 import {
 	usePostQuery,
 	useDeletePostMutation,
+	useCreateMessageMutation,
+	useMessagesByPostQuery,
 	useUnlikePostMutation,
 	useLikePostMutation,
 } from "@/generated/graphql";
@@ -26,17 +28,6 @@ import { AlertCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { toast } from "sonner";
 import { useAuth } from "@/AuthContext";
-
-interface Comment {
-	id: string;
-	author: {
-		username: string;
-		avatarUrl?: string;
-		avatarFallback: string;
-	};
-	text: string;
-	publishedAt: string;
-}
 
 export function PostPage() {
 	const { userAuth } = useAuth();
@@ -59,6 +50,11 @@ export function PostPage() {
 
 	const post = postData?.post;
 
+	const { data: messagesData } = useMessagesByPostQuery({
+		variables: { postId: post?.id ?? 0 },
+		skip: !post,
+	});
+
 	const [deletePost] = useDeletePostMutation({
 		update(cache, { data }) {
 			if (!data?.deletePost) return;
@@ -73,30 +69,7 @@ export function PostPage() {
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [likePost] = useLikePostMutation();
 	const [unlikePost] = useUnlikePostMutation();
-
-	// Mock comments - use lazy initialization to avoid calling Date.now() during render
-	const [comments, setComments] = useState<Comment[]>(() => [
-		{
-			id: "1",
-			author: {
-				username: "jane_smith",
-				avatarUrl: "https://i.pravatar.cc/150?img=5",
-				avatarFallback: "JS",
-			},
-			text: "Amazing shot! 😍",
-			publishedAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
-		},
-		{
-			id: "2",
-			author: {
-				username: "travel_explorer",
-				avatarUrl: "https://i.pravatar.cc/150?img=8",
-				avatarFallback: "TE",
-			},
-			text: "Love this! Where was this taken?",
-			publishedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-		},
-	]);
+	const [createMessage] = useCreateMessageMutation();
 
 	const handleLike = async () => {
 		if (post?.isLikedByCurrentUser) {
@@ -112,23 +85,24 @@ export function PostPage() {
 		}
 	};
 
-	const handleAddComment = (e: React.FormEvent) => {
-		e.preventDefault();
-		if (!newComment.trim()) return;
+	const handleAddComment = async (e: React.FormEvent) => {
+		if (post) {
+			e.preventDefault();
+			if (!newComment.trim()) return;
 
-		const comment: Comment = {
-			id: Date.now().toString(),
-			author: {
-				username: "current_user",
-				avatarUrl: "https://i.pravatar.cc/150?img=10",
-				avatarFallback: "CU",
-			},
-			text: newComment,
-			publishedAt: new Date().toISOString(),
-		};
+			await createMessage({
+				variables: {
+					data: {
+						content: newComment,
+						authorId: userAuth!.id,
+						postId: post.id,
+					},
+				},
+				refetchQueries: ["Posts", "MessagesByPost", "UserByUserName"],
+			});
 
-		setComments((prevComments) => [comment, ...prevComments]);
-		setNewComment("");
+			setNewComment("");
+		}
 	};
 
 	const handlePostDeletion = async (postId: number) => {
@@ -298,26 +272,28 @@ export function PostPage() {
 								{/* Comments */}
 								<div className="flex-1 min-h-0 overflow-hidden">
 									<div className="h-full overflow-y-auto p-4 space-y-4">
-										{comments.map((comment) => (
+										{messagesData?.messagesByPost.map((comment) => (
 											<div key={comment.id} className="flex gap-3">
-												<Link to={`/profile/${comment.author.username}`}>
+												<Link to={`/profile/${comment.author.userName}`}>
 													<Avatar className="h-8 w-8 flex-shrink-0">
-														<AvatarImage src={comment.author.avatarUrl} />
-														<AvatarFallback>{comment.author.avatarFallback}</AvatarFallback>
+														<AvatarImage src={comment.author.picture!} />
+														<AvatarFallback>
+															{comment.author.firstName[0] + comment.author.lastName[0]}
+														</AvatarFallback>
 													</Avatar>
 												</Link>
 												<div className="flex-1">
 													<p className="text-sm">
 														<Link
-															to={`/profile/${comment.author.username}`}
+															to={`/profile/${comment.author.userName}`}
 															className="font-semibold mr-2 hover:underline"
 														>
-															{comment.author.username}
+															{comment.author.userName}
 														</Link>
-														{comment.text}
+														{comment.content}
 													</p>
 													<p className="text-xs text-muted-foreground mt-1">
-														{formatDate(comment.publishedAt)}
+														{formatDate(comment.createdAt)}
 													</p>
 												</div>
 											</div>
@@ -351,8 +327,10 @@ export function PostPage() {
 											aria-label="Comment"
 										>
 											<MessageCircle className="w-6 h-6" strokeWidth={2} />
-											{comments.length > 0 && (
-												<span className="text-sm font-semibold">{comments.length}</span>
+											{post.messageCount > 0 && (
+												<span className="text-sm font-semibold">
+													{messagesData?.messagesByPost.length ?? post.messageCount}
+												</span>
 											)}
 										</button>
 										<button

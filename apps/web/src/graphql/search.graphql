@@ -25,6 +25,7 @@ query Search(
 			posts {
 				id
 				imageUrl
+				messageCount
 				likeCount
 			}
 		}
@@ -37,6 +38,7 @@ query Search(
 				picture
 				userName
 			}
+			messageCount
 			likeCount
 			isLikedByCurrentUser
 			description

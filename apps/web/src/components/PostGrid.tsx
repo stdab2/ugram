@@ -5,7 +5,7 @@ interface PostGridProps {
 		id: string | number;
 		imageUrl: string;
 		likeCount?: number;
-		comments?: number;
+		messageCount?: number;
 	}>;
 	onPostClick: (post: PostGridProps["posts"][0]) => void;
 }
@@ -18,7 +18,7 @@ export function PostGrid({ posts, onPostClick }: PostGridProps) {
 					key={post.id}
 					imageUrl={post.imageUrl}
 					likes={post.likeCount || 0}
-					comments={post.comments || 0}
+					comments={post.messageCount || 0}
 					onClick={() => onPostClick(post)}
 				/>
 			))}
