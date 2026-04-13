@@ -18,6 +18,7 @@ import {
 	useMarkAllNotificationsReadMutation,
 	useMarkNotificationReadMutation,
 	useNotificationsQuery,
+	useUnreadNotificationCountQuery,
 } from "@/generated/graphql";
 import { toast } from "sonner";
 
@@ -26,12 +27,13 @@ export function NotificationsPage() {
 	const { data, loading, error, refetch } = useNotificationsQuery({
 		variables: { limit: 30, offset: 0 },
 	});
+	const { data: unreadCountData } = useUnreadNotificationCountQuery();
 	const [markNotificationRead] = useMarkNotificationReadMutation();
 	const [markAllNotificationsRead, { loading: isMarkingAllRead }] =
 		useMarkAllNotificationsReadMutation();
 
 	const notifications = data?.notifications ?? [];
-	const unreadCount = notifications.filter((notification) => !notification.readAt).length;
+	const unreadCount = unreadCountData?.unreadNotificationCount ?? 0;
 
 	const todayStart = new Date();
 	todayStart.setHours(0, 0, 0, 0);
@@ -83,23 +85,38 @@ export function NotificationsPage() {
 		isUnread: boolean
 	) => {
 		if (isUnread) {
-			await markNotificationRead({
-				variables: { id: notificationId },
-				refetchQueries: ["Notifications", "UnreadNotificationCount"],
-				awaitRefetchQueries: true,
-			});
+			try {
+				await markNotificationRead({
+					variables: { id: notificationId },
+					refetchQueries: ["Notifications", "UnreadNotificationCount"],
+					awaitRefetchQueries: true,
+				});
+			} catch (error) {
+				console.error("Failed to mark notification as read:", error);
+				toast.error("Failed to mark notification as read");
+			}
 		}
 
 		navigate(`/post/${postId}`);
 	};
 
 	const handleMarkAllAsRead = async () => {
-		await markAllNotificationsRead({
-			refetchQueries: ["Notifications", "UnreadNotificationCount"],
-			awaitRefetchQueries: true,
-		});
+		try {
+			const result = await markAllNotificationsRead({
+				refetchQueries: ["Notifications", "UnreadNotificationCount"],
+				awaitRefetchQueries: true,
+			});
 
-		toast.success("All notifications marked as read.");
+			if (result.errors && result.errors.length > 0) {
+				toast.error("Failed to mark all notifications as read");
+				return;
+			}
+
+			toast.success("All notifications marked as read.");
+		} catch (error) {
+			console.error("Error marking all notifications as read:", error);
+			toast.error("Failed to mark all notifications as read");
+		}
 	};
 
 	const getNotificationLabel = (type: string) => {

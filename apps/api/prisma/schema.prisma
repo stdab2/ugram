@@ -56,15 +56,17 @@ model Hashtag {
 }
 
 model Message {
-  id        Int       @id @default(autoincrement())
-  createdAt DateTime  @default(now())
-  content   String
+  id            Int       @id @default(autoincrement())
+  createdAt     DateTime  @default(now())
+  content       String
 
-  authorId  Int
-  author    UserUgram @relation("UserMessages", fields: [authorId], references: [id], onDelete: Cascade)
+  authorId      Int
+  author        UserUgram @relation("UserMessages", fields: [authorId], references: [id], onDelete: Cascade)
 
-  postId    Int
-  post      Post      @relation("PostMessages", fields: [postId], references: [id], onDelete: Cascade)
+  postId        Int
+  post          Post      @relation("PostMessages", fields: [postId], references: [id], onDelete: Cascade)
+
+  notifications Notification[]
 }
 
 
@@ -95,6 +97,7 @@ model Notification {
   post       Post             @relation("PostNotifications", fields: [postId], references: [id], onDelete: Cascade)
 
   messageId  Int?
+  message    Message?         @relation(fields: [messageId], references: [id], onDelete: SetNull)
 
   @@index([recipientId, readAt, createdAt])
   @@index([postId, createdAt])

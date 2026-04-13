@@ -59,10 +59,19 @@ export const notificationResolvers = {
 					id: args.id,
 					recipientId: context.user!.id,
 				},
+				include: {
+					actor: true,
+					post: true,
+				},
 			});
 
 			if (!notification) {
 				throw new Error("Notification not found.");
+			}
+
+			// If already read, return unchanged (idempotent)
+			if (notification.readAt) {
+				return notification;
 			}
 
 			return prisma.notification.update({
