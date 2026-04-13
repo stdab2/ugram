@@ -1,0 +1,23 @@
+enum NotificationType {
+  LIKE
+  COMMENT
+}
+
+type Notification {
+  id: Int!
+  createdAt: DateTime!
+  readAt: DateTime
+  type: NotificationType!
+  actor: UserUgram!
+  post: Post!
+}
+
+extend type Query {
+  notifications(limit: Int, offset: Int): [Notification!]!
+  unreadNotificationCount: Int!
+}
+
+extend type Mutation {
+  markNotificationRead(id: Int!): Notification!
+  markAllNotificationsRead: Int!
+}
