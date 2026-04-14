@@ -16,6 +16,7 @@ query User($id: Int!) {
 			messageCount
 			likeCount
 			isLikedByCurrentUser
+			imageStatus
 		}
 	}
 }

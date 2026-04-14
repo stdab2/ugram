@@ -21,14 +21,16 @@ model UserUgram {
   posts         Post[]   @relation("UserPosts")
   mentions      Post[]   @relation("UserMentions")
   messages      Message[] @relation("UserMessages")
-  likes          Like[]
+  likes         Like[]
 }
 
 model Post {
   id             Int       @id @default(autoincrement())
   createdAt      DateTime  @default(now())
   description    String
-  imageUrl       String
+  imageUrl       String?
+  imageKey       String    
+  imageStatus    String    @default("PENDING")
 
   authorId       Int
   author         UserUgram  @relation("UserPosts", fields: [authorId], references: [id], onDelete: Cascade)

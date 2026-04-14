@@ -10,5 +10,7 @@ mutation UpdatePost($id: Int!, $description: String!) {
 			id
 		}
 		createdAt
+		imageKey
+		imageStatus
 	}
 }

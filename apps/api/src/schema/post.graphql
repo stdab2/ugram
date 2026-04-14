@@ -5,6 +5,8 @@ type Post {
 	description: String!
 	imageUrl: String!
 	authorId: Int!
+	imageKey: String!
+	imageStatus: String!
 	author: UserUgram!
 	createdAt: DateTime!
 	hashtags: [Hashtag!]

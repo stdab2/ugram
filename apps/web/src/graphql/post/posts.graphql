@@ -13,5 +13,7 @@ query Posts($limit: Int, $offset: Int) {
 			userName
 		}
 		createdAt
+		imageKey
+		imageStatus
 	}
 }

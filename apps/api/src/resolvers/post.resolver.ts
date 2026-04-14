@@ -151,7 +151,7 @@ export const postResolvers = {
 				throw new Error("Image upload is required.");
 			}
 
-			const imageUrl = await saveUploadedImage(image, "post");
+			const { imageKey } = await saveUploadedImage(image, "post");
 			let hashtagRows: { id: number }[] = [];
 
 			if (hashtags?.length) {
@@ -179,7 +179,6 @@ export const postResolvers = {
 				const post = await prisma.post.create({
 					data: {
 						description,
-						imageUrl,
 						authorId,
 						hashtags: {
 							connect: hashtagRows.map((h) => ({ id: h.id })),
@@ -187,6 +186,7 @@ export const postResolvers = {
 						mentionedUsers: {
 							connect: mentionedUsers ? mentionedUsers.map((id: number) => ({ id })) : [],
 						},
+						imageKey,
 					},
 					include: {
 						hashtags: true,

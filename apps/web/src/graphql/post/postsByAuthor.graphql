@@ -14,5 +14,7 @@ query PostsByAuthor($authorId: Int!, $limit: Int, $offset: Int) {
 			lastName
 			picture
 		}
+		imageKey
+		imageStatus
 	}
 }

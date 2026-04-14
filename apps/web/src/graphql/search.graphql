@@ -27,6 +27,8 @@ query Search(
 				imageUrl
 				messageCount
 				likeCount
+				imageStatus
+				imageKey
 			}
 		}
 		posts {
@@ -44,6 +46,8 @@ query Search(
 			description
 			imageUrl
 			createdAt
+			imageStatus
+			imageKey
 		}
 		hashtags {
 			id

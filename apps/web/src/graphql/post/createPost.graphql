@@ -21,5 +21,7 @@ mutation CreatePost($data: CreatePostInput!) {
 			id
 			userName
 		}
+		imageKey
+		imageStatus
 	}
 }

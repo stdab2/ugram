@@ -14,5 +14,7 @@ query Post($id: Int!) {
 			userName
 		}
 		createdAt
+		imageKey
+		imageStatus
 	}
 }
