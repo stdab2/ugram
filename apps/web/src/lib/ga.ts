@@ -24,7 +24,8 @@ export const initGoogleAnalytics = () => {
 	if (!window.gtag) {
 		// Match Google's official snippet behavior by pushing the function
 		// arguments object, not a plain array, to maximize compatibility.
-		window.gtag = function gtag(..._args: unknown[]) {
+		window.gtag = function gtag() {
+			// eslint-disable-next-line prefer-rest-params
 			window.dataLayer.push(arguments);
 		};
 		window.gtag("js", new Date());

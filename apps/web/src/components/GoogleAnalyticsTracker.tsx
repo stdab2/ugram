@@ -1,10 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import {
-	initGoogleAnalytics,
-	isGoogleAnalyticsEnabled,
-	trackPageView,
-} from "@/lib/ga";
+import { initGoogleAnalytics, isGoogleAnalyticsEnabled, trackPageView } from "@/lib/ga";
 
 export function GoogleAnalyticsTracker() {
 	const location = useLocation();
