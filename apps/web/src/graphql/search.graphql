@@ -22,6 +22,7 @@ query Search(
 			firstName
 			lastName
 			picture
+			followerCount
 			posts {
 				id
 				imageUrl

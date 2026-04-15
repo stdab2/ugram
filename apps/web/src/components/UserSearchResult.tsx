@@ -20,7 +20,7 @@ export function UserSearchResult({ user, onPostClick }: UserSearchResultProps) {
 	// Get user's recent posts (up to 3)
 	const recentPosts = user.posts?.slice(0, 3) || [];
 	const totalPosts = user.posts?.length || 0;
-	const totalComments = user.posts?.reduce((sum, post) => sum + (post.messageCount || 0), 0) || 0;
+	const followerCount = user.followerCount ?? 0;
 	const totalLikes = user.posts?.reduce((sum, post) => sum + (post.likeCount || 0), 0) || 0;
 	return (
 		<Link to={`/profile/${user.userName}`}>
@@ -37,16 +37,16 @@ export function UserSearchResult({ user, onPostClick }: UserSearchResultProps) {
 							<p className="text-xs text-muted-foreground truncate mb-2">{fullName}</p>
 							<div className="flex gap-4 text-xs">
 								<div>
+									<span className="font-semibold">{followerCount}</span>
+									<span className="text-muted-foreground ml-1">followers</span>
+								</div>
+								<div>
 									<span className="font-semibold">{totalPosts}</span>
 									<span className="text-muted-foreground ml-1">posts</span>
 								</div>
 								<div>
 									<span className="font-semibold">{totalLikes}</span>
 									<span className="text-muted-foreground ml-1">likes</span>
-								</div>
-								<div>
-									<span className="font-semibold">{totalComments}</span>
-									<span className="text-muted-foreground ml-1">comments</span>
 								</div>
 							</div>
 						</div>

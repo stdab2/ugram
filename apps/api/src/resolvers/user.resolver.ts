@@ -83,6 +83,7 @@ export const userResolvers = {
 			const offset = Math.max(args.offset || 0, 0);
 
 			return prisma.userUgram.findMany({
+				orderBy: [{ followers: { _count: "desc" } }, { id: "asc" }],
 				take: limit,
 				skip: offset,
 			});

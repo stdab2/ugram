@@ -7,6 +7,7 @@ query User($id: Int!) {
 		lastName
 		phoneNumber
 		picture
+		followerCount
 		createdAt
 		posts {
 			id

@@ -375,7 +375,7 @@ export function SearchPage() {
 							{(activeFilter === "all" || activeFilter === "hashtags") && (
 								<div className="mb-6">
 									<div className="px-4 py-3">
-										<h2 className="font-semibold">Hashtags</h2>
+										<h2 className="font-semibold">Popular Hashtags</h2>
 									</div>
 									<div className="flex flex-col gap-2 px-4">
 										{hashtagsData?.hashtags.map((hashtag) => (
@@ -405,7 +405,7 @@ export function SearchPage() {
 							{(activeFilter === "all" || activeFilter === "users") && (
 								<div className="mb-6">
 									<div className="px-4 py-3">
-										<h2 className="font-semibold">Users</h2>
+										<h2 className="font-semibold">Popular Users</h2>
 									</div>
 									<div className="flex flex-col gap-4 px-4">
 										{displayUsers.map((user) => (
@@ -468,7 +468,7 @@ export function SearchPage() {
 									{(activeFilter === "all" || activeFilter === "hashtags") && (
 										<div className="mb-6">
 											<div className="px-4 py-3">
-												<h2 className="font-semibold">Hashtags</h2>
+												<h2 className="font-semibold">Popular Hashtags</h2>
 											</div>
 											{displayHashtags.length > 0 ? (
 												<>
@@ -506,7 +506,7 @@ export function SearchPage() {
 									{(activeFilter === "all" || activeFilter === "users") && (
 										<div className="mb-6">
 											<div className="px-4 py-3">
-												<h2 className="font-semibold">Users</h2>
+												<h2 className="font-semibold">Popular Users</h2>
 											</div>
 											{displayUsers.length > 0 ? (
 												<>

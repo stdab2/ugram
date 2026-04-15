@@ -26,11 +26,7 @@ export const hashtagResolvers = {
 						select: { posts: true },
 					},
 				},
-				orderBy: {
-					posts: {
-						_count: "desc",
-					},
-				},
+				orderBy: [{ posts: { _count: "desc" } }, { id: "asc" }],
 				skip: offset,
 				take: limit,
 			});

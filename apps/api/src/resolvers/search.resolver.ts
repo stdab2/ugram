@@ -50,6 +50,7 @@ export const searchResolvers = {
 						{ lastName: { contains: searchTerm, mode: "insensitive" } },
 					],
 				},
+				orderBy: [{ followers: { _count: "desc" } }, { id: "asc" }],
 				take: usersLimit,
 				skip: usersOffset,
 			});
@@ -112,11 +113,7 @@ export const searchResolvers = {
 				},
 				take: hashtagsLimit,
 				skip: hashtagsOffset,
-				orderBy: {
-					posts: {
-						_count: "desc", // Trier par popularité
-					},
-				},
+				orderBy: [{ posts: { _count: "desc" } }, { id: "asc" }],
 			});
 
 			// Transformer les hashtags pour inclure le postCount
