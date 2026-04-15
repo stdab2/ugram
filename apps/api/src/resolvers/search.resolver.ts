@@ -73,6 +73,7 @@ export const searchResolvers = {
 						mentionedUsers: true,
 						author: true,
 					},
+					orderBy: [{ likes: { _count: "desc" } }, { id: "asc" }],
 					take: postsLimit,
 					skip: postsOffset,
 				});
@@ -96,6 +97,7 @@ export const searchResolvers = {
 						mentionedUsers: true,
 						author: true,
 					},
+					orderBy: [{ likes: { _count: "desc" } }, { id: "asc" }],
 					take: postsLimit,
 					skip: postsOffset,
 				});

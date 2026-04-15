@@ -66,6 +66,7 @@ export const postResolvers = {
 			const limit = Math.min(Math.max(args.limit ?? 20, 0), 100);
 			const offset = Math.max(args.offset ?? 0, 0);
 			return prisma.post.findMany({
+				orderBy: [{ likes: { _count: "desc" } }, { id: "asc" }],
 				take: limit,
 				skip: offset,
 				include: {

@@ -435,7 +435,7 @@ export function SearchPage() {
 							{(activeFilter === "all" || activeFilter === "posts") && (
 								<div>
 									<div className="px-4 py-3">
-										<h2 className="font-semibold">Posts</h2>
+										<h2 className="font-semibold">Popular Posts</h2>
 									</div>
 									<PostGrid posts={displayPosts} onPostClick={handlePostClick} />
 									{initialPostsData && hasMorePosts && (
@@ -544,7 +544,7 @@ export function SearchPage() {
 									{(activeFilter === "all" || activeFilter === "posts") && (
 										<div>
 											<div className="px-4 py-3">
-												<h2 className="font-semibold">Posts</h2>
+												<h2 className="font-semibold">Popular Posts</h2>
 											</div>
 											{displayPosts.length > 0 ? (
 												<>

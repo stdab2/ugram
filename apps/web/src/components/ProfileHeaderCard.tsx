@@ -49,10 +49,20 @@ export function ProfileHeaderCard({
 
 				<div className="flex-1 space-y-4">
 					<div className="space-y-2">
-						<div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
-							<h1 className="text-2xl font-bold">{user.userName}</h1>
+						<div className="flex items-start justify-between gap-4">
+							<div className="min-w-0">
+								<h1 className="text-2xl font-bold">{user.userName}</h1>
+								<p className="text-lg text-foreground">
+									{user.firstName} {user.lastName}
+								</p>
+							</div>
 							{isOwnProfile && (
-								<Button variant="outline" size="sm" onClick={onOpenSettings}>
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={onOpenSettings}
+									className="w-fit shrink-0"
+								>
 									Edit Profile
 								</Button>
 							)}
@@ -62,14 +72,12 @@ export function ProfileHeaderCard({
 									variant={displayedIsFollowedByCurrentUser ? "outline" : "default"}
 									disabled={isFollowActionLoading}
 									onClick={onToggleFollow}
+									className="w-fit shrink-0"
 								>
 									{displayedIsFollowedByCurrentUser ? "Unfollow" : "Follow"}
 								</Button>
 							)}
 						</div>
-						<p className="text-lg text-foreground">
-							{user.firstName} {user.lastName}
-						</p>
 					</div>
 
 					<div className="flex gap-6">
