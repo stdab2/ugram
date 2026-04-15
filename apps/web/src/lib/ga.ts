@@ -22,8 +22,10 @@ export const initGoogleAnalytics = () => {
 	}
 
 	if (!window.gtag) {
-		window.gtag = (...args: unknown[]) => {
-			window.dataLayer.push(args);
+		// Match Google's official snippet behavior by pushing the function
+		// arguments object, not a plain array, to maximize compatibility.
+		window.gtag = function gtag(..._args: unknown[]) {
+			window.dataLayer.push(arguments);
 		};
 		window.gtag("js", new Date());
 		// For SPA apps we send page views manually on route changes.
