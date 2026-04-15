@@ -2,7 +2,7 @@ name: Deploy Web to S3
 
 on:
   push:
-    branches: [main, feature/environment-variables]
+    branches: [main, feature/environment-variables, feature_setupGA]
     paths:
       - "apps/web/**"
       - "pnpm-lock.yaml"
