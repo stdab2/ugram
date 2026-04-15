@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { getGoogleOAuthUrl } from "@/lib/utils";
+import { trackEvent } from "@/lib/ga";
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
 	const [email, setEmail] = useState("");
@@ -40,6 +41,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 		e.preventDefault();
 		try {
 			await login(email, password);
+			trackEvent("login", { method: "password" });
 			toast.success("Logged in successfully!");
 			navigate("/");
 		} catch (error) {
