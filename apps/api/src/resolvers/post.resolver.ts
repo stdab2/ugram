@@ -216,7 +216,7 @@ export const postResolvers = {
 					const error =
 						cleanupError instanceof Error ? cleanupError : new Error(String(cleanupError));
 
-					Sentry.withScope((scope) => {
+					Sentry.withScope((scope: Sentry.Scope) => {
 						scope.setTag("resolver", "deletePost");
 						scope.setContext("cleanup", {
 							postId: deletedPost.id,
