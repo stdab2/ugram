@@ -1,0 +1,9 @@
+query Followers($userId: Int!, $limit: Int, $offset: Int) {
+	followers(userId: $userId, limit: $limit, offset: $offset) {
+		id
+		userName
+		firstName
+		lastName
+		picture
+	}
+}

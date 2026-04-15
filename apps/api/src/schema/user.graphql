@@ -8,6 +8,9 @@ type UserUgram {
 	picture: String
 	createdAt: String!
 	posts: [Post!]
+	followerCount: Int!
+	followingCount: Int!
+	isFollowedByCurrentUser: Boolean!
 }
 
 extend type Query {

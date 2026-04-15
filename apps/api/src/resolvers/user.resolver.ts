@@ -104,6 +104,40 @@ export const userResolvers = {
 				},
 			});
 		},
+
+		followerCount: async (parent: UserUgram, _: unknown, context: UserContext) => {
+			authenticateUser(context.user);
+			return prisma.follow.count({
+				where: { followingId: parent.id },
+			});
+		},
+
+		followingCount: async (parent: UserUgram, _: unknown, context: UserContext) => {
+			authenticateUser(context.user);
+			return prisma.follow.count({
+				where: { followerId: parent.id },
+			});
+		},
+
+		isFollowedByCurrentUser: async (parent: UserUgram, _: unknown, context: UserContext) => {
+			authenticateUser(context.user);
+
+			if (context.user!.id === parent.id) {
+				return false;
+			}
+
+			const relation = await prisma.follow.findUnique({
+				where: {
+					followerId_followingId: {
+						followerId: context.user!.id,
+						followingId: parent.id,
+					},
+				},
+				select: { followerId: true },
+			});
+
+			return !!relation;
+		},
 	},
 
 	Mutation: {

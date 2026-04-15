@@ -4,6 +4,7 @@ import { hashtagResolvers } from "./hashtag.resolver.js";
 import { searchResolvers } from "./search.resolver.js";
 import { likesResolvers } from "./like.resolver.js";
 import { notificationResolvers } from "./notification.resolver.js";
+import { followResolvers } from "./follow.resolver.js";
 import { DateTimeScalar, scalars } from "./scalars.js";
 import { messageResolvers } from "./message.resolver.js";
 import GraphQLUpload from "graphql-upload/GraphQLUpload.mjs";
@@ -21,6 +22,7 @@ export const resolvers = {
 		...messageResolvers.Query,
 		...likesResolvers.Query,
 		...notificationResolvers.Query,
+		...followResolvers.Query,
 	},
 
 	Mutation: {
@@ -30,6 +32,7 @@ export const resolvers = {
 		...messageResolvers.Mutation,
 		...likesResolvers.Mutation,
 		...notificationResolvers.Mutation,
+		...followResolvers.Mutation,
 	},
 
 	Post: {

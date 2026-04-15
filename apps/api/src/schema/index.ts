@@ -13,6 +13,7 @@ const searchSchema = fs.readFileSync(path.join(__dirname, "search.graphql"), "ut
 const messageSchema = fs.readFileSync(path.join(__dirname, "message.graphql"), "utf-8");
 const likeSchema = fs.readFileSync(path.join(__dirname, "like.graphql"), "utf-8");
 const notificationSchema = fs.readFileSync(path.join(__dirname, "notification.graphql"), "utf-8");
+const followSchema = fs.readFileSync(path.join(__dirname, "follow.graphql"), "utf-8");
 
 export const typeDefs = `#graphql
   ${scalarsSchema}
@@ -23,4 +24,5 @@ export const typeDefs = `#graphql
   ${messageSchema}
   ${likeSchema}
   ${notificationSchema}
+  ${followSchema}
 `;
