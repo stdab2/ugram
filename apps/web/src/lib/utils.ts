@@ -73,7 +73,7 @@ export function getImageUrl(imageUrl: string | null | undefined): string | undef
 }
 
 /**
- * Converts an image URL from to a file that cant be received by the backend.
+ * Converts a data URL to a `File` so it can be sent to the backend.
  */
 export function dataURLToFile(dataUrl: string, filename: string): File {
 	const arr = dataUrl.split(",");
