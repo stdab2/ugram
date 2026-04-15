@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ImageProcessing } from "@/components/ImageProcessing";
 
 interface PostPreviewProps {
-	imageUrl: string;
+	thumbnailUrl: string | null;
 	imageStatus?: string;
 	likes?: number;
 	comments?: number;
@@ -13,7 +13,7 @@ interface PostPreviewProps {
 }
 
 export function PostPreview({
-	imageUrl,
+	thumbnailUrl,
 	imageStatus,
 	likes = 0,
 	comments = 0,
@@ -38,7 +38,7 @@ export function PostPreview({
 				<ImageProcessing />
 			) : (
 				<img
-					src={getImageUrl(imageUrl)}
+					src={getImageUrl(thumbnailUrl)}
 					alt="Post preview"
 					className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
 				/>

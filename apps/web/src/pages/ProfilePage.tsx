@@ -194,7 +194,7 @@ export function ProfilePage() {
 						<PostGrid
 							posts={userPosts.map((post) => ({
 								id: post.id,
-								imageUrl: post.imageUrl || "",
+								thumbnailUrl: post.thumbnailUrl || "",
 								imageStatus: post.imageStatus,
 								likeCount: post.likeCount,
 								isLikedByCurrentUser: post.isLikedByCurrentUser,

@@ -3,7 +3,8 @@ scalar Upload
 type Post {
 	id: Int!
 	description: String!
-	imageUrl: String!
+	imageUrl: String
+	thumbnailUrl: String
 	authorId: Int!
 	imageKey: String!
 	imageStatus: String!

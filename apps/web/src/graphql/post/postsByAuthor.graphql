@@ -3,6 +3,7 @@ query PostsByAuthor($authorId: Int!, $limit: Int, $offset: Int) {
 		id
 		description
 		imageUrl
+		thumbnailUrl
 		createdAt
 		messageCount
 		likeCount

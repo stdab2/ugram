@@ -25,6 +25,7 @@ query Search(
 			posts {
 				id
 				imageUrl
+				thumbnailUrl
 				messageCount
 				likeCount
 				imageStatus
@@ -45,6 +46,7 @@ query Search(
 			isLikedByCurrentUser
 			description
 			imageUrl
+			thumbnailUrl
 			createdAt
 			imageStatus
 			imageKey

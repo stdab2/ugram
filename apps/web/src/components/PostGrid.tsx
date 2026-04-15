@@ -3,7 +3,7 @@ import { PostPreview } from "@/components/PostPreview";
 interface PostGridProps {
 	posts: Array<{
 		id: string | number;
-		imageUrl: string;
+		thumbnailUrl: string | null;
 		imageStatus?: string;
 		likeCount?: number;
 		messageCount?: number;
@@ -17,7 +17,7 @@ export function PostGrid({ posts, onPostClick }: PostGridProps) {
 			{posts.map((post) => (
 				<PostPreview
 					key={post.id}
-					imageUrl={post.imageUrl}
+					thumbnailUrl={post.thumbnailUrl}
 					imageStatus={post.imageStatus}
 					likes={post.likeCount || 0}
 					comments={post.messageCount || 0}

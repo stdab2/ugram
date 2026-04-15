@@ -71,7 +71,7 @@ export function UserSearchResult({ user, onPostClick }: UserSearchResultProps) {
 										<ImageProcessing compact />
 									) : (
 										<img
-											src={getImageUrl(post.imageUrl || "")}
+											src={getImageUrl(post.thumbnailUrl || "")}
 											alt=""
 											className="w-full h-full object-cover"
 										/>

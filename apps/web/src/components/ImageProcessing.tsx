@@ -35,6 +35,9 @@ export function ImageProcessing({ compact = false }: ImageProcessingProps) {
 					</div>
 					<div className="flex flex-col items-center gap-1">
 						<span className="text-sm font-medium text-muted-foreground">Processing image…</span>
+						<span className="text-xs font-medium text-muted-foreground">
+							Refresh the page if it doesn't load
+						</span>
 						<span className="text-xs text-muted-foreground/60">This may take a moment</span>
 					</div>
 					<div className="flex items-center gap-1.5">

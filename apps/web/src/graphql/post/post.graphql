@@ -3,6 +3,7 @@ query Post($id: Int!) {
 		id
 		description
 		imageUrl
+		thumbnailUrl
 		messageCount
 		likeCount
 		isLikedByCurrentUser

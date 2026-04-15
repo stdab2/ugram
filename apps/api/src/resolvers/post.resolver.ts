@@ -195,6 +195,19 @@ export const postResolvers = {
 					},
 				});
 
+				if (process.env.NODE_ENV !== "production") {
+					setTimeout(async () => {
+						await prisma.post.update({
+							where: { id: post.id },
+							data: {
+								imageStatus: "UPLOADED",
+								imageUrl: `uploads/post/${imageKey}.webp`,
+								thumbnailUrl: `uploads/post/${imageKey}_thumb.webp`,
+							},
+						});
+					}, 10000);
+				}
+
 				return post;
 			} catch (error: unknown) {
 				handlePrismaError(error, "Post");

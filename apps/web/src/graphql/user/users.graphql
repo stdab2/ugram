@@ -10,6 +10,7 @@ query Users($limit: Int, $offset: Int) {
 		posts {
 			id
 			imageUrl
+			thumbnailUrl
 			description
 			createdAt
 			messageCount

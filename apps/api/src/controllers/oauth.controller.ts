@@ -6,14 +6,14 @@ export async function startGoogleOAuth(_req: Request, res: Response) {
 
 	res.cookie("state", state, {
 		httpOnly: true,
-		secure: process.env.ENV === "production",
+		secure: process.env.NODE_ENV === "production",
 		sameSite: "lax",
 		maxAge: 30_000,
 	});
 
 	res.cookie("code_verifier", codeVerifier, {
 		httpOnly: true,
-		secure: process.env.ENV === "production",
+		secure: process.env.NODE_ENV === "production",
 		sameSite: "lax",
 		maxAge: 30_000,
 	});

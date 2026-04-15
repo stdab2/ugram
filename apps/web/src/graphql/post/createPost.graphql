@@ -3,6 +3,7 @@ mutation CreatePost($data: CreatePostInput!) {
 		id
 		description
 		imageUrl
+		thumbnailUrl
 		createdAt
 		likeCount
 		isLikedByCurrentUser

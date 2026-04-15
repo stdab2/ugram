@@ -29,6 +29,7 @@ model Post {
   createdAt      DateTime  @default(now())
   description    String
   imageUrl       String?
+  thumbnailUrl   String?
   imageKey       String    
   imageStatus    String    @default("PENDING")
 

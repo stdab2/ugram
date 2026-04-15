@@ -51,6 +51,7 @@ const userData: Prisma.UserUgramCreateInput[] = [
 				{
 					description: "Beautiful sunset at the beach 🌅 #sunset #beach #photography",
 					imageUrl: "uploads/post/1.webp",
+					thumbnailUrl: "uploads/post/1_thumb.webp",
 					hashtags: {
 						connect: [{ name: "#sunset" }, { name: "#beach" }, { name: "#photography" }],
 					},
@@ -60,6 +61,7 @@ const userData: Prisma.UserUgramCreateInput[] = [
 				{
 					description: "New adventure begins! #travel #adventure",
 					imageUrl: "uploads/post/6.webp",
+					thumbnailUrl: "uploads/post/6_thumb.webp",
 					hashtags: {
 						connect: [{ name: "#travel" }, { name: "#adventure" }],
 					},
@@ -69,6 +71,7 @@ const userData: Prisma.UserUgramCreateInput[] = [
 				{
 					description: "Good vibes only ✨ #lifestyle #mood",
 					imageUrl: "uploads/post/7.webp",
+					thumbnailUrl: "uploads/post/7_thumb.webp",
 					hashtags: {
 						connect: [{ name: "#lifestyle" }, { name: "#mood" }],
 					},
@@ -78,6 +81,7 @@ const userData: Prisma.UserUgramCreateInput[] = [
 				{
 					description: "Throwback to summer days 🌞 #summer #memories",
 					imageUrl: "uploads/post/8.webp",
+					thumbnailUrl: "uploads/post/8_thumb.webp",
 					hashtags: {
 						connect: [{ name: "#summer" }, { name: "#memories" }],
 					},
@@ -102,6 +106,7 @@ const userData: Prisma.UserUgramCreateInput[] = [
 					description:
 						"Morning coffee vibes ☕️ Thanks @john_doe for the recommendation! #coffee #morning #lifestyle",
 					imageUrl: "uploads/post/2.webp",
+					thumbnailUrl: "uploads/post/2_thumb.webp",
 					hashtags: {
 						connect: [{ name: "#coffee" }, { name: "#morning" }, { name: "#lifestyle" }],
 					},
@@ -129,6 +134,7 @@ const userData: Prisma.UserUgramCreateInput[] = [
 					description:
 						"Mountain views from the top 🏔️ Amazing hiking experience with @john_doe #travel #mountains #adventure #hiking",
 					imageUrl: "uploads/post/3.webp",
+					thumbnailUrl: "uploads/post/3_thumb.webp",
 					hashtags: {
 						connect: [
 							{ name: "#travel" },
@@ -161,6 +167,7 @@ const userData: Prisma.UserUgramCreateInput[] = [
 					description:
 						"Homemade pasta night 🍝 Recipe in bio! Cooking with @john_doe and @jane_smith #food #cooking #pasta #italian",
 					imageUrl: "uploads/post/4.webp",
+					thumbnailUrl: "uploads/post/4_thumb.webp",
 					hashtags: {
 						connect: [
 							{ name: "#food" },
@@ -193,6 +200,7 @@ const userData: Prisma.UserUgramCreateInput[] = [
 					description:
 						"City lights and night vibes 🌃 Shot with @jane_smith #citylife #photography #urban #nightphotography",
 					imageUrl: "uploads/post/5.webp",
+					thumbnailUrl: "uploads/post/5_thumb.webp",
 					hashtags: {
 						connect: [
 							{ name: "#citylife" },
