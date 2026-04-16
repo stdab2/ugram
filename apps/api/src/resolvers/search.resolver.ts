@@ -2,6 +2,7 @@ import { PrismaClient, Prisma } from "../../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { getDatabaseUrl } from "../database-url.js";
 import { UserContext } from "../types/userContext.types.js";
+import { authenticateUser } from "../../Validators/validateUser.js";
 
 const adapter = new PrismaPg({
 	connectionString: getDatabaseUrl(),
@@ -42,6 +43,8 @@ interface SearchArgs {
 export const searchResolvers = {
 	Query: {
 		search: async (_: unknown, args: SearchArgs, context: UserContext) => {
+			authenticateUser(context.user);
+
 			// Validate and clamp pagination parameters
 			const usersLimit = Math.min(Math.max(args.usersLimit ?? 20, 0), 100);
 			const usersOffset = Math.max(args.usersOffset ?? 0, 0);

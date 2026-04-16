@@ -8,7 +8,7 @@ import {
 } from "../../Validators/validateUser.js";
 import { saveUploadedImage, deleteImageFromStorage } from "../services/image.service.js";
 import type { FileUpload } from "graphql-upload";
-import { Post } from "../../generated/prisma/client.js";
+import { Post, UserUgram } from "../../generated/prisma/client.js";
 import { handlePrismaError } from "../../Validators/errors.js";
 import {
 	validatePostId,
@@ -36,6 +36,10 @@ type PostWithCount = Prisma.PostGetPayload<{
 		};
 	};
 }>;
+
+type PostWithOptionalAuthor = Post & {
+	author?: UserUgram;
+};
 
 type CreatePostArgs = {
 	data: {
@@ -89,6 +93,7 @@ export const postResolvers = {
 				take: limit,
 				skip: offset,
 				include: {
+					author: true,
 					_count: {
 						select: { messages: true },
 					},
@@ -117,8 +122,13 @@ export const postResolvers = {
 		},
 	},
 	Post: {
-		author: async (parent: Post, _: unknown, context: UserContext) => {
+		author: async (parent: PostWithOptionalAuthor, _: unknown, context: UserContext) => {
 			authenticateUser(context.user);
+
+			if (parent.author) {
+				return parent.author;
+			}
+
 			return prisma.userUgram.findUnique({
 				where: { id: parent.authorId },
 			});
