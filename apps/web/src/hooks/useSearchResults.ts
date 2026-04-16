@@ -41,13 +41,13 @@ export function useSearchResults(
 	const users = useLoadMore();
 	const posts = useLoadMore();
 
-	// Reset load more state when search changes
+	// Reset load more state when search mode or debounced query changes
 	useEffect(() => {
 		hashtags.reset();
 		users.reset();
 		posts.reset();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [isSearching]);
+	}, [isSearching, debouncedSearchQuery]);
 
 	// Initial queries (when not searching)
 	const hashtagsQuery = useHashtagsQuery({
