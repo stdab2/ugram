@@ -1,4 +1,4 @@
-﻿import { SearchBar } from "@/components/SearchBar";
+import { SearchBar } from "@/components/SearchBar";
 import { SearchFilters } from "@/components/SearchFilters";
 import { PostModal } from "@/components/PostModal";
 import { SearchSkeleton } from "@/components/SearchSkeleton";
