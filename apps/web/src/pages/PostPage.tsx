@@ -2,7 +2,8 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Heart, MessageCircle, Send } from "lucide-react";
+import { AlertCircle, Heart, MessageCircle, Send } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/Dialog";
 import { PostMenu } from "@/components/PostMenu";
 import { DeletePostDialog } from "@/components/DeletePostDialog";
 import { cn, getImageUrl } from "@/lib/utils";
@@ -24,7 +25,6 @@ import {
 	EmptyHeader,
 	EmptyTitle,
 } from "@/components/ui/Empty";
-import { AlertCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { toast } from "sonner";
 import { useAuth } from "@/AuthContext";
@@ -190,14 +190,19 @@ export function PostPage() {
 	return (
 		<>
 			<PageFade key="content">
-				<div className="w-full min-h-screen bg-background pb-20 md:pb-0">
-					<div className="max-w-7xl mx-auto p-4">
-						{/* Back button */}
-						<Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-4 gap-2">
-							Back
-						</Button>
-
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-4 border rounded-xl overflow-hidden bg-card">
+				<Dialog
+					open
+					onOpenChange={(open) => {
+						if (!open) {
+							navigate(-1);
+						}
+					}}
+				>
+					<DialogContent
+						showCloseButton={false}
+						className="max-w-[95vw] w-full h-[90vh] p-0 gap-0 overflow-hidden rounded-xl md:max-w-7xl flex flex-col"
+					>
+						<div className="grid grid-cols-1 md:grid-cols-2 flex-1 min-h-0 w-full">
 							{/* Left side - Image */}
 							<div className="bg-black flex items-center justify-center">
 								<img
@@ -367,8 +372,8 @@ export function PostPage() {
 								</div>
 							</div>
 						</div>
-					</div>
-				</div>
+					</DialogContent>
+				</Dialog>
 			</PageFade>
 
 			<DeletePostDialog

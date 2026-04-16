@@ -1,5 +1,3 @@
-import { PrismaClient } from "../../generated/prisma/client.js";
-import { PrismaPg } from "@prisma/adapter-pg";
 import { Message } from "../../generated/prisma/client.js";
 import { handlePrismaError } from "../../Validators/errors.js";
 import {
@@ -15,15 +13,8 @@ import {
 	validateMessageCreationOwnership,
 } from "../../Validators/validateMessage.js";
 import { UserContext } from "../types/userContext.types.js";
-import { getDatabaseUrl } from "../database-url.js";
-
-const adapter = new PrismaPg({
-	connectionString: getDatabaseUrl(),
-});
-
-const prisma = new PrismaClient({
-	adapter,
-});
+import { prisma } from "../lib/prisma.js";
+import { createNotification } from "../services/notification.service.js";
 
 type CreateMessageArgs = {
 	data: {
@@ -130,16 +121,29 @@ export const messageResolvers = {
 			await validatePostExists(postId);
 
 			try {
-				return await prisma.message.create({
-					data: {
-						content,
-						authorId,
-						postId,
-					},
-					include: {
-						author: true,
-						post: true,
-					},
+				return await prisma.$transaction(async (tx) => {
+					const message = await tx.message.create({
+						data: {
+							content,
+							authorId,
+							postId,
+						},
+						include: {
+							author: true,
+							post: true,
+						},
+					});
+
+					await createNotification({
+						tx,
+						type: "COMMENT",
+						recipientId: message.post.authorId,
+						actorId: message.authorId,
+						postId: message.postId,
+						messageId: message.id,
+					});
+
+					return message;
 				});
 			} catch (error: unknown) {
 				handlePrismaError(error, "Message");

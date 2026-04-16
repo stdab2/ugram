@@ -7,6 +7,11 @@ datasource db {
   provider = "postgresql"
 }
 
+enum NotificationType {
+  LIKE
+  COMMENT
+}
+
 model UserUgram {
   id            Int      @id @default(autoincrement())
   createdAt     DateTime @default(now())
@@ -21,7 +26,9 @@ model UserUgram {
   posts         Post[]   @relation("UserPosts")
   mentions      Post[]   @relation("UserMentions")
   messages      Message[] @relation("UserMessages")
-  likes         Like[]
+  likes          Like[]
+  notifications  Notification[] @relation("UserNotificationsReceived")
+  notificationsSent Notification[] @relation("UserNotificationsActor")
 }
 
 model Post {
@@ -41,6 +48,7 @@ model Post {
   hashtags       Hashtag[]   @relation("PostHashtags")
   messages       Message[]   @relation("PostMessages")
   likes          Like[]
+  notifications  Notification[] @relation("PostNotifications")
 }
 
 model Hashtag {
@@ -51,15 +59,17 @@ model Hashtag {
 }
 
 model Message {
-  id        Int       @id @default(autoincrement())
-  createdAt DateTime  @default(now())
-  content   String
+  id            Int       @id @default(autoincrement())
+  createdAt     DateTime  @default(now())
+  content       String
 
-  authorId  Int
-  author    UserUgram @relation("UserMessages", fields: [authorId], references: [id], onDelete: Cascade)
+  authorId      Int
+  author        UserUgram @relation("UserMessages", fields: [authorId], references: [id], onDelete: Cascade)
 
-  postId    Int
-  post      Post      @relation("PostMessages", fields: [postId], references: [id], onDelete: Cascade)
+  postId        Int
+  post          Post      @relation("PostMessages", fields: [postId], references: [id], onDelete: Cascade)
+
+  notifications Notification[]
 }
 
 
@@ -72,4 +82,26 @@ model Like {
   post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@id([userId, postId])
+}
+
+model Notification {
+  id         Int              @id @default(autoincrement())
+  createdAt  DateTime         @default(now())
+  readAt     DateTime?
+  type       NotificationType
+
+  recipientId Int
+  recipient   UserUgram       @relation("UserNotificationsReceived", fields: [recipientId], references: [id], onDelete: Cascade)
+
+  actorId    Int
+  actor      UserUgram        @relation("UserNotificationsActor", fields: [actorId], references: [id], onDelete: Cascade)
+
+  postId     Int
+  post       Post             @relation("PostNotifications", fields: [postId], references: [id], onDelete: Cascade)
+
+  messageId  Int?
+  message    Message?         @relation(fields: [messageId], references: [id], onDelete: SetNull)
+
+  @@index([recipientId, readAt, createdAt])
+  @@index([postId, createdAt])
 }
