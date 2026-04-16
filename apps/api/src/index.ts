@@ -17,6 +17,7 @@ import { verifyToken } from "./services/jwt.service.js";
 import cookieParser from "cookie-parser";
 import oauthRouter from "./routes/oauth.route.js";
 import authRouter from "./routes/auth.route.js";
+import { getLocalUploadsDir, isUsingLocalUploads } from "./services/image.service.js";
 async function startServer() {
 	const app: Express = express();
 	const httpServer = http.createServer(app);
@@ -44,6 +45,10 @@ async function startServer() {
 	app.use("/oauth2", oauthRouter);
 
 	app.use("/auth", authRouter);
+
+	if (isUsingLocalUploads()) {
+		app.use("/uploads", express.static(getLocalUploadsDir()));
+	}
 
 	app.use("/graphql", graphqlUploadExpress({ maxFileSize: 10_000_000, maxFiles: 1 }));
 
