@@ -1,0 +1,20 @@
+query Notifications($limit: Int, $offset: Int) {
+	notifications(limit: $limit, offset: $offset) {
+		id
+		createdAt
+		readAt
+		type
+		actor {
+			id
+			userName
+			firstName
+			lastName
+			picture
+		}
+		post {
+			id
+			description
+			imageUrl
+		}
+	}
+}

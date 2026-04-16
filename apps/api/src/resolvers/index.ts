@@ -4,7 +4,9 @@ import { hashtagResolvers } from "./hashtag.resolver.js";
 import { searchResolvers } from "./search.resolver.js";
 import { autocompleteResolvers } from "./autocomplete.resolver.js";
 import { likesResolvers } from "./like.resolver.js";
+import { notificationResolvers } from "./notification.resolver.js";
 import { DateTimeScalar, scalars } from "./scalars.js";
+import { messageResolvers } from "./message.resolver.js";
 import GraphQLUpload from "graphql-upload/GraphQLUpload.mjs";
 
 export const resolvers = {
@@ -18,14 +20,18 @@ export const resolvers = {
 		...hashtagResolvers.Query,
 		...searchResolvers.Query,
 		...autocompleteResolvers.Query,
+		...messageResolvers.Query,
 		...likesResolvers.Query,
+		...notificationResolvers.Query,
 	},
 
 	Mutation: {
 		...userResolvers.Mutation,
 		...postResolvers.Mutation,
 		...hashtagResolvers.Mutation,
+		...messageResolvers.Mutation,
 		...likesResolvers.Mutation,
+		...notificationResolvers.Mutation,
 	},
 
 	Post: {
@@ -34,5 +40,13 @@ export const resolvers = {
 
 	UserUgram: {
 		...userResolvers.UserUgram,
+	},
+
+	Message: {
+		...messageResolvers.Message,
+	},
+
+	NotificationType: {
+		...notificationResolvers.NotificationType,
 	},
 };

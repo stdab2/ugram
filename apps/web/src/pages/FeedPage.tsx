@@ -100,7 +100,7 @@ export function FeedPage() {
 							post={post}
 							aspectRatio={"square"}
 							likes={post.likeCount}
-							comments={20} // Replace with actual comment count from API
+							comments={post.messageCount}
 							isLiked={post.isLikedByCurrentUser}
 							onComment={() => console.log("Comment", post.id)}
 							onPostDeletion={handlePostDeletion}

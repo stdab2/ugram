@@ -1,0 +1,26 @@
+type Message {
+  id: Int!
+  createdAt: DateTime!
+  content: String!
+  author: UserUgram!
+  post: Post!
+}
+
+input CreateMessageInput {
+  content: String!
+  authorId: Int!
+  postId: Int!
+}
+
+extend type Query {
+  message(id: Int!): Message
+  messages(limit: Int, offset: Int): [Message!]!
+  messagesByPost(postId: Int!, limit: Int, offset: Int): [Message!]!
+  messagesByAuthor(authorId: Int!, limit: Int, offset: Int): [Message!]!
+}
+
+extend type Mutation {
+  createMessage(data: CreateMessageInput!): Message!
+  updateMessage(id: Int!, content: String!): Message!
+  deleteMessage(id: Int!): Message!
+}

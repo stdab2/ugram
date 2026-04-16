@@ -197,7 +197,7 @@ export function ProfilePage() {
 								imageUrl: post.imageUrl || "",
 								likeCount: post.likeCount,
 								isLikedByCurrentUser: post.isLikedByCurrentUser,
-								comments: 0, // TODO: Add comments count to GraphQL schema
+								messageCount: post.messageCount,
 							}))}
 							onPostClick={(postPreview) => {
 								const fullPost = userPosts.find((p) => p.id === postPreview.id);

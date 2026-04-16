@@ -1,0 +1,17 @@
+mutation CreateMessage($data: CreateMessageInput!) {
+  createMessage(data: $data) {
+    id
+    content
+    createdAt
+    author {
+      id
+      userName
+      firstName
+      lastName
+      picture
+    }
+    post {
+      id
+    }
+  }
+}

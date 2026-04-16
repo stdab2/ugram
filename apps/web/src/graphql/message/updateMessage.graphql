@@ -1,0 +1,17 @@
+mutation UpdateMessage($id: Int!, $content: String!) {
+  updateMessage(id: $id, content: $content) {
+    id
+    content
+    createdAt
+    author {
+      id
+      userName
+      firstName
+      lastName
+      picture
+    }
+    post {
+      id
+    }
+  }
+}
