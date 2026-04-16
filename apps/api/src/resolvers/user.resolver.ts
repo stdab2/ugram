@@ -28,6 +28,34 @@ const prisma = new PrismaClient({
 	adapter,
 });
 
+type UserWithFollowMeta = UserUgram & {
+	_count?: {
+		followers: number;
+		following: number;
+	};
+	followers?: Array<{
+		followerId: number;
+	}>;
+};
+
+const userWithFollowMetaInclude = (currentUserId?: number): Prisma.UserUgramInclude => ({
+	_count: {
+		select: {
+			followers: true,
+			following: true,
+		},
+	},
+	...(currentUserId
+		? {
+				followers: {
+					where: { followerId: currentUserId },
+					select: { followerId: true },
+					take: 1,
+				},
+			}
+		: {}),
+});
+
 /**
  * User Resolvers
  * Handles all user-related GraphQL queries and mutations
@@ -48,6 +76,7 @@ export const userResolvers = {
 			validateUserId(args.id);
 			return prisma.userUgram.findUnique({
 				where: { id: args.id },
+				include: userWithFollowMetaInclude(context.user?.id),
 			});
 		},
 
@@ -55,6 +84,7 @@ export const userResolvers = {
 			authenticateUser(context.user);
 			return prisma.userUgram.findUnique({
 				where: { userName: args.userName },
+				include: userWithFollowMetaInclude(context.user?.id),
 			});
 		},
 
@@ -64,6 +94,7 @@ export const userResolvers = {
 
 			const users = await prisma.userUgram.findMany({
 				where: { userName: { in: requested } },
+				include: userWithFollowMetaInclude(context.user?.id),
 			});
 
 			const found = new Set(users.map((u) => u.userName));
@@ -86,6 +117,7 @@ export const userResolvers = {
 				orderBy: [{ followers: { _count: "desc" } }, { id: "asc" }],
 				take: limit,
 				skip: offset,
+				include: userWithFollowMetaInclude(context.user?.id),
 			});
 		},
 	},
@@ -106,25 +138,43 @@ export const userResolvers = {
 			});
 		},
 
-		followerCount: async (parent: UserUgram, _: unknown, context: UserContext) => {
+		followerCount: async (parent: UserWithFollowMeta, _: unknown, context: UserContext) => {
 			authenticateUser(context.user);
+
+			if (parent._count?.followers !== undefined) {
+				return parent._count.followers;
+			}
+
 			return prisma.follow.count({
 				where: { followingId: parent.id },
 			});
 		},
 
-		followingCount: async (parent: UserUgram, _: unknown, context: UserContext) => {
+		followingCount: async (parent: UserWithFollowMeta, _: unknown, context: UserContext) => {
 			authenticateUser(context.user);
+
+			if (parent._count?.following !== undefined) {
+				return parent._count.following;
+			}
+
 			return prisma.follow.count({
 				where: { followerId: parent.id },
 			});
 		},
 
-		isFollowedByCurrentUser: async (parent: UserUgram, _: unknown, context: UserContext) => {
+		isFollowedByCurrentUser: async (
+			parent: UserWithFollowMeta,
+			_: unknown,
+			context: UserContext
+		) => {
 			authenticateUser(context.user);
 
 			if (context.user!.id === parent.id) {
 				return false;
+			}
+
+			if (parent.followers !== undefined) {
+				return parent.followers.length > 0;
 			}
 
 			const relation = await prisma.follow.findUnique({

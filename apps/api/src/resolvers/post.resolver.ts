@@ -66,6 +66,25 @@ export const postResolvers = {
 			const limit = Math.min(Math.max(args.limit ?? 20, 0), 100);
 			const offset = Math.max(args.offset ?? 0, 0);
 			return prisma.post.findMany({
+				orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+				take: limit,
+				skip: offset,
+				include: {
+					_count: {
+						select: { messages: true },
+					},
+				},
+			});
+		},
+		popularPosts: async (
+			_: unknown,
+			args: { limit?: number; offset?: number },
+			context: UserContext
+		) => {
+			authenticateUser(context.user);
+			const limit = Math.min(Math.max(args.limit ?? 20, 0), 100);
+			const offset = Math.max(args.offset ?? 0, 0);
+			return prisma.post.findMany({
 				orderBy: [{ likes: { _count: "desc" } }, { id: "asc" }],
 				take: limit,
 				skip: offset,

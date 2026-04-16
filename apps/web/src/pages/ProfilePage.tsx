@@ -42,6 +42,13 @@ type OptimisticFollowState = {
 	followersList: FollowListUser[] | null;
 };
 
+type HasMoreState = {
+	userName: string;
+	posts: boolean;
+	followers: boolean;
+	following: boolean;
+};
+
 export function ProfilePage() {
 	const { username } = useParams();
 	const navigate = useNavigate();
@@ -61,10 +68,35 @@ export function ProfilePage() {
 		followerDelta: 0,
 		followersList: null,
 	});
+	const [hasMoreState, setHasMoreState] = useState<HasMoreState>({
+		userName: userNameToFetch,
+		posts: true,
+		followers: true,
+		following: true,
+	});
 
 	const isCurrentProfileState = profileUiState.userName === userNameToFetch;
+	const isCurrentHasMoreState = hasMoreState.userName === userNameToFetch;
 	const activeView = isCurrentProfileState ? profileUiState.activeView : "posts";
 	const selectedPostId = isCurrentProfileState ? profileUiState.selectedPostId : null;
+
+	const setHasMoreForView = (view: "posts" | "followers" | "following", hasMore: boolean) => {
+		setHasMoreState((prev) => {
+			if (prev.userName !== userNameToFetch) {
+				return {
+					userName: userNameToFetch,
+					posts: view === "posts" ? hasMore : true,
+					followers: view === "followers" ? hasMore : true,
+					following: view === "following" ? hasMore : true,
+				};
+			}
+
+			return {
+				...prev,
+				[view]: hasMore,
+			};
+		});
+	};
 
 	const handleChangeView = (view: ProfileView) => {
 		setProfileUiState((prev) => ({
@@ -99,6 +131,9 @@ export function ProfilePage() {
 	} = usePostsByAuthorQuery({
 		variables: { authorId: viewedUserId ?? 0, limit: PROFILE_LIST_PAGE_SIZE, offset: 0 },
 		skip: !viewedUserId || activeView !== "posts",
+		onCompleted: (data) => {
+			setHasMoreForView("posts", data.postsByAuthor.length === PROFILE_LIST_PAGE_SIZE);
+		},
 	});
 
 	const {
@@ -109,6 +144,9 @@ export function ProfilePage() {
 	} = useFollowersQuery({
 		variables: { userId: viewedUserId ?? 0, limit: PROFILE_LIST_PAGE_SIZE, offset: 0 },
 		skip: !viewedUserId || activeView !== "followers",
+		onCompleted: (data) => {
+			setHasMoreForView("followers", data.followers.length === PROFILE_LIST_PAGE_SIZE);
+		},
 	});
 
 	const {
@@ -119,6 +157,9 @@ export function ProfilePage() {
 	} = useFollowingQuery({
 		variables: { userId: viewedUserId ?? 0, limit: PROFILE_LIST_PAGE_SIZE, offset: 0 },
 		skip: !viewedUserId || activeView !== "following",
+		onCompleted: (data) => {
+			setHasMoreForView("following", data.following.length === PROFILE_LIST_PAGE_SIZE);
+		},
 	});
 
 	const [deletePost] = useDeletePostMutation({
@@ -138,17 +179,20 @@ export function ProfilePage() {
 	const currentFollowing = followingData?.following ?? [];
 	const isOptimisticForViewedUser =
 		viewedUserId !== undefined && optimisticFollowState.targetUserId === viewedUserId;
-	const displayedFollowers = isOptimisticForViewedUser
-		? (optimisticFollowState.followersList ?? currentFollowers)
-		: currentFollowers;
+	const hasRealFollowersData = followersData !== undefined;
+	const displayedFollowers =
+		isOptimisticForViewedUser &&
+		optimisticFollowState.followersList !== null &&
+		!hasRealFollowersData
+			? optimisticFollowState.followersList
+			: currentFollowers;
 	const isViewLoading =
 		(activeView === "posts" && postsLoading && !postsData) ||
 		(activeView === "followers" && followersLoading && !followersData) ||
 		(activeView === "following" && followingLoading && !followingData);
-
-	const hasMorePosts = currentPosts.length >= PROFILE_LIST_PAGE_SIZE;
-	const hasMoreFollowers = currentFollowers.length >= PROFILE_LIST_PAGE_SIZE;
-	const hasMoreFollowing = currentFollowing.length >= PROFILE_LIST_PAGE_SIZE;
+	const hasMorePosts = isCurrentHasMoreState ? hasMoreState.posts : true;
+	const hasMoreFollowers = isCurrentHasMoreState ? hasMoreState.followers : true;
+	const hasMoreFollowing = isCurrentHasMoreState ? hasMoreState.following : true;
 
 	const handlePostDeletion = async (postId: number) => {
 		try {
@@ -163,15 +207,19 @@ export function ProfilePage() {
 	const handleFollowToggle = async (targetUserId: number, isCurrentlyFollowing: boolean) => {
 		const previousOptimisticFollowState = optimisticFollowState;
 		const followerDelta = isCurrentlyFollowing ? -1 : 1;
+		const canBuildFollowersList =
+			followersData !== undefined ||
+			(previousOptimisticFollowState.targetUserId === targetUserId &&
+				previousOptimisticFollowState.followersList !== null);
 
 		setOptimisticFollowState((prev) => {
 			const isSameTarget = prev.targetUserId === targetUserId;
 			const baseFollowersList = isSameTarget ? prev.followersList : null;
-			const source = baseFollowersList ?? currentFollowers;
+			const source = baseFollowersList ?? (canBuildFollowersList ? currentFollowers : null);
 			const nextFollowerDelta = (isSameTarget ? prev.followerDelta : 0) + followerDelta;
 			let nextFollowersList = source;
 
-			if (userAuth) {
+			if (userAuth && source !== null) {
 				const currentUserListEntry: FollowListUser = {
 					id: userAuth.id,
 					userName: userAuth.userName,
@@ -191,7 +239,7 @@ export function ProfilePage() {
 				targetUserId,
 				isFollowed: !isCurrentlyFollowing,
 				followerDelta: nextFollowerDelta,
-				followersList: nextFollowersList,
+				followersList: nextFollowersList ?? null,
 			};
 		});
 
@@ -204,14 +252,27 @@ export function ProfilePage() {
 				toast.success("User followed.");
 			}
 
-			await Promise.all([refetchFollowers(), refetchFollowing()]);
+			if (isOwnProfile) {
+				await refetchFollowing();
+			} else {
+				await refetchFollowers();
+			}
+
+			setOptimisticFollowState((prev) =>
+				prev.targetUserId !== targetUserId
+					? prev
+					: {
+							...prev,
+							followersList: null,
+						}
+			);
 		} catch {
 			setOptimisticFollowState(previousOptimisticFollowState);
 		}
 	};
 
 	const handleLoadMorePosts = () => {
-		if (!viewedUserId) return;
+		if (!viewedUserId || !hasMorePosts) return;
 
 		const currentLength = currentPosts.length;
 
@@ -224,6 +285,7 @@ export function ProfilePage() {
 			updateQuery: (prev, { fetchMoreResult }) => {
 				if (!fetchMoreResult) return prev;
 				const newPosts = fetchMoreResult.postsByAuthor;
+				setHasMoreForView("posts", newPosts.length === PROFILE_LIST_PAGE_SIZE);
 				return {
 					__typename: "Query",
 					postsByAuthor: [...prev.postsByAuthor, ...newPosts],
@@ -233,7 +295,7 @@ export function ProfilePage() {
 	};
 
 	const handleLoadMoreFollowers = () => {
-		if (!viewedUserId) return;
+		if (!viewedUserId || !hasMoreFollowers) return;
 
 		const currentLength = currentFollowers.length;
 
@@ -246,6 +308,7 @@ export function ProfilePage() {
 			updateQuery: (prev, { fetchMoreResult }) => {
 				if (!fetchMoreResult) return prev;
 				const newFollowers = fetchMoreResult.followers;
+				setHasMoreForView("followers", newFollowers.length === PROFILE_LIST_PAGE_SIZE);
 				return {
 					__typename: "Query",
 					followers: [...prev.followers, ...newFollowers],
@@ -255,7 +318,7 @@ export function ProfilePage() {
 	};
 
 	const handleLoadMoreFollowing = () => {
-		if (!viewedUserId) return;
+		if (!viewedUserId || !hasMoreFollowing) return;
 		const currentLength = currentFollowing.length;
 		fetchMoreFollowing({
 			variables: {
@@ -267,6 +330,7 @@ export function ProfilePage() {
 				if (!fetchMoreResult) return prev;
 
 				const newFollowing = fetchMoreResult.following;
+				setHasMoreForView("following", newFollowing.length === PROFILE_LIST_PAGE_SIZE);
 
 				return {
 					__typename: "Query",

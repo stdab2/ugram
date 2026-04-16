@@ -1,4 +1,4 @@
-import { BadRequestError } from "../../Validators/errors.js";
+import { BadRequestError, NotFoundError } from "../../Validators/errors.js";
 import { authenticateUser, validateUserId } from "../../Validators/validateUser.js";
 import { prisma } from "../lib/prisma.js";
 import { UserContext } from "../types/userContext.types.js";
@@ -15,7 +15,7 @@ const validateTargetUserExists = async (targetUserId: number) => {
 		select: { id: true },
 	});
 	if (!user) {
-		throw new BadRequestError("Target user does not exist");
+		throw new NotFoundError("Target user not found");
 	}
 };
 

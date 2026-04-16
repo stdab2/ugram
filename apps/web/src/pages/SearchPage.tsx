@@ -18,7 +18,7 @@ import type { SearchType } from "@/types/search";
 import { AlertCircle, RefreshCcw } from "lucide-react";
 import {
 	useUsersQuery,
-	usePostsQuery,
+	usePopularPostsQuery,
 	useSearchQuery,
 	useHashtagsQuery,
 } from "@/generated/graphql";
@@ -52,6 +52,24 @@ export function SearchPage() {
 	const debouncedSearchQuery = useDebounce(searchQuery, SEARCH_DEBOUNCE_MS);
 	const isSearching = debouncedSearchQuery.trim().length >= MIN_SEARCH_LENGTH;
 
+	const resetSearchHasMore = () => {
+		setHasMoreSearchHashtags(true);
+		setHasMoreSearchUsers(true);
+		setHasMoreSearchPosts(true);
+	};
+
+	const handleSearchQueryChange = (value: string) => {
+		setSearchQuery(value);
+		if (value.trim().length >= MIN_SEARCH_LENGTH) {
+			resetSearchHasMore();
+		}
+	};
+
+	const handleSearchClear = () => {
+		setSearchQuery("");
+		resetSearchHasMore();
+	};
+
 	// Fetch hashtags
 	const {
 		data: hashtagsData,
@@ -62,6 +80,9 @@ export function SearchPage() {
 	} = useHashtagsQuery({
 		variables: { limit: INITIAL_HASHTAGS_LIMIT, offset: 0 },
 		skip: isSearching,
+		onCompleted: (data) => {
+			setHasMoreHashtags(data.hashtags.length === INITIAL_HASHTAGS_LIMIT);
+		},
 	});
 
 	// Fetch initial users
@@ -77,6 +98,9 @@ export function SearchPage() {
 			offset: 0,
 		},
 		skip: isSearching,
+		onCompleted: (data) => {
+			setHasMoreUsers(data.users.length === INITIAL_USERS_LIMIT);
+		},
 	});
 
 	// Fetch initial posts
@@ -86,9 +110,12 @@ export function SearchPage() {
 		error: initialPostsError,
 		refetch: refetchInitialPosts,
 		fetchMore: fetchMorePosts,
-	} = usePostsQuery({
+	} = usePopularPostsQuery({
 		variables: { limit: INITIAL_POSTS_LIMIT, offset: 0 },
 		skip: isSearching,
+		onCompleted: (data) => {
+			setHasMorePosts(data.popularPosts.length === INITIAL_POSTS_LIMIT);
+		},
 	});
 
 	// Unified search query
@@ -109,11 +136,18 @@ export function SearchPage() {
 			hashtagsOffset: 0,
 		},
 		skip: !isSearching,
+		onCompleted: (data) => {
+			setHasMoreSearchHashtags(data.search.hashtags.length === INITIAL_HASHTAGS_LIMIT);
+			setHasMoreSearchUsers(data.search.users.length === INITIAL_USERS_LIMIT);
+			setHasMoreSearchPosts(data.search.posts.length === INITIAL_POSTS_LIMIT);
+		},
 	});
 
 	// Determine which data to use
 	const allUsers = isSearching ? searchData?.search.users || [] : initialUsersData?.users || [];
-	const allPosts = isSearching ? searchData?.search.posts || [] : initialPostsData?.posts || [];
+	const allPosts = isSearching
+		? searchData?.search.posts || []
+		: initialPostsData?.popularPosts || [];
 	const allHashtags = isSearching
 		? searchData?.search.hashtags || []
 		: hashtagsData?.hashtags || [];
@@ -193,11 +227,13 @@ export function SearchPage() {
 	};
 
 	const handleHashtagClick = (hashtagName: string) => {
-		setSearchQuery(hashtagName);
+		handleSearchQueryChange(hashtagName);
 		setActiveFilter("posts");
 	};
 
 	const handleLoadMoreHashtags = () => {
+		if ((isSearching && !hasMoreSearchHashtags) || (!isSearching && !hasMoreHashtags)) return;
+
 		if (isSearching) {
 			// For search, use fetchMore with offset
 			const currentLength = searchData?.search.hashtags.length || 0;
@@ -214,7 +250,7 @@ export function SearchPage() {
 				updateQuery: (prev, { fetchMoreResult }) => {
 					if (!fetchMoreResult) return prev;
 					const newHashtags = fetchMoreResult.search.hashtags;
-					setHasMoreSearchHashtags(newHashtags.length >= LOAD_MORE_HASHTAGS_INCREMENT);
+					setHasMoreSearchHashtags(newHashtags.length === LOAD_MORE_HASHTAGS_INCREMENT);
 					return {
 						__typename: "Query",
 						search: {
@@ -235,7 +271,7 @@ export function SearchPage() {
 				updateQuery: (prev, { fetchMoreResult }) => {
 					if (!fetchMoreResult) return prev;
 					const newHashtags = fetchMoreResult.hashtags;
-					setHasMoreHashtags(newHashtags.length >= LOAD_MORE_HASHTAGS_INCREMENT);
+					setHasMoreHashtags(newHashtags.length === LOAD_MORE_HASHTAGS_INCREMENT);
 					return {
 						__typename: "Query",
 						hashtags: [...prev.hashtags, ...newHashtags],
@@ -247,6 +283,8 @@ export function SearchPage() {
 	const selectedPost =
 		selectedPostId !== null ? (allPosts.find((p) => p.id === selectedPostId) ?? null) : null;
 	const handleLoadMoreUsers = () => {
+		if ((isSearching && !hasMoreSearchUsers) || (!isSearching && !hasMoreUsers)) return;
+
 		if (isSearching) {
 			// For search, use fetchMore with offset
 			const currentLength = searchData?.search.users.length || 0;
@@ -263,7 +301,7 @@ export function SearchPage() {
 				updateQuery: (prev, { fetchMoreResult }) => {
 					if (!fetchMoreResult) return prev;
 					const newUsers = fetchMoreResult.search.users;
-					setHasMoreSearchUsers(newUsers.length >= LOAD_MORE_USERS_INCREMENT);
+					setHasMoreSearchUsers(newUsers.length === LOAD_MORE_USERS_INCREMENT);
 					return {
 						__typename: "Query",
 						search: {
@@ -284,7 +322,7 @@ export function SearchPage() {
 				updateQuery: (prev, { fetchMoreResult }) => {
 					if (!fetchMoreResult) return prev;
 					const newUsers = fetchMoreResult.users;
-					setHasMoreUsers(newUsers.length >= LOAD_MORE_USERS_INCREMENT);
+					setHasMoreUsers(newUsers.length === LOAD_MORE_USERS_INCREMENT);
 					return {
 						__typename: "Query",
 						users: [...prev.users, ...newUsers],
@@ -295,6 +333,8 @@ export function SearchPage() {
 	};
 
 	const handleLoadMorePosts = () => {
+		if ((isSearching && !hasMoreSearchPosts) || (!isSearching && !hasMorePosts)) return;
+
 		if (isSearching) {
 			// For search, use fetchMore with offset
 			const currentLength = searchData?.search.posts.length || 0;
@@ -311,7 +351,7 @@ export function SearchPage() {
 				updateQuery: (prev, { fetchMoreResult }) => {
 					if (!fetchMoreResult) return prev;
 					const newPosts = fetchMoreResult.search.posts;
-					setHasMoreSearchPosts(newPosts.length >= LOAD_MORE_POSTS_INCREMENT);
+					setHasMoreSearchPosts(newPosts.length === LOAD_MORE_POSTS_INCREMENT);
 					return {
 						__typename: "Query",
 						search: {
@@ -323,7 +363,7 @@ export function SearchPage() {
 			});
 		} else {
 			// For default view, use fetchMore with offset
-			const currentLength = initialPostsData?.posts.length || 0;
+			const currentLength = initialPostsData?.popularPosts.length || 0;
 			fetchMorePosts({
 				variables: {
 					offset: currentLength,
@@ -331,11 +371,11 @@ export function SearchPage() {
 				},
 				updateQuery: (prev, { fetchMoreResult }) => {
 					if (!fetchMoreResult) return prev;
-					const newPosts = fetchMoreResult.posts;
-					setHasMorePosts(newPosts.length >= LOAD_MORE_POSTS_INCREMENT);
+					const newPosts = fetchMoreResult.popularPosts;
+					setHasMorePosts(newPosts.length === LOAD_MORE_POSTS_INCREMENT);
 					return {
 						__typename: "Query",
-						posts: [...prev.posts, ...newPosts],
+						popularPosts: [...prev.popularPosts, ...newPosts],
 					};
 				},
 			});
@@ -359,8 +399,8 @@ export function SearchPage() {
 					<div className="p-4">
 						<SearchBar
 							value={searchQuery}
-							onChange={setSearchQuery}
-							onClear={() => setSearchQuery("")}
+							onChange={handleSearchQueryChange}
+							onClear={handleSearchClear}
 							placeholder="Search users, posts, hashtags..."
 						/>
 					</div>
@@ -468,7 +508,9 @@ export function SearchPage() {
 									{(activeFilter === "all" || activeFilter === "hashtags") && (
 										<div className="mb-6">
 											<div className="px-4 py-3">
-												<h2 className="font-semibold">Popular Hashtags</h2>
+												<h2 className="font-semibold">
+													{isSearching ? "Hashtags" : "Popular Hashtags"}
+												</h2>
 											</div>
 											{displayHashtags.length > 0 ? (
 												<>
@@ -506,7 +548,7 @@ export function SearchPage() {
 									{(activeFilter === "all" || activeFilter === "users") && (
 										<div className="mb-6">
 											<div className="px-4 py-3">
-												<h2 className="font-semibold">Popular Users</h2>
+												<h2 className="font-semibold">{isSearching ? "Users" : "Popular Users"}</h2>
 											</div>
 											{displayUsers.length > 0 ? (
 												<>
@@ -544,7 +586,7 @@ export function SearchPage() {
 									{(activeFilter === "all" || activeFilter === "posts") && (
 										<div>
 											<div className="px-4 py-3">
-												<h2 className="font-semibold">Popular Posts</h2>
+												<h2 className="font-semibold">{isSearching ? "Posts" : "Popular Posts"}</h2>
 											</div>
 											{displayPosts.length > 0 ? (
 												<>
