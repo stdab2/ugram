@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Heart, MessageCircle, Send } from "lucide-react";
 import { PostMenu } from "@/components/PostMenu";
+import { ImageProcessing } from "@/components/ImageProcessing";
 import { DeletePostDialog } from "@/components/DeletePostDialog";
 import { cn, getImageUrl } from "@/lib/utils";
 import { formatDescription, formatDate } from "@/lib/postUtils";
@@ -111,11 +112,15 @@ export function PostModal({ open, onOpenChange, post, onPostDeletion }: PostModa
 					<div className="grid grid-cols-1 md:grid-cols-2 flex-1 min-h-0 w-full">
 						{/* Left side - Image */}
 						<div className="bg-black flex items-center justify-center">
-							<img
-								src={getImageUrl(post.imageUrl)}
-								alt={`Post by ${author.userName}`}
-								className="w-full h-full object-contain"
-							/>
+							{post.imageStatus === "PENDING" ? (
+								<ImageProcessing />
+							) : (
+								<img
+									src={getImageUrl(post.imageUrl)}
+									alt={`Post by ${author.userName}`}
+									className="w-full h-full object-contain"
+								/>
+							)}
 						</div>
 
 						{/* Right side - Details */}

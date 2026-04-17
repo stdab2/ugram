@@ -35,7 +35,10 @@ model Post {
   id             Int       @id @default(autoincrement())
   createdAt      DateTime  @default(now())
   description    String
-  imageUrl       String
+  imageUrl       String?
+  thumbnailUrl   String?
+  imageKey       String    
+  imageStatus    String    @default("PENDING")
 
   authorId       Int
   author         UserUgram  @relation("UserPosts", fields: [authorId], references: [id], onDelete: Cascade)

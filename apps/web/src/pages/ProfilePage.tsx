@@ -194,14 +194,15 @@ export function ProfilePage() {
 						<PostGrid
 							posts={userPosts.map((post) => ({
 								id: post.id,
-								imageUrl: post.imageUrl || "",
+								thumbnailUrl: post.thumbnailUrl || "",
+								imageStatus: post.imageStatus,
 								likeCount: post.likeCount,
 								isLikedByCurrentUser: post.isLikedByCurrentUser,
 								messageCount: post.messageCount,
 							}))}
 							onPostClick={(postPreview) => {
 								const fullPost = userPosts.find((p) => p.id === postPreview.id);
-								if (fullPost) setSelectedPostId(fullPost.id);
+								if (fullPost && fullPost) setSelectedPostId(fullPost.id);
 							}}
 						/>
 					</div>

@@ -3,6 +3,7 @@ query Post($id: Int!) {
 		id
 		description
 		imageUrl
+		thumbnailUrl
 		messageCount
 		likeCount
 		isLikedByCurrentUser
@@ -14,5 +15,7 @@ query Post($id: Int!) {
 			userName
 		}
 		createdAt
+		imageKey
+		imageStatus
 	}
 }

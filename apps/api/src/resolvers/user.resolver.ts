@@ -14,7 +14,6 @@ import {
 	authenticateUserModifiesSelf,
 } from "../../Validators/validateUser.js";
 import { BadRequestError, handlePrismaError } from "../../Validators/errors.js";
-import { saveUploadedImage } from "../services/image.service.js";
 import { UserContext } from "../types/userContext.types.js";
 import { getDatabaseUrl } from "../database-url.js";
 
@@ -126,11 +125,13 @@ export const userResolvers = {
 				validatePhoneNumber(normalizedPhoneNumber);
 			}
 
-			// Handle profile picture upload
-			let pictureUrl: string | undefined;
-			if (args.picture) {
-				pictureUrl = await saveUploadedImage(args.picture, "profile");
-			}
+			// Handle profile picture upload - optional for now, can be added later
+
+			// let pictureUrl: string | undefined;
+			// let imageKey: string | undefined;
+			// if (args.picture) {
+			// 	({ key: pictureUrl, imageKey } = await saveUploadedImage(args.picture, "profile"));
+			// }
 
 			// Hash password before storing
 			const hashedPassword = await bcrypt.hash(args.password, SALT_ROUNDS);
@@ -144,7 +145,6 @@ export const userResolvers = {
 						firstName: args.firstName,
 						lastName: args.lastName,
 						phoneNumber: normalizedPhoneNumber,
-						picture: pictureUrl,
 					},
 				});
 			} catch (error: unknown) {
@@ -204,10 +204,12 @@ export const userResolvers = {
 				data.phoneNumber = normalizedPhoneNumber;
 			}
 
-			if (args.picture !== undefined) {
-				const pictureUrl = await saveUploadedImage(args.picture, "profile");
-				data.picture = pictureUrl;
-			}
+			// Handle profile picture upload - optional for now, can be added later
+
+			// if (args.picture !== undefined) {
+			// 	const { key: pictureUrl, imageKey } = await saveUploadedImage(args.picture, "profile");
+			// 	data.picture = pictureUrl;
+			// }
 
 			if (Object.keys(data).length === 0) {
 				throw new BadRequestError("No fields to update");

@@ -3,6 +3,7 @@ query Posts($limit: Int, $offset: Int) {
 		id
 		description
 		imageUrl
+		thumbnailUrl
 		messageCount
 		likeCount
 		isLikedByCurrentUser
@@ -13,5 +14,7 @@ query Posts($limit: Int, $offset: Int) {
 			userName
 		}
 		createdAt
+		imageKey
+		imageStatus
 	}
 }

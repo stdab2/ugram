@@ -180,7 +180,7 @@ export function SearchPage() {
 
 	const handlePostClick = (post: {
 		id: string | number;
-		imageUrl: string;
+		thumbnailUrl: string | null;
 		likes?: number;
 		comments?: number;
 		isLikedByCurrentUser?: boolean;
