@@ -1,13 +1,13 @@
 import { PAGINATION } from "@/hooks/useSearchState";
 import type {
 	HashtagsQuery,
+	HashtagsQueryHookResult,
 	PostsQuery,
+	PostsQueryHookResult,
 	SearchQuery,
-	useHashtagsQuery,
-	usePostsQuery,
-	useSearchQuery,
-	useUsersQuery,
+	SearchQueryHookResult,
 	UsersQuery,
+	UsersQueryHookResult,
 } from "@/generated/graphql";
 import type { UseLoadMoreReturn } from "@/hooks/useLoadMore";
 
@@ -17,10 +17,10 @@ const { LOAD_MORE_HASHTAGS_INCREMENT, LOAD_MORE_USERS_INCREMENT, LOAD_MORE_POSTS
 interface LoadMoreHandlersProps {
 	isSearching: boolean;
 	debouncedSearchQuery: string;
-	searchQueryData: ReturnType<typeof useSearchQuery>;
-	hashtagsQuery: ReturnType<typeof useHashtagsQuery>;
-	usersQuery: ReturnType<typeof useUsersQuery>;
-	postsQuery: ReturnType<typeof usePostsQuery>;
+	searchQueryData: SearchQueryHookResult;
+	hashtagsQuery: HashtagsQueryHookResult;
+	usersQuery: UsersQueryHookResult;
+	postsQuery: PostsQueryHookResult;
 	hashtags: UseLoadMoreReturn;
 	users: UseLoadMoreReturn;
 	posts: UseLoadMoreReturn;
