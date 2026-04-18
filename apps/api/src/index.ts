@@ -9,10 +9,13 @@ import http from "http";
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@as-integrations/express5";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
+import {
+	ApolloServerPluginLandingPageLocalDefault,
+	ApolloServerPluginLandingPageProductionDefault,
+} from "@apollo/server/plugin/landingPage/default";
 import graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.mjs";
 import { typeDefs } from "./schema/index.js";
 import { resolvers } from "./resolvers/index.js";
-import "dotenv/config";
 import { verifyToken } from "./services/jwt.service.js";
 import cookieParser from "cookie-parser";
 import oauthRouter from "./routes/oauth.route.js";
@@ -20,12 +23,18 @@ import authRouter from "./routes/auth.route.js";
 async function startServer() {
 	const app: Express = express();
 	const httpServer = http.createServer(app);
+	const isProduction = process.env.NODE_ENV === "production";
+
+	const landingPagePlugin = isProduction
+		? ApolloServerPluginLandingPageProductionDefault({ footer: false })
+		: ApolloServerPluginLandingPageLocalDefault({ embed: true, includeCookies: true });
 
 	// Create Apollo server
 	const server = new ApolloServer({
 		typeDefs,
 		resolvers,
-		plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+		introspection: !isProduction,
+		plugins: [ApolloServerPluginDrainHttpServer({ httpServer }), landingPagePlugin],
 		//catch all unhandled errors to log them and report to Sentry if needed
 		formatError: (formattedError, error: unknown) => {
 			const originalError = error instanceof GraphQLError ? (error.originalError ?? error) : error;

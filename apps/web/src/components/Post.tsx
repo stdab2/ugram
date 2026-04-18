@@ -5,10 +5,12 @@ import { cn, getImageUrl } from "@/lib/utils";
 import { formatDescription, formatDate } from "@/lib/postUtils";
 import { PostModal } from "@/components/PostModal";
 import { PostMenu } from "@/components/PostMenu";
+import { PostImage } from "@/components/PostImage";
 import { DeletePostDialog } from "@/components/DeletePostDialog";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import type { PostsQuery } from "@/generated/graphql";
+import { useLikePostMutation, useUnlikePostMutation } from "@/generated/graphql";
 import { useAuth } from "@/AuthContext";
 import { toast } from "sonner";
 
@@ -31,7 +33,6 @@ export function Post({
 	likes = 0,
 	comments = 0,
 	isLiked = false,
-	onLike,
 	onComment,
 	onPostDeletion,
 }: PostProps) {
@@ -40,7 +41,8 @@ export function Post({
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
 	const navigate = useNavigate();
-
+	const [likePost] = useLikePostMutation();
+	const [unlikePost] = useUnlikePostMutation();
 	const isOwnPost = post.author.userName === userAuth!.userName;
 	const aspectRatioClasses = {
 		square: "aspect-square",
@@ -67,6 +69,18 @@ export function Post({
 			toast.error("Unable to copy post link.");
 		}
 	}
+
+	const onLike = async () => {
+		if (post.isLikedByCurrentUser) {
+			await unlikePost({
+				variables: { postId: post.id },
+			});
+		} else {
+			await likePost({
+				variables: { postId: post.id },
+			});
+		}
+	};
 
 	return (
 		<>
@@ -110,10 +124,10 @@ export function Post({
 					)}
 					aria-label="View post details"
 				>
-					<img
-						src={getImageUrl(post.imageUrl)}
+					<PostImage
+						thumbnailUrl={post.thumbnailUrl}
+						imageStatus={post.imageStatus}
 						alt={`Post by ${post.author.userName}`}
-						className="w-full h-full object-cover"
 					/>
 				</button>
 
@@ -188,7 +202,6 @@ export function Post({
 				post={post}
 				aspectRatio={aspectRatio}
 				likes={likes}
-				comments={comments}
 				isLiked={isLiked}
 				onPostDeletion={() => handlePostDeletion(post.id)}
 			/>

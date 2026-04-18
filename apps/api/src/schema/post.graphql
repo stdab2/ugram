@@ -3,17 +3,24 @@ scalar Upload
 type Post {
 	id: Int!
 	description: String!
-	imageUrl: String!
+	imageUrl: String
+	thumbnailUrl: String
 	authorId: Int!
+	imageKey: String!
+	imageStatus: String!
 	author: UserUgram!
 	createdAt: DateTime!
 	hashtags: [Hashtag!]
-	mentionedUsers: [UserUgram!]
+	mentionedUsers: [UserUgram!]	
+	messageCount: Int!
+	likeCount: Int!
+	isLikedByCurrentUser: Boolean!
 }
 
 extend type Query {
 	post(id: Int!): Post
 	posts(limit: Int, offset: Int): [Post!]!
+	popularPosts(limit: Int, offset: Int): [Post!]!
 	postsByAuthor(authorId: Int!, limit: Int, offset: Int): [Post!]!
 }
 

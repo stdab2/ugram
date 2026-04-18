@@ -2,13 +2,21 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Heart, MessageCircle, Send } from "lucide-react";
+import { AlertCircle, Heart, MessageCircle, Send } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/Dialog";
 import { PostMenu } from "@/components/PostMenu";
 import { DeletePostDialog } from "@/components/DeletePostDialog";
 import { cn, getImageUrl } from "@/lib/utils";
 import { formatDescription, formatDate } from "@/lib/postUtils";
 import { useState } from "react";
-import { usePostQuery, useDeletePostMutation } from "@/generated/graphql";
+import {
+	usePostQuery,
+	useDeletePostMutation,
+	useCreateMessageMutation,
+	useMessagesByPostQuery,
+	useUnlikePostMutation,
+	useLikePostMutation,
+} from "@/generated/graphql";
 import { PageFade } from "@/components/PageFade";
 import {
 	Empty,
@@ -17,21 +25,10 @@ import {
 	EmptyHeader,
 	EmptyTitle,
 } from "@/components/ui/Empty";
-import { AlertCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { PostImage } from "@/components/PostImage";
 import { toast } from "sonner";
 import { useAuth } from "@/AuthContext";
-
-interface Comment {
-	id: string;
-	author: {
-		username: string;
-		avatarUrl?: string;
-		avatarFallback: string;
-	};
-	text: string;
-	publishedAt: string;
-}
 
 export function PostPage() {
 	const { userAuth } = useAuth();
@@ -54,6 +51,11 @@ export function PostPage() {
 
 	const post = postData?.post;
 
+	const { data: messagesData } = useMessagesByPostQuery({
+		variables: { postId: post?.id ?? 0 },
+		skip: !post,
+	});
+
 	const [deletePost] = useDeletePostMutation({
 		update(cache, { data }) {
 			if (!data?.deletePost) return;
@@ -64,57 +66,44 @@ export function PostPage() {
 	});
 
 	const [newComment, setNewComment] = useState("");
-	const [isLiked, setIsLiked] = useState(false);
-	const [likesCount, setLikesCount] = useState(0);
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
+	const [likePost] = useLikePostMutation();
+	const [unlikePost] = useUnlikePostMutation();
+	const [createMessage] = useCreateMessageMutation();
 
-	// Mock comments - use lazy initialization to avoid calling Date.now() during render
-	const [comments, setComments] = useState<Comment[]>(() => [
-		{
-			id: "1",
-			author: {
-				username: "jane_smith",
-				avatarUrl: "https://i.pravatar.cc/150?img=5",
-				avatarFallback: "JS",
-			},
-			text: "Amazing shot! 😍",
-			publishedAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
-		},
-		{
-			id: "2",
-			author: {
-				username: "travel_explorer",
-				avatarUrl: "https://i.pravatar.cc/150?img=8",
-				avatarFallback: "TE",
-			},
-			text: "Love this! Where was this taken?",
-			publishedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-		},
-	]);
-
-	const handleLike = () => {
-		setIsLiked((prev) => !prev);
-		setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
+	const handleLike = async () => {
+		if (post?.isLikedByCurrentUser) {
+			await unlikePost({
+				variables: { postId: post.id },
+			});
+		} else {
+			if (post) {
+				await likePost({
+					variables: { postId: post.id },
+				});
+			}
+		}
 	};
 
-	const handleAddComment = (e: React.FormEvent) => {
-		e.preventDefault();
-		if (!newComment.trim()) return;
+	const handleAddComment = async (e: React.FormEvent) => {
+		if (post) {
+			e.preventDefault();
+			if (!newComment.trim()) return;
 
-		const comment: Comment = {
-			id: Date.now().toString(),
-			author: {
-				username: "current_user",
-				avatarUrl: "https://i.pravatar.cc/150?img=10",
-				avatarFallback: "CU",
-			},
-			text: newComment,
-			publishedAt: new Date().toISOString(),
-		};
+			await createMessage({
+				variables: {
+					data: {
+						content: newComment,
+						authorId: userAuth!.id,
+						postId: post.id,
+					},
+				},
+				refetchQueries: ["Posts", "MessagesByPost", "UserByUserName"],
+			});
 
-		setComments((prevComments) => [comment, ...prevComments]);
-		setNewComment("");
+			setNewComment("");
+		}
 	};
 
 	const handlePostDeletion = async (postId: number) => {
@@ -202,20 +191,26 @@ export function PostPage() {
 	return (
 		<>
 			<PageFade key="content">
-				<div className="w-full min-h-screen bg-background pb-20 md:pb-0">
-					<div className="max-w-7xl mx-auto p-4">
-						{/* Back button */}
-						<Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-4 gap-2">
-							Back
-						</Button>
-
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-4 border rounded-xl overflow-hidden bg-card">
+				<Dialog
+					open
+					onOpenChange={(open) => {
+						if (!open) {
+							navigate(-1);
+						}
+					}}
+				>
+					<DialogContent
+						showCloseButton={false}
+						className="max-w-[95vw] w-full h-[90vh] p-0 gap-0 overflow-hidden rounded-xl md:max-w-7xl flex flex-col"
+					>
+						<div className="grid grid-cols-1 md:grid-cols-2 flex-1 min-h-0 w-full">
 							{/* Left side - Image */}
 							<div className="bg-black flex items-center justify-center">
-								<img
-									src={getImageUrl(post.imageUrl)}
+								<PostImage
+									thumbnailUrl={post.thumbnailUrl}
+									imageStatus={post.imageStatus}
 									alt={`Post by ${author.userName}`}
-									className="w-full h-full object-contain"
+									className="object-contain"
 								/>
 							</div>
 
@@ -284,26 +279,28 @@ export function PostPage() {
 								{/* Comments */}
 								<div className="flex-1 min-h-0 overflow-hidden">
 									<div className="h-full overflow-y-auto p-4 space-y-4">
-										{comments.map((comment) => (
+										{messagesData?.messagesByPost.map((comment) => (
 											<div key={comment.id} className="flex gap-3">
-												<Link to={`/profile/${comment.author.username}`}>
+												<Link to={`/profile/${comment.author.userName}`}>
 													<Avatar className="h-8 w-8 flex-shrink-0">
-														<AvatarImage src={comment.author.avatarUrl} />
-														<AvatarFallback>{comment.author.avatarFallback}</AvatarFallback>
+														<AvatarImage src={comment.author.picture!} />
+														<AvatarFallback>
+															{comment.author.firstName[0] + comment.author.lastName[0]}
+														</AvatarFallback>
 													</Avatar>
 												</Link>
 												<div className="flex-1">
 													<p className="text-sm">
 														<Link
-															to={`/profile/${comment.author.username}`}
+															to={`/profile/${comment.author.userName}`}
 															className="font-semibold mr-2 hover:underline"
 														>
-															{comment.author.username}
+															{comment.author.userName}
 														</Link>
-														{comment.text}
+														{comment.content}
 													</p>
 													<p className="text-xs text-muted-foreground mt-1">
-														{formatDate(comment.publishedAt)}
+														{formatDate(comment.createdAt)}
 													</p>
 												</div>
 											</div>
@@ -320,11 +317,16 @@ export function PostPage() {
 											aria-label="Like"
 										>
 											<Heart
-												className={cn("w-7 h-7", isLiked && "fill-red-500 text-red-500")}
+												className={cn(
+													"w-7 h-7",
+													post?.isLikedByCurrentUser && "fill-red-500 text-red-500"
+												)}
 												strokeWidth={2}
 											/>
-											{likesCount > 0 && (
-												<span className="text-sm font-semibold">{likesCount.toLocaleString()}</span>
+											{post?.likeCount > 0 && (
+												<span className="text-sm font-semibold">
+													{post.likeCount.toLocaleString()}
+												</span>
 											)}
 										</button>
 										<button
@@ -332,8 +334,10 @@ export function PostPage() {
 											aria-label="Comment"
 										>
 											<MessageCircle className="w-6 h-6" strokeWidth={2} />
-											{comments.length > 0 && (
-												<span className="text-sm font-semibold">{comments.length}</span>
+											{post.messageCount > 0 && (
+												<span className="text-sm font-semibold">
+													{messagesData?.messagesByPost.length ?? post.messageCount}
+												</span>
 											)}
 										</button>
 										<button
@@ -370,8 +374,8 @@ export function PostPage() {
 								</div>
 							</div>
 						</div>
-					</div>
-				</div>
+					</DialogContent>
+				</Dialog>
 			</PageFade>
 
 			<DeletePostDialog

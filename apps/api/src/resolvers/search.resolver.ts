@@ -1,6 +1,8 @@
-import { PrismaClient } from "../../generated/prisma/client.js";
+import { PrismaClient, Prisma } from "../../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { getDatabaseUrl } from "../database-url.js";
+import { UserContext } from "../types/userContext.types.js";
+import { authenticateUser } from "../../Validators/validateUser.js";
 
 const adapter = new PrismaPg({
 	connectionString: getDatabaseUrl(),
@@ -8,6 +10,24 @@ const adapter = new PrismaPg({
 
 const prisma = new PrismaClient({
 	adapter,
+});
+
+const userWithFollowMetaInclude = (currentUserId?: number): Prisma.UserUgramInclude => ({
+	_count: {
+		select: {
+			followers: true,
+			following: true,
+		},
+	},
+	...(currentUserId
+		? {
+				followers: {
+					where: { followerId: currentUserId },
+					select: { followerId: true },
+					take: 1,
+				},
+			}
+		: {}),
 });
 
 interface SearchArgs {
@@ -22,7 +42,9 @@ interface SearchArgs {
 
 export const searchResolvers = {
 	Query: {
-		search: async (_: unknown, args: SearchArgs) => {
+		search: async (_: unknown, args: SearchArgs, context: UserContext) => {
+			authenticateUser(context.user);
+
 			// Validate and clamp pagination parameters
 			const usersLimit = Math.min(Math.max(args.usersLimit ?? 20, 0), 100);
 			const usersOffset = Math.max(args.usersOffset ?? 0, 0);
@@ -50,8 +72,10 @@ export const searchResolvers = {
 						{ lastName: { contains: searchTerm, mode: "insensitive" } },
 					],
 				},
+				orderBy: [{ followers: { _count: "desc" } }, { id: "asc" }],
 				take: usersLimit,
 				skip: usersOffset,
+				include: userWithFollowMetaInclude(context.user?.id),
 			});
 
 			// Recherche de posts
@@ -71,7 +95,11 @@ export const searchResolvers = {
 						hashtags: true,
 						mentionedUsers: true,
 						author: true,
+						_count: {
+							select: { messages: true },
+						},
 					},
+					orderBy: [{ likes: { _count: "desc" } }, { id: "asc" }],
 					take: postsLimit,
 					skip: postsOffset,
 				});
@@ -94,7 +122,11 @@ export const searchResolvers = {
 						hashtags: true,
 						mentionedUsers: true,
 						author: true,
+						_count: {
+							select: { messages: true },
+						},
 					},
+					orderBy: [{ likes: { _count: "desc" } }, { id: "asc" }],
 					take: postsLimit,
 					skip: postsOffset,
 				});
@@ -112,11 +144,7 @@ export const searchResolvers = {
 				},
 				take: hashtagsLimit,
 				skip: hashtagsOffset,
-				orderBy: {
-					posts: {
-						_count: "desc", // Trier par popularité
-					},
-				},
+				orderBy: [{ posts: { _count: "desc" } }, { id: "asc" }],
 			});
 
 			// Transformer les hashtags pour inclure le postCount

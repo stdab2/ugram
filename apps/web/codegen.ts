@@ -35,6 +35,7 @@ const config: CodegenConfig = {
 		"src/generated/graphql.tsx": {
 			plugins: ["typescript", "typescript-operations", "typescript-react-apollo"],
 			config: {
+				enumsAsTypes: true,
 				withHooks: true,
 				withHOC: false,
 				withComponent: false,

@@ -8,7 +8,7 @@ import {
 } from "../../Validators/validateUser.js";
 import { saveUploadedImage, deleteImageFromStorage } from "../services/image.service.js";
 import type { FileUpload } from "graphql-upload";
-import { Post } from "../../generated/prisma/client.js";
+import { Post, UserUgram } from "../../generated/prisma/client.js";
 import { handlePrismaError } from "../../Validators/errors.js";
 import {
 	validatePostId,
@@ -19,6 +19,7 @@ import {
 import { authenticateUser } from "../../Validators/validateUser.js";
 import { UserContext } from "../types/userContext.types.js";
 import { getDatabaseUrl } from "../database-url.js";
+import { Prisma } from "../../generated/prisma/client.js";
 
 const adapter = new PrismaPg({
 	connectionString: getDatabaseUrl(),
@@ -27,6 +28,18 @@ const adapter = new PrismaPg({
 const prisma = new PrismaClient({
 	adapter,
 });
+
+type PostWithCount = Prisma.PostGetPayload<{
+	include: {
+		_count: {
+			select: { messages: true };
+		};
+	};
+}>;
+
+type PostWithOptionalAuthor = Post & {
+	author?: UserUgram;
+};
 
 type CreatePostArgs = {
 	data: {
@@ -45,6 +58,11 @@ export const postResolvers = {
 			validatePostId(args.id);
 			return prisma.post.findUnique({
 				where: { id: args.id },
+				include: {
+					_count: {
+						select: { messages: true },
+					},
+				},
 			});
 		},
 		posts: async (_: unknown, args: { limit?: number; offset?: number }, context: UserContext) => {
@@ -52,8 +70,34 @@ export const postResolvers = {
 			const limit = Math.min(Math.max(args.limit ?? 20, 0), 100);
 			const offset = Math.max(args.offset ?? 0, 0);
 			return prisma.post.findMany({
+				orderBy: [{ createdAt: "desc" }, { id: "desc" }],
 				take: limit,
 				skip: offset,
+				include: {
+					_count: {
+						select: { messages: true },
+					},
+				},
+			});
+		},
+		popularPosts: async (
+			_: unknown,
+			args: { limit?: number; offset?: number },
+			context: UserContext
+		) => {
+			authenticateUser(context.user);
+			const limit = Math.min(Math.max(args.limit ?? 20, 0), 100);
+			const offset = Math.max(args.offset ?? 0, 0);
+			return prisma.post.findMany({
+				orderBy: [{ likes: { _count: "desc" } }, { id: "asc" }],
+				take: limit,
+				skip: offset,
+				include: {
+					author: true,
+					_count: {
+						select: { messages: true },
+					},
+				},
 			});
 		},
 		postsByAuthor: async (
@@ -69,15 +113,56 @@ export const postResolvers = {
 				where: { authorId: args.authorId },
 				take: limit,
 				skip: offset,
+				include: {
+					_count: {
+						select: { messages: true },
+					},
+				},
 			});
 		},
 	},
 	Post: {
-		author: async (parent: Post, _: unknown, context: UserContext) => {
+		author: async (parent: PostWithOptionalAuthor, _: unknown, context: UserContext) => {
 			authenticateUser(context.user);
+
+			if (parent.author) {
+				return parent.author;
+			}
+
 			return prisma.userUgram.findUnique({
 				where: { id: parent.authorId },
 			});
+		},
+
+		messageCount: (parent: PostWithCount) => {
+			if (!parent._count) {
+				console.warn("messageCount called without _count in parent", {
+					postId: parent.id,
+				});
+			}
+			return parent._count?.messages ?? 0;
+		},
+		likeCount: async (parent: Post, _: unknown, context: UserContext) => {
+			authenticateUser(context.user);
+
+			return prisma.like.count({
+				where: { postId: parent.id },
+			});
+		},
+
+		isLikedByCurrentUser: async (parent: Post, _: unknown, context: UserContext) => {
+			authenticateUser(context.user);
+
+			const like = await prisma.like.findUnique({
+				where: {
+					userId_postId: {
+						userId: context.user!.id,
+						postId: parent.id,
+					},
+				},
+			});
+
+			return !!like;
 		},
 	},
 	Mutation: {
@@ -96,7 +181,7 @@ export const postResolvers = {
 				throw new Error("Image upload is required.");
 			}
 
-			const imageUrl = await saveUploadedImage(image, "post");
+			const { imageKey } = await saveUploadedImage(image, "post");
 			let hashtagRows: { id: number }[] = [];
 
 			if (hashtags?.length) {
@@ -124,7 +209,6 @@ export const postResolvers = {
 				const post = await prisma.post.create({
 					data: {
 						description,
-						imageUrl,
 						authorId,
 						hashtags: {
 							connect: hashtagRows.map((h) => ({ id: h.id })),
@@ -132,6 +216,7 @@ export const postResolvers = {
 						mentionedUsers: {
 							connect: mentionedUsers ? mentionedUsers.map((id: number) => ({ id })) : [],
 						},
+						imageKey,
 					},
 					include: {
 						hashtags: true,
@@ -139,6 +224,19 @@ export const postResolvers = {
 						author: true,
 					},
 				});
+
+				if (process.env.NODE_ENV !== "production") {
+					setTimeout(async () => {
+						await prisma.post.update({
+							where: { id: post.id },
+							data: {
+								imageStatus: "UPLOADED",
+								imageUrl: `uploads/post/${imageKey}.webp`,
+								thumbnailUrl: `uploads/post/${imageKey}_thumb.webp`,
+							},
+						});
+					}, 10000);
+				}
 
 				return post;
 			} catch (error: unknown) {
@@ -161,7 +259,7 @@ export const postResolvers = {
 					const error =
 						cleanupError instanceof Error ? cleanupError : new Error(String(cleanupError));
 
-					Sentry.withScope((scope) => {
+					Sentry.withScope((scope: Sentry.Scope) => {
 						scope.setTag("resolver", "deletePost");
 						scope.setContext("cleanup", {
 							postId: deletedPost.id,

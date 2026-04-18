@@ -2,8 +2,11 @@ query PostsByAuthor($authorId: Int!, $limit: Int, $offset: Int) {
 	postsByAuthor(authorId: $authorId, limit: $limit, offset: $offset) {
 		id
 		description
-		imageUrl
+		thumbnailUrl
 		createdAt
+		messageCount
+		likeCount
+		isLikedByCurrentUser
 		author {
 			id
 			userName
@@ -11,5 +14,7 @@ query PostsByAuthor($authorId: Int!, $limit: Int, $offset: Int) {
 			lastName
 			picture
 		}
+		imageKey
+		imageStatus
 	}
 }

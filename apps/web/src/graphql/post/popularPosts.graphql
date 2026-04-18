@@ -1,0 +1,17 @@
+query PopularPosts($limit: Int, $offset: Int) {
+	popularPosts(limit: $limit, offset: $offset) {
+		id
+		description
+		thumbnailUrl
+		messageCount
+		likeCount
+		isLikedByCurrentUser
+		author {
+			firstName
+			lastName
+			picture
+			userName
+		}
+		createdAt
+	}
+}

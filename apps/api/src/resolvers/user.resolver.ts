@@ -14,7 +14,6 @@ import {
 	authenticateUserModifiesSelf,
 } from "../../Validators/validateUser.js";
 import { BadRequestError, handlePrismaError } from "../../Validators/errors.js";
-import { saveUploadedImage } from "../services/image.service.js";
 import { UserContext } from "../types/userContext.types.js";
 import { getDatabaseUrl } from "../database-url.js";
 
@@ -26,6 +25,34 @@ const adapter = new PrismaPg({
 
 const prisma = new PrismaClient({
 	adapter,
+});
+
+type UserWithFollowMeta = UserUgram & {
+	_count?: {
+		followers: number;
+		following: number;
+	};
+	followers?: Array<{
+		followerId: number;
+	}>;
+};
+
+const userWithFollowMetaInclude = (currentUserId?: number): Prisma.UserUgramInclude => ({
+	_count: {
+		select: {
+			followers: true,
+			following: true,
+		},
+	},
+	...(currentUserId
+		? {
+				followers: {
+					where: { followerId: currentUserId },
+					select: { followerId: true },
+					take: 1,
+				},
+			}
+		: {}),
 });
 
 /**
@@ -48,6 +75,7 @@ export const userResolvers = {
 			validateUserId(args.id);
 			return prisma.userUgram.findUnique({
 				where: { id: args.id },
+				include: userWithFollowMetaInclude(context.user?.id),
 			});
 		},
 
@@ -55,6 +83,7 @@ export const userResolvers = {
 			authenticateUser(context.user);
 			return prisma.userUgram.findUnique({
 				where: { userName: args.userName },
+				include: userWithFollowMetaInclude(context.user?.id),
 			});
 		},
 
@@ -64,6 +93,7 @@ export const userResolvers = {
 
 			const users = await prisma.userUgram.findMany({
 				where: { userName: { in: requested } },
+				include: userWithFollowMetaInclude(context.user?.id),
 			});
 
 			const found = new Set(users.map((u) => u.userName));
@@ -83,8 +113,10 @@ export const userResolvers = {
 			const offset = Math.max(args.offset || 0, 0);
 
 			return prisma.userUgram.findMany({
+				orderBy: [{ followers: { _count: "desc" } }, { id: "asc" }],
 				take: limit,
 				skip: offset,
+				include: userWithFollowMetaInclude(context.user?.id),
 			});
 		},
 	},
@@ -97,7 +129,64 @@ export const userResolvers = {
 			authenticateUser(context.user);
 			return prisma.post.findMany({
 				where: { authorId: parent.id },
+				include: {
+					_count: {
+						select: { messages: true },
+					},
+				},
 			});
+		},
+
+		followerCount: async (parent: UserWithFollowMeta, _: unknown, context: UserContext) => {
+			authenticateUser(context.user);
+
+			if (parent._count?.followers !== undefined) {
+				return parent._count.followers;
+			}
+
+			return prisma.follow.count({
+				where: { followingId: parent.id },
+			});
+		},
+
+		followingCount: async (parent: UserWithFollowMeta, _: unknown, context: UserContext) => {
+			authenticateUser(context.user);
+
+			if (parent._count?.following !== undefined) {
+				return parent._count.following;
+			}
+
+			return prisma.follow.count({
+				where: { followerId: parent.id },
+			});
+		},
+
+		isFollowedByCurrentUser: async (
+			parent: UserWithFollowMeta,
+			_: unknown,
+			context: UserContext
+		) => {
+			authenticateUser(context.user);
+
+			if (context.user!.id === parent.id) {
+				return false;
+			}
+
+			if (parent.followers !== undefined) {
+				return parent.followers.length > 0;
+			}
+
+			const relation = await prisma.follow.findUnique({
+				where: {
+					followerId_followingId: {
+						followerId: context.user!.id,
+						followingId: parent.id,
+					},
+				},
+				select: { followerId: true },
+			});
+
+			return !!relation;
 		},
 	},
 
@@ -121,11 +210,13 @@ export const userResolvers = {
 				validatePhoneNumber(normalizedPhoneNumber);
 			}
 
-			// Handle profile picture upload
-			let pictureUrl: string | undefined;
-			if (args.picture) {
-				pictureUrl = await saveUploadedImage(args.picture, "profile");
-			}
+			// Handle profile picture upload - optional for now, can be added later
+
+			// let pictureUrl: string | undefined;
+			// let imageKey: string | undefined;
+			// if (args.picture) {
+			// 	({ key: pictureUrl, imageKey } = await saveUploadedImage(args.picture, "profile"));
+			// }
 
 			// Hash password before storing
 			const hashedPassword = await bcrypt.hash(args.password, SALT_ROUNDS);
@@ -139,7 +230,6 @@ export const userResolvers = {
 						firstName: args.firstName,
 						lastName: args.lastName,
 						phoneNumber: normalizedPhoneNumber,
-						picture: pictureUrl,
 					},
 				});
 			} catch (error: unknown) {
@@ -199,10 +289,12 @@ export const userResolvers = {
 				data.phoneNumber = normalizedPhoneNumber;
 			}
 
-			if (args.picture !== undefined) {
-				const pictureUrl = await saveUploadedImage(args.picture, "profile");
-				data.picture = pictureUrl;
-			}
+			// Handle profile picture upload - optional for now, can be added later
+
+			// if (args.picture !== undefined) {
+			// 	const { key: pictureUrl, imageKey } = await saveUploadedImage(args.picture, "profile");
+			// 	data.picture = pictureUrl;
+			// }
 
 			if (Object.keys(data).length === 0) {
 				throw new BadRequestError("No fields to update");

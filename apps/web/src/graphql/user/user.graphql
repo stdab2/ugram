@@ -7,12 +7,17 @@ query User($id: Int!) {
 		lastName
 		phoneNumber
 		picture
+		followerCount
 		createdAt
 		posts {
 			id
-			imageUrl
+			thumbnailUrl
 			description
 			createdAt
+			messageCount
+			likeCount
+			isLikedByCurrentUser
+			imageStatus
 		}
 	}
 }

@@ -4,26 +4,36 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Heart, MessageCircle, Send } from "lucide-react";
 import { PostMenu } from "@/components/PostMenu";
+import { PostImage } from "@/components/PostImage";
 import { DeletePostDialog } from "@/components/DeletePostDialog";
 import { cn, getImageUrl } from "@/lib/utils";
 import { formatDescription, formatDate } from "@/lib/postUtils";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import type { PostsQuery, PostsByAuthorQuery } from "@/generated/graphql";
+import {
+	useUnlikePostMutation,
+	useLikePostMutation,
+	useMessagesByPostQuery,
+	useCreateMessageMutation,
+} from "@/generated/graphql";
 import { useAuth } from "@/AuthContext";
 import { toast } from "sonner";
 
-type PostData = PostsQuery["posts"][0] | PostsByAuthorQuery["postsByAuthor"][0];
-
-interface Comment {
-	id: string;
+interface PostData {
+	id: number;
+	description: string;
+	thumbnailUrl: string | null;
+	imageStatus?: string | null;
+	createdAt: unknown;
+	messageCount: number;
+	likeCount: number;
+	isLikedByCurrentUser: boolean;
 	author: {
-		username: string;
-		avatarUrl?: string;
-		avatarFallback: string;
+		firstName: string;
+		lastName: string;
+		picture: string | null;
+		userName: string;
 	};
-	text: string;
-	publishedAt: string;
 }
 
 interface PostModalProps {
@@ -37,74 +47,52 @@ interface PostModalProps {
 	onPostDeletion: (postId: number) => void;
 }
 
-export function PostModal({
-	open,
-	onOpenChange,
-	post,
-	likes = 0,
-	isLiked: initialIsLiked = false,
-	onPostDeletion,
-}: PostModalProps) {
+export function PostModal({ open, onOpenChange, post, onPostDeletion }: PostModalProps) {
 	const { userAuth } = useAuth();
 	const navigate = useNavigate();
 
 	const [newComment, setNewComment] = useState("");
-	const [isLiked, setIsLiked] = useState(initialIsLiked);
-	const [likesCount, setLikesCount] = useState(likes);
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
-
+	const [likePost] = useLikePostMutation();
+	const [unlikePost] = useUnlikePostMutation();
 	// Extract author info for convenience
 	const author = post.author;
 	const isOwnPost = author.userName === userAuth!.userName;
+	const [createMessage] = useCreateMessageMutation();
 
-	// Mock comments - use lazy initialization to avoid calling Date.now() during render
-	const [comments, setComments] = useState<Comment[]>(() => [
-		{
-			id: "1",
-			author: {
-				username: "jane_smith",
-				avatarUrl: "https://i.pravatar.cc/150?img=5",
-				avatarFallback: "JS",
-			},
-			text: "Amazing shot! 😍",
-			publishedAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
-		},
-		{
-			id: "2",
-			author: {
-				username: "travel_explorer",
-				avatarUrl: "https://i.pravatar.cc/150?img=8",
-				avatarFallback: "TE",
-			},
-			text: "Love this! Where was this taken?",
-			publishedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-		},
-	]);
+	const { data: messagesData } = useMessagesByPostQuery({
+		variables: { postId: post.id },
+		skip: !post,
+	});
 
-	const handleLike = () => {
-		setIsLiked((prev) => !prev);
-		setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
+	const handleLike = async () => {
+		if (post.isLikedByCurrentUser) {
+			await unlikePost({
+				variables: { postId: post.id },
+			});
+		} else {
+			await likePost({
+				variables: { postId: post.id },
+			});
+		}
 	};
 
-	const handleAddComment = (e: React.FormEvent) => {
+	const handleAddComment = async (e: React.FormEvent) => {
 		e.preventDefault();
 		if (!newComment.trim()) return;
 
-		const comment: Comment = {
-			id: Date.now().toString(),
-			author: {
-				username: userAuth!.userName,
-				avatarUrl: userAuth!.profilePictureUrl
-					? getImageUrl(userAuth!.profilePictureUrl)
-					: undefined,
-				avatarFallback: userAuth!.firstName[0] + userAuth!.lastName[0],
+		await createMessage({
+			variables: {
+				data: {
+					content: newComment,
+					authorId: userAuth!.id,
+					postId: post.id,
+				},
 			},
-			text: newComment,
-			publishedAt: new Date().toISOString(),
-		};
+			refetchQueries: ["Posts", "MessagesByPost", "UserByUserName"],
+		});
 
-		setComments((prevComments) => [comment, ...prevComments]);
 		setNewComment("");
 	};
 
@@ -138,10 +126,11 @@ export function PostModal({
 					<div className="grid grid-cols-1 md:grid-cols-2 flex-1 min-h-0 w-full">
 						{/* Left side - Image */}
 						<div className="bg-black flex items-center justify-center">
-							<img
-								src={getImageUrl(post.imageUrl)}
+							<PostImage
+								thumbnailUrl={post.thumbnailUrl}
+								imageStatus={post.imageStatus}
 								alt={`Post by ${author.userName}`}
-								className="w-full h-full object-contain"
+								className="object-contain"
 							/>
 						</div>
 
@@ -216,26 +205,28 @@ export function PostModal({
 							{/* Comments */}
 							<div className="flex-1 min-h-0 overflow-hidden">
 								<div className="h-full overflow-y-auto p-4 space-y-4">
-									{comments.map((comment) => (
+									{messagesData?.messagesByPost.map((comment) => (
 										<div key={comment.id} className="flex gap-3">
-											<Link to={`/profile/${comment.author.username}`}>
+											<Link to={`/profile/${comment.author.userName}`}>
 												<Avatar className="h-8 w-8 flex-shrink-0">
-													<AvatarImage src={comment.author.avatarUrl} />
-													<AvatarFallback>{comment.author.avatarFallback}</AvatarFallback>
+													<AvatarImage src={comment.author.picture!} />
+													<AvatarFallback>
+														{comment.author.firstName[0] + comment.author.lastName[0]}
+													</AvatarFallback>
 												</Avatar>
 											</Link>
 											<div className="flex-1">
 												<p className="text-sm">
 													<Link
-														to={`/profile/${comment.author.username}`}
+														to={`/profile/${comment.author.userName}`}
 														className="font-semibold mr-2 hover:underline"
 													>
-														{comment.author.username}
+														{comment.author.userName}
 													</Link>
-													{comment.text}
+													{comment.content}
 												</p>
 												<p className="text-xs text-muted-foreground mt-1">
-													{formatDate(comment.publishedAt)}
+													{formatDate(comment.createdAt)}
 												</p>
 											</div>
 										</div>
@@ -252,11 +243,16 @@ export function PostModal({
 										aria-label="Like"
 									>
 										<Heart
-											className={cn("w-7 h-7", isLiked && "fill-red-500 text-red-500")}
+											className={cn(
+												"w-7 h-7",
+												post.isLikedByCurrentUser && "fill-red-500 text-red-500"
+											)}
 											strokeWidth={2}
 										/>
-										{likesCount > 0 && (
-											<span className="text-sm font-semibold">{likesCount.toLocaleString()}</span>
+										{post.likeCount > 0 && (
+											<span className="text-sm font-semibold">
+												{post.likeCount.toLocaleString()}
+											</span>
 										)}
 									</button>
 									<button
@@ -264,8 +260,10 @@ export function PostModal({
 										aria-label="Comment"
 									>
 										<MessageCircle className="w-6 h-6" strokeWidth={2} />
-										{comments.length > 0 && (
-											<span className="text-sm font-semibold">{comments.length}</span>
+										{post.messageCount > 0 && (
+											<span className="text-sm font-semibold">
+												{messagesData?.messagesByPost.length ?? post.messageCount}
+											</span>
 										)}
 									</button>
 									<button

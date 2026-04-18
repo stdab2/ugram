@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 import { Card } from "@/components/ui/Card";
+import { PostImage } from "@/components/PostImage";
 import type { UserQuery, SearchQuery } from "@/generated/graphql";
 import { Link } from "react-router-dom";
 import { getImageUrl } from "@/lib/utils";
@@ -20,6 +21,8 @@ export function UserSearchResult({ user, onPostClick }: UserSearchResultProps) {
 	// Get user's recent posts (up to 3)
 	const recentPosts = user.posts?.slice(0, 3) || [];
 	const totalPosts = user.posts?.length || 0;
+	const followerCount = user.followerCount ?? 0;
+	const totalLikes = user.posts?.reduce((sum, post) => sum + (post.likeCount || 0), 0) || 0;
 	return (
 		<Link to={`/profile/${user.userName}`}>
 			<Card className="p-4 hover:bg-muted/50 transition-all duration-200 cursor-pointer hover:scale-[1.01] hover:shadow-md">
@@ -35,16 +38,16 @@ export function UserSearchResult({ user, onPostClick }: UserSearchResultProps) {
 							<p className="text-xs text-muted-foreground truncate mb-2">{fullName}</p>
 							<div className="flex gap-4 text-xs">
 								<div>
+									<span className="font-semibold">{followerCount}</span>
+									<span className="text-muted-foreground ml-1">followers</span>
+								</div>
+								<div>
 									<span className="font-semibold">{totalPosts}</span>
 									<span className="text-muted-foreground ml-1">posts</span>
 								</div>
 								<div>
-									<span className="font-semibold">0</span>
+									<span className="font-semibold">{totalLikes}</span>
 									<span className="text-muted-foreground ml-1">likes</span>
-								</div>
-								<div>
-									<span className="font-semibold">0</span>
-									<span className="text-muted-foreground ml-1">comments</span>
 								</div>
 							</div>
 						</div>
@@ -64,10 +67,11 @@ export function UserSearchResult({ user, onPostClick }: UserSearchResultProps) {
 									}}
 									className="w-20 h-20 rounded-md overflow-hidden hover:opacity-80 transition-opacity"
 								>
-									<img
-										src={getImageUrl(post.imageUrl || "")}
+									<PostImage
+										thumbnailUrl={post.thumbnailUrl || null}
+										imageStatus={post.imageStatus}
 										alt=""
-										className="w-full h-full object-cover"
+										compact
 									/>
 								</button>
 							))}

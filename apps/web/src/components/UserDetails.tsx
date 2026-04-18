@@ -26,8 +26,8 @@ export function UserDetails({
 				<AvatarFallback>{avatarFallback}</AvatarFallback>
 			</Avatar>
 			<div>
-				<p className="font-bold text-lg">{username}</p>
-				<p className="text-gray-500 text-sm">{fullname}</p>
+				<p className="font-bold text-lg">{fullname}</p>
+				<p className="text-gray-500 text-sm">@{username}</p>
 				<p className="text-gray-400 text-xs mt-1">
 					Member since {timestampToDateString(+memberSince)}
 				</p>

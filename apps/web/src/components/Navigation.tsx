@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/DropdownMenu";
 import { Badge } from "@/components/ui/Badge";
 import { cn, getImageUrl } from "@/lib/utils";
-import { useUserByUserNameQuery } from "@/generated/graphql";
+import { useUnreadNotificationCountQuery, useUserByUserNameQuery } from "@/generated/graphql";
 import { useAuth } from "../AuthContext";
 
 const navItems = [
@@ -38,25 +38,31 @@ export function Navigation() {
 	const profilePath = currentUserName ? `/profile/${currentUserName}` : "/profile/me";
 	const isProfileActive = pathname === "/profile/me" || pathname === profilePath;
 
-	// Fetch current user data
 	const { data: userData } = useUserByUserNameQuery({
 		variables: { userName: currentUserName ?? "" },
 		skip: !currentUserName,
 	});
 
+	const { data: unreadNotificationsData } = useUnreadNotificationCountQuery({
+		skip: !currentUserName,
+		pollInterval: 30000,
+	});
+
 	const user = userData?.userByUserName;
 	const avatarUrl = getImageUrl(user?.picture);
+	const unreadNotificationCount = unreadNotificationsData?.unreadNotificationCount ?? 0;
 
 	const handleLogout = () => {
 		logout();
 	};
+
+	const unreadBadgeLabel = unreadNotificationCount > 99 ? "99+" : unreadNotificationCount;
 
 	return (
 		<>
 			{/* Desktop Sidebar */}
 			<aside className="hidden md:flex fixed left-0 top-0 h-screen bg-background border-r z-50 group/sidebar hover:w-60 w-16 transition-all duration-300">
 				<nav className="flex flex-col w-full p-2">
-					{/* Accueil en haut */}
 					<div className="flex flex-col gap-2 mb-4">
 						<Link
 							to="/"
@@ -72,10 +78,10 @@ export function Navigation() {
 						</Link>
 					</div>
 
-					{/* Section du milieu - Search, CreatePost, Messages, Notifications, Profil */}
 					<div className="flex flex-col gap-2 flex-1 justify-center">
 						{navItems.slice(1).map((item) => {
 							const isActive = pathname === item.href;
+
 							return (
 								<Link
 									key={item.href}
@@ -100,14 +106,24 @@ export function Navigation() {
 								pathname === "/notifications" && "bg-accent text-accent-foreground font-medium"
 							)}
 						>
-							<Bell className="w-6 h-6 flex-shrink-0" />
+							<div className="relative flex-shrink-0">
+								<Bell className="w-6 h-6" />
+								{unreadNotificationCount > 0 && (
+									<Badge
+										variant="default"
+										className="absolute -top-2 -right-2 h-5 min-w-5 px-1.5 flex items-center justify-center text-[10px] font-semibold leading-none bg-rose-500 text-white border-2 border-background shadow-sm"
+									>
+										{unreadBadgeLabel}
+									</Badge>
+								)}
+							</div>
 							<span className="whitespace-nowrap opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">
 								Notifications
 							</span>
 						</Link>
 
 						<Link
-							to={`/profile/me`}
+							to={profilePath}
 							className={cn(
 								"flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-all duration-200 hover:scale-105",
 								isProfileActive && "bg-accent text-accent-foreground font-medium"
@@ -125,7 +141,6 @@ export function Navigation() {
 						</Link>
 					</div>
 
-					{/* Paramètres et Se déconnecter en bas */}
 					<div className="flex flex-col gap-2 mt-4">
 						<Link
 							to="/settings"
@@ -157,6 +172,7 @@ export function Navigation() {
 				<div className="flex justify-around items-center h-20 px-2">
 					{navItems.map((item) => {
 						const isActive = pathname === item.href;
+
 						return (
 							<Link
 								key={item.href}
@@ -171,10 +187,30 @@ export function Navigation() {
 							</Link>
 						);
 					})}
+
+					<Link
+						to="/notifications"
+						aria-label="Notifications"
+						className={cn(
+							"relative flex items-center justify-center h-16 w-16 rounded-lg hover:bg-accent transition-all duration-200 hover:scale-110",
+							pathname === "/notifications" && "text-primary"
+						)}
+					>
+						<Bell className="w-7 h-7" strokeWidth={pathname === "/notifications" ? 2.5 : 2} />
+						{unreadNotificationCount > 0 && (
+							<Badge
+								variant="default"
+								className="absolute top-0.5 right-0.5 h-5 min-w-5 px-1.5 flex items-center justify-center text-[10px] font-semibold leading-none bg-rose-500 text-white border-2 border-background shadow-sm"
+							>
+								{unreadBadgeLabel}
+							</Badge>
+						)}
+					</Link>
+
 					<DropdownMenu>
 						<DropdownMenuTrigger
 							aria-label="User menu"
-							className="flex items-center justify-center h-16 w-16 rounded-lg hover:bg-accent transition-all duration-200 hover:scale-110 relative"
+							className="flex items-center justify-center h-16 w-16 rounded-lg hover:bg-accent transition-all duration-200 hover:scale-110"
 						>
 							<Avatar className="h-9 w-9">
 								<AvatarImage src={avatarUrl} />
@@ -182,20 +218,16 @@ export function Navigation() {
 									{user ? user.firstName[0] + user.lastName[0] : "??"}
 								</AvatarFallback>
 							</Avatar>
-							<Badge
-								variant="destructive"
-								className="absolute top-2 right-1 h-4 w-4 p-0 flex items-center justify-center text-xs"
-							>
-								3
-							</Badge>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent side="top" align="end" className="w-56">
 							<DropdownMenuItem onClick={() => navigate("/notifications")}>
 								<Bell className="mr-2 h-4 w-4" />
 								Notifications
-								<Badge variant="secondary" className="ml-auto">
-									3
-								</Badge>
+								{unreadNotificationCount > 0 && (
+									<Badge variant="secondary" className="ml-auto">
+										{unreadBadgeLabel}
+									</Badge>
+								)}
 							</DropdownMenuItem>
 							<DropdownMenuItem onClick={() => navigate(profilePath)}>
 								<User className="mr-2 h-4 w-4" />

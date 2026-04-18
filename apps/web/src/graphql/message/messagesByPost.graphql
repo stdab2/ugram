@@ -1,0 +1,13 @@
+query MessagesByPost($postId: Int!) {
+  messagesByPost(postId: $postId) {
+    id
+    content
+    createdAt
+    author {
+      userName
+      firstName
+      lastName
+      picture
+    }
+  }
+}
