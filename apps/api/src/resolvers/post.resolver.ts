@@ -8,7 +8,7 @@ import {
 } from "../../Validators/validateUser.js";
 import { saveUploadedImage, deleteImageFromStorage } from "../services/image.service.js";
 import type { FileUpload } from "graphql-upload";
-import { Post } from "../../generated/prisma/client.js";
+import { Post, UserUgram } from "../../generated/prisma/client.js";
 import { handlePrismaError } from "../../Validators/errors.js";
 import {
 	validatePostId,
@@ -36,6 +36,10 @@ type PostWithCount = Prisma.PostGetPayload<{
 		};
 	};
 }>;
+
+type PostWithOptionalAuthor = Post & {
+	author?: UserUgram;
+};
 
 type CreatePostArgs = {
 	data: {
@@ -66,9 +70,30 @@ export const postResolvers = {
 			const limit = Math.min(Math.max(args.limit ?? 20, 0), 100);
 			const offset = Math.max(args.offset ?? 0, 0);
 			return prisma.post.findMany({
+				orderBy: [{ createdAt: "desc" }, { id: "desc" }],
 				take: limit,
 				skip: offset,
 				include: {
+					_count: {
+						select: { messages: true },
+					},
+				},
+			});
+		},
+		popularPosts: async (
+			_: unknown,
+			args: { limit?: number; offset?: number },
+			context: UserContext
+		) => {
+			authenticateUser(context.user);
+			const limit = Math.min(Math.max(args.limit ?? 20, 0), 100);
+			const offset = Math.max(args.offset ?? 0, 0);
+			return prisma.post.findMany({
+				orderBy: [{ likes: { _count: "desc" } }, { id: "asc" }],
+				take: limit,
+				skip: offset,
+				include: {
+					author: true,
 					_count: {
 						select: { messages: true },
 					},
@@ -97,8 +122,13 @@ export const postResolvers = {
 		},
 	},
 	Post: {
-		author: async (parent: Post, _: unknown, context: UserContext) => {
+		author: async (parent: PostWithOptionalAuthor, _: unknown, context: UserContext) => {
 			authenticateUser(context.user);
+
+			if (parent.author) {
+				return parent.author;
+			}
+
 			return prisma.userUgram.findUnique({
 				where: { id: parent.authorId },
 			});

@@ -20,6 +20,7 @@ import {
 	useNotificationsQuery,
 	useUnreadNotificationCountQuery,
 } from "@/generated/graphql";
+import { PostImage } from "@/components/PostImage";
 import { toast } from "sonner";
 
 export function NotificationsPage() {
@@ -288,11 +289,14 @@ export function NotificationsPage() {
 															</p>
 														</div>
 														<div className="flex items-center gap-3">
-															<img
-																src={getImageUrl(notification.post.imageUrl)}
-																alt="Related post"
-																className="h-16 w-16 rounded-xl object-cover"
-															/>
+															<div className="h-16 w-16 rounded-xl overflow-hidden bg-muted flex items-center justify-center">
+																<PostImage
+																	thumbnailUrl={notification.post.thumbnailUrl}
+																	imageStatus={notification.post.imageStatus}
+																	alt="Related post"
+																	compact
+																/>
+															</div>
 															<ArrowRight className="h-4 w-4 text-muted-foreground" />
 														</div>
 													</div>

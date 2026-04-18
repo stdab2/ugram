@@ -4,13 +4,12 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Heart, MessageCircle, Send } from "lucide-react";
 import { PostMenu } from "@/components/PostMenu";
-import { ImageProcessing } from "@/components/ImageProcessing";
+import { PostImage } from "@/components/PostImage";
 import { DeletePostDialog } from "@/components/DeletePostDialog";
 import { cn, getImageUrl } from "@/lib/utils";
 import { formatDescription, formatDate } from "@/lib/postUtils";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import type { PostsQuery, PostsByAuthorQuery } from "@/generated/graphql";
 import {
 	useUnlikePostMutation,
 	useLikePostMutation,
@@ -20,7 +19,22 @@ import {
 import { useAuth } from "@/AuthContext";
 import { toast } from "sonner";
 
-type PostData = PostsQuery["posts"][0] | PostsByAuthorQuery["postsByAuthor"][0];
+interface PostData {
+	id: number;
+	description: string;
+	thumbnailUrl: string | null;
+	imageStatus?: string | null;
+	createdAt: unknown;
+	messageCount: number;
+	likeCount: number;
+	isLikedByCurrentUser: boolean;
+	author: {
+		firstName: string;
+		lastName: string;
+		picture: string | null;
+		userName: string;
+	};
+}
 
 interface PostModalProps {
 	open: boolean;
@@ -112,15 +126,12 @@ export function PostModal({ open, onOpenChange, post, onPostDeletion }: PostModa
 					<div className="grid grid-cols-1 md:grid-cols-2 flex-1 min-h-0 w-full">
 						{/* Left side - Image */}
 						<div className="bg-black flex items-center justify-center">
-							{post.imageStatus === "PENDING" ? (
-								<ImageProcessing />
-							) : (
-								<img
-									src={getImageUrl(post.imageUrl)}
-									alt={`Post by ${author.userName}`}
-									className="w-full h-full object-contain"
-								/>
-							)}
+							<PostImage
+								thumbnailUrl={post.thumbnailUrl}
+								imageStatus={post.imageStatus}
+								alt={`Post by ${author.userName}`}
+								className="object-contain"
+							/>
 						</div>
 
 						{/* Right side - Details */}

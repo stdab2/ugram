@@ -7,9 +7,9 @@ query Users($limit: Int, $offset: Int) {
 		lastName
 		phoneNumber
 		picture
+		followerCount
 		posts {
 			id
-			imageUrl
 			thumbnailUrl
 			description
 			createdAt

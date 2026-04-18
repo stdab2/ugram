@@ -52,18 +52,18 @@ export function getGoogleOAuthUrl(): string {
 const apiBaseUrl = getApiBaseUrl();
 
 /**
- * Converts an image key/URL from the API to an absolute URL for the frontend.
+ * Converts a media key/URL from the API to an absolute URL for the frontend.
  * In dev, falls back to the API server. In prod, uses VITE_MEDIA_BASE_URL (S3 / CloudFront).
  */
-export function getImageUrl(imageUrl: string | null | undefined): string | undefined {
-	if (!imageUrl) return undefined;
+export function getImageUrl(mediaPath: string | null | undefined): string | undefined {
+	if (!mediaPath) return undefined;
 
 	// Keep already absolute/protocol-relative URLs as-is.
-	if (/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(imageUrl) || imageUrl.startsWith("//")) {
-		return imageUrl;
+	if (/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(mediaPath) || mediaPath.startsWith("//")) {
+		return mediaPath;
 	}
 
-	const normalizedPath = imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
+	const normalizedPath = mediaPath.startsWith("/") ? mediaPath : `/${mediaPath}`;
 	const mediaBaseUrl = import.meta.env.VITE_MEDIA_BASE_URL?.replace(/\/+$/, "");
 	if (mediaBaseUrl) {
 		return `${mediaBaseUrl}${normalizedPath}`;

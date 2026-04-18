@@ -1,7 +1,7 @@
 import { Heart, MessageCircle } from "lucide-react";
-import { cn, getImageUrl } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { useState } from "react";
-import { ImageProcessing } from "@/components/ImageProcessing";
+import { PostImage } from "@/components/PostImage";
 
 interface PostPreviewProps {
 	thumbnailUrl: string | null;
@@ -21,7 +21,6 @@ export function PostPreview({
 	onClick,
 }: PostPreviewProps) {
 	const [isHovered, setIsHovered] = useState(false);
-	const isPending = imageStatus === "PENDING";
 
 	return (
 		<button
@@ -34,15 +33,12 @@ export function PostPreview({
 			onMouseLeave={() => setIsHovered(false)}
 			aria-label="View post"
 		>
-			{isPending ? (
-				<ImageProcessing />
-			) : (
-				<img
-					src={getImageUrl(thumbnailUrl)}
-					alt="Post preview"
-					className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-				/>
-			)}
+			<PostImage
+				thumbnailUrl={thumbnailUrl}
+				imageStatus={imageStatus}
+				alt="Post preview"
+				className="transition-transform duration-300 group-hover:scale-105"
+			/>
 			{isHovered && (
 				<div className="absolute inset-0 bg-black/40 flex items-center justify-center gap-6 text-white">
 					<div className="flex items-center gap-2">

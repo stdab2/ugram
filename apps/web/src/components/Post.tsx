@@ -5,7 +5,7 @@ import { cn, getImageUrl } from "@/lib/utils";
 import { formatDescription, formatDate } from "@/lib/postUtils";
 import { PostModal } from "@/components/PostModal";
 import { PostMenu } from "@/components/PostMenu";
-import { ImageProcessing } from "@/components/ImageProcessing";
+import { PostImage } from "@/components/PostImage";
 import { DeletePostDialog } from "@/components/DeletePostDialog";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
@@ -124,15 +124,11 @@ export function Post({
 					)}
 					aria-label="View post details"
 				>
-					{post.imageStatus === "PENDING" ? (
-						<ImageProcessing />
-					) : (
-						<img
-							src={getImageUrl(post.imageUrl)}
-							alt={`Post by ${post.author.userName}`}
-							className="w-full h-full object-cover"
-						/>
-					)}
+					<PostImage
+						thumbnailUrl={post.thumbnailUrl}
+						imageStatus={post.imageStatus}
+						alt={`Post by ${post.author.userName}`}
+					/>
 				</button>
 
 				{/* Actions */}

@@ -1,13 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
-import { Card } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
-import { Separator } from "@/components/ui/Separator";
 import { Button } from "@/components/ui/Button";
-import { PostGrid } from "@/components/PostGrid";
 import { PostModal } from "@/components/PostModal";
 import { ProfileSkeleton } from "@/components/ProfileSkeleton";
-import { timestampToDateString } from "@/lib/utils";
 import {
 	Empty,
 	EmptyContent,
@@ -15,27 +9,111 @@ import {
 	EmptyHeader,
 	EmptyTitle,
 } from "@/components/ui/Empty";
-import { useUserByUserNameQuery, useDeletePostMutation } from "@/generated/graphql";
-import { Calendar, UserX, AlertCircle } from "lucide-react";
+import {
+	useUserByUserNameQuery,
+	useDeletePostMutation,
+	useFollowUserMutation,
+	useUnfollowUserMutation,
+	useFollowersQuery,
+	useFollowingQuery,
+	usePostsByAuthorQuery,
+} from "@/generated/graphql";
+import { UserX, AlertCircle } from "lucide-react";
 import { useState } from "react";
-import { getImageUrl } from "@/lib/utils";
 import { PageFade } from "@/components/PageFade";
 import { toast } from "sonner";
 import { useAuth } from "@/AuthContext";
+import { ProfileHeaderCard } from "@/components/ProfileHeaderCard";
+import { ProfileContentPanel } from "@/components/ProfileContentPanel";
+import type { ProfileView, FollowListUser } from "@/components/ProfileContentTypes";
+
+const PROFILE_LIST_PAGE_SIZE = 6;
+
+type ProfileUiState = {
+	userName: string;
+	activeView: ProfileView;
+	selectedPostId: number | null;
+};
+
+type OptimisticFollowState = {
+	targetUserId: number | null;
+	isFollowed: boolean | null;
+	followerDelta: number;
+	followersList: FollowListUser[] | null;
+};
+
+type HasMoreState = {
+	userName: string;
+	posts: boolean;
+	followers: boolean;
+	following: boolean;
+};
 
 export function ProfilePage() {
 	const { username } = useParams();
 	const navigate = useNavigate();
 	const { userAuth } = useAuth();
 
-	// Use username from URL or default to current user
-	// Treat "me" as a special keyword for the current user
 	const userNameToFetch = username === "me" || !username ? userAuth!.userName : username;
 
-	// Check if this is the current user's profile
 	const isOwnProfile = userNameToFetch === userAuth!.userName;
+	const [profileUiState, setProfileUiState] = useState<ProfileUiState>({
+		userName: userNameToFetch,
+		activeView: "posts",
+		selectedPostId: null,
+	});
+	const [optimisticFollowState, setOptimisticFollowState] = useState<OptimisticFollowState>({
+		targetUserId: null,
+		isFollowed: null,
+		followerDelta: 0,
+		followersList: null,
+	});
+	const [hasMoreState, setHasMoreState] = useState<HasMoreState>({
+		userName: userNameToFetch,
+		posts: true,
+		followers: true,
+		following: true,
+	});
 
-	// Fetch user data by username
+	const isCurrentProfileState = profileUiState.userName === userNameToFetch;
+	const isCurrentHasMoreState = hasMoreState.userName === userNameToFetch;
+	const activeView = isCurrentProfileState ? profileUiState.activeView : "posts";
+	const selectedPostId = isCurrentProfileState ? profileUiState.selectedPostId : null;
+
+	const setHasMoreForView = (view: "posts" | "followers" | "following", hasMore: boolean) => {
+		setHasMoreState((prev) => {
+			if (prev.userName !== userNameToFetch) {
+				return {
+					userName: userNameToFetch,
+					posts: view === "posts" ? hasMore : true,
+					followers: view === "followers" ? hasMore : true,
+					following: view === "following" ? hasMore : true,
+				};
+			}
+
+			return {
+				...prev,
+				[view]: hasMore,
+			};
+		});
+	};
+
+	const handleChangeView = (view: ProfileView) => {
+		setProfileUiState((prev) => ({
+			userName: userNameToFetch,
+			activeView: view,
+			selectedPostId: prev.userName === userNameToFetch ? prev.selectedPostId : null,
+		}));
+	};
+
+	const handleSelectPost = (postId: number | null) => {
+		setProfileUiState((prev) => ({
+			userName: userNameToFetch,
+			activeView: prev.userName === userNameToFetch ? prev.activeView : "posts",
+			selectedPostId: postId,
+		}));
+	};
+
 	const {
 		data: userData,
 		loading: userLoading,
@@ -44,8 +122,45 @@ export function ProfilePage() {
 		variables: { userName: userNameToFetch },
 	});
 
-	// const [selectedPost, setSelectedPost] = useState<UserPostType | null>(null);
-	const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
+	const viewedUserId = userData?.userByUserName?.id;
+
+	const {
+		data: postsData,
+		loading: postsLoading,
+		fetchMore: fetchMorePosts,
+	} = usePostsByAuthorQuery({
+		variables: { authorId: viewedUserId ?? 0, limit: PROFILE_LIST_PAGE_SIZE, offset: 0 },
+		skip: !viewedUserId || activeView !== "posts",
+		onCompleted: (data) => {
+			setHasMoreForView("posts", data.postsByAuthor.length === PROFILE_LIST_PAGE_SIZE);
+		},
+	});
+
+	const {
+		data: followersData,
+		loading: followersLoading,
+		fetchMore: fetchMoreFollowers,
+		refetch: refetchFollowers,
+	} = useFollowersQuery({
+		variables: { userId: viewedUserId ?? 0, limit: PROFILE_LIST_PAGE_SIZE, offset: 0 },
+		skip: !viewedUserId || activeView !== "followers",
+		onCompleted: (data) => {
+			setHasMoreForView("followers", data.followers.length === PROFILE_LIST_PAGE_SIZE);
+		},
+	});
+
+	const {
+		data: followingData,
+		loading: followingLoading,
+		fetchMore: fetchMoreFollowing,
+		refetch: refetchFollowing,
+	} = useFollowingQuery({
+		variables: { userId: viewedUserId ?? 0, limit: PROFILE_LIST_PAGE_SIZE, offset: 0 },
+		skip: !viewedUserId || activeView !== "following",
+		onCompleted: (data) => {
+			setHasMoreForView("following", data.following.length === PROFILE_LIST_PAGE_SIZE);
+		},
+	});
 
 	const [deletePost] = useDeletePostMutation({
 		update(cache, { data }) {
@@ -56,17 +171,175 @@ export function ProfilePage() {
 		},
 	});
 
+	const [followUser, { loading: followLoading }] = useFollowUserMutation();
+	const [unfollowUser, { loading: unfollowLoading }] = useUnfollowUserMutation();
+
+	const currentPosts = postsData?.postsByAuthor ?? [];
+	const currentFollowers = followersData?.followers ?? [];
+	const currentFollowing = followingData?.following ?? [];
+	const isOptimisticForViewedUser =
+		viewedUserId !== undefined && optimisticFollowState.targetUserId === viewedUserId;
+	const hasRealFollowersData = followersData !== undefined;
+	const displayedFollowers =
+		isOptimisticForViewedUser &&
+		optimisticFollowState.followersList !== null &&
+		!hasRealFollowersData
+			? optimisticFollowState.followersList
+			: currentFollowers;
+	const isViewLoading =
+		(activeView === "posts" && postsLoading && !postsData) ||
+		(activeView === "followers" && followersLoading && !followersData) ||
+		(activeView === "following" && followingLoading && !followingData);
+	const hasMorePosts = isCurrentHasMoreState ? hasMoreState.posts : true;
+	const hasMoreFollowers = isCurrentHasMoreState ? hasMoreState.followers : true;
+	const hasMoreFollowing = isCurrentHasMoreState ? hasMoreState.following : true;
+
 	const handlePostDeletion = async (postId: number) => {
 		try {
 			await deletePost({ variables: { id: postId } });
-			setSelectedPostId(null);
+			handleSelectPost(null);
 			toast.success("Your post has been successfully deleted!");
 		} catch {
-			// Error already handled by errorLink
+			// Already handled
 		}
 	};
 
-	// Handle loading state
+	const handleFollowToggle = async (targetUserId: number, isCurrentlyFollowing: boolean) => {
+		const previousOptimisticFollowState = optimisticFollowState;
+		const followerDelta = isCurrentlyFollowing ? -1 : 1;
+		const canBuildFollowersList =
+			followersData !== undefined ||
+			(previousOptimisticFollowState.targetUserId === targetUserId &&
+				previousOptimisticFollowState.followersList !== null);
+
+		setOptimisticFollowState((prev) => {
+			const isSameTarget = prev.targetUserId === targetUserId;
+			const baseFollowersList = isSameTarget ? prev.followersList : null;
+			const source = baseFollowersList ?? (canBuildFollowersList ? currentFollowers : null);
+			const nextFollowerDelta = (isSameTarget ? prev.followerDelta : 0) + followerDelta;
+			let nextFollowersList = source;
+
+			if (userAuth && source !== null) {
+				const currentUserListEntry: FollowListUser = {
+					id: userAuth.id,
+					userName: userAuth.userName,
+					firstName: userAuth.firstName,
+					lastName: userAuth.lastName,
+					picture: userAuth.profilePictureUrl ?? null,
+				};
+
+				if (isCurrentlyFollowing) {
+					nextFollowersList = source.filter((follower) => follower.id !== currentUserListEntry.id);
+				} else if (!source.some((follower) => follower.id === currentUserListEntry.id)) {
+					nextFollowersList = [currentUserListEntry, ...source];
+				}
+			}
+
+			return {
+				targetUserId,
+				isFollowed: !isCurrentlyFollowing,
+				followerDelta: nextFollowerDelta,
+				followersList: nextFollowersList ?? null,
+			};
+		});
+
+		try {
+			if (isCurrentlyFollowing) {
+				await unfollowUser({ variables: { userId: targetUserId } });
+				toast.success("User unfollowed.");
+			} else {
+				await followUser({ variables: { userId: targetUserId } });
+				toast.success("User followed.");
+			}
+
+			if (isOwnProfile) {
+				await refetchFollowing();
+			} else {
+				await refetchFollowers();
+			}
+
+			setOptimisticFollowState((prev) =>
+				prev.targetUserId !== targetUserId
+					? prev
+					: {
+							...prev,
+							followersList: null,
+						}
+			);
+		} catch {
+			setOptimisticFollowState(previousOptimisticFollowState);
+		}
+	};
+
+	const handleLoadMorePosts = () => {
+		if (!viewedUserId || !hasMorePosts) return;
+
+		const currentLength = currentPosts.length;
+
+		fetchMorePosts({
+			variables: {
+				authorId: viewedUserId,
+				limit: PROFILE_LIST_PAGE_SIZE,
+				offset: currentLength,
+			},
+			updateQuery: (prev, { fetchMoreResult }) => {
+				if (!fetchMoreResult) return prev;
+				const newPosts = fetchMoreResult.postsByAuthor;
+				setHasMoreForView("posts", newPosts.length === PROFILE_LIST_PAGE_SIZE);
+				return {
+					__typename: "Query",
+					postsByAuthor: [...prev.postsByAuthor, ...newPosts],
+				};
+			},
+		});
+	};
+
+	const handleLoadMoreFollowers = () => {
+		if (!viewedUserId || !hasMoreFollowers) return;
+
+		const currentLength = currentFollowers.length;
+
+		fetchMoreFollowers({
+			variables: {
+				userId: viewedUserId,
+				limit: PROFILE_LIST_PAGE_SIZE,
+				offset: currentLength,
+			},
+			updateQuery: (prev, { fetchMoreResult }) => {
+				if (!fetchMoreResult) return prev;
+				const newFollowers = fetchMoreResult.followers;
+				setHasMoreForView("followers", newFollowers.length === PROFILE_LIST_PAGE_SIZE);
+				return {
+					__typename: "Query",
+					followers: [...prev.followers, ...newFollowers],
+				};
+			},
+		});
+	};
+
+	const handleLoadMoreFollowing = () => {
+		if (!viewedUserId || !hasMoreFollowing) return;
+		const currentLength = currentFollowing.length;
+		fetchMoreFollowing({
+			variables: {
+				userId: viewedUserId,
+				limit: PROFILE_LIST_PAGE_SIZE,
+				offset: currentLength,
+			},
+			updateQuery: (prev, { fetchMoreResult }) => {
+				if (!fetchMoreResult) return prev;
+
+				const newFollowing = fetchMoreResult.following;
+				setHasMoreForView("following", newFollowing.length === PROFILE_LIST_PAGE_SIZE);
+
+				return {
+					__typename: "Query",
+					following: [...prev.following, ...newFollowing],
+				};
+			},
+		});
+	};
+
 	if (userLoading) {
 		return (
 			<PageFade key="loading" delay={0.3}>
@@ -75,7 +348,6 @@ export function ProfilePage() {
 		);
 	}
 
-	// Handle error state
 	if (userError) {
 		return (
 			<PageFade key="error">
@@ -95,7 +367,6 @@ export function ProfilePage() {
 		);
 	}
 
-	// Handle user not found
 	if (!userData?.userByUserName) {
 		return (
 			<PageFade key="not-found">
@@ -118,101 +389,71 @@ export function ProfilePage() {
 	}
 
 	const user = userData.userByUserName;
-	// Sort posts by date (most recent first)
-	const userPosts = [...(user.posts || [])].sort(
-		(a, b) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime()
+	const displayedIsFollowedByCurrentUser =
+		isOptimisticForViewedUser && optimisticFollowState.isFollowed !== null
+			? optimisticFollowState.isFollowed
+			: user.isFollowedByCurrentUser;
+	const displayedFollowerCount = Math.max(
+		0,
+		user.followerCount + (isOptimisticForViewedUser ? optimisticFollowState.followerDelta : 0)
 	);
 
 	const selectedPost =
-		selectedPostId !== null ? (userPosts.find((p) => p.id === selectedPostId) ?? null) : null;
+		selectedPostId !== null ? (currentPosts.find((p) => p.id === selectedPostId) ?? null) : null;
+	const isFollowActionLoading = followLoading || unfollowLoading;
+
 	return (
 		<PageFade key="content">
 			<div className="w-full min-h-screen bg-background pb-20 md:pb-0">
 				<div className="max-w-5xl mx-auto px-4 py-8">
-					{/* Profile Header */}
-					<Card className="p-6 md:p-8 mb-8">
-						<div className="flex flex-col md:flex-row gap-6 md:gap-8">
-							{/* Avatar */}
-							<div className="flex justify-center md:justify-start">
-								<Avatar className="h-32 w-32 md:h-40 md:w-40">
-									<AvatarImage src={user.picture ? getImageUrl(user.picture) : undefined} />
-									<AvatarFallback className="text-3xl">
-										{user.firstName[0] + user.lastName[0]}
-									</AvatarFallback>
-								</Avatar>
-							</div>
-
-							{/* Profile Info */}
-							<div className="flex-1 space-y-4">
-								<div className="space-y-2">
-									<div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
-										<h1 className="text-2xl font-bold">{user.userName}</h1>
-										{isOwnProfile && (
-											<Button variant="outline" size="sm" onClick={() => navigate("/settings")}>
-												Edit Profile
-											</Button>
-										)}
-									</div>
-									<p className="text-lg text-foreground">
-										{user.firstName} {user.lastName}
-									</p>
-								</div>
-
-								{/* Stats */}
-								<div className="flex gap-6">
-									<div className="text-center">
-										<p className="font-semibold text-lg">{userPosts.length}</p>
-										<p className="text-sm text-muted-foreground">Posts</p>
-									</div>
-									<div className="text-center">
-										<p className="font-semibold text-lg">0</p>
-										<p className="text-sm text-muted-foreground">Followers</p>
-									</div>
-									<div className="text-center">
-										<p className="font-semibold text-lg">0</p>
-										<p className="text-sm text-muted-foreground">Following</p>
-									</div>
-								</div>
-								<Separator />
-								{/* Member Since Info */}
-								<div className="space-y-2">
-									<div className="flex items-center gap-2 text-sm">
-										<Calendar className="h-4 w-4 text-muted-foreground" />
-										<span>Member since {timestampToDateString(+user.createdAt)}</span>
-									</div>
-								</div>
-							</div>
-						</div>
-					</Card>
-
-					{/* Posts Grid */}
-					<div>
-						<div className="flex items-center justify-between mb-4">
-							<h2 className="text-xl font-semibold">Posts</h2>
-							<Badge variant="secondary">{userPosts.length} posts</Badge>
-						</div>
-						<PostGrid
-							posts={userPosts.map((post) => ({
-								id: post.id,
-								thumbnailUrl: post.thumbnailUrl || "",
-								imageStatus: post.imageStatus,
-								likeCount: post.likeCount,
-								isLikedByCurrentUser: post.isLikedByCurrentUser,
-								messageCount: post.messageCount,
-							}))}
-							onPostClick={(postPreview) => {
-								const fullPost = userPosts.find((p) => p.id === postPreview.id);
-								if (fullPost && fullPost) setSelectedPostId(fullPost.id);
+					<ProfileHeaderCard
+						user={user}
+						isOwnProfile={isOwnProfile}
+						activeView={activeView}
+						displayedIsFollowedByCurrentUser={displayedIsFollowedByCurrentUser}
+						displayedFollowerCount={displayedFollowerCount}
+						followingCount={user.followingCount}
+						isFollowActionLoading={isFollowActionLoading}
+						onOpenSettings={() => navigate("/settings")}
+						onToggleFollow={() => handleFollowToggle(user.id, displayedIsFollowedByCurrentUser)}
+						onChangeView={handleChangeView}
+					/>
+					{isViewLoading ? (
+						<ProfileSkeleton />
+					) : (
+						<ProfileContentPanel
+							activeView={activeView}
+							posts={currentPosts}
+							followers={displayedFollowers}
+							following={currentFollowing}
+							viewStates={{
+								posts: {
+									loading: postsLoading,
+									hasMore: hasMorePosts,
+									onLoadMore: handleLoadMorePosts,
+								},
+								followers: {
+									loading: followersLoading,
+									hasMore: hasMoreFollowers,
+									onLoadMore: handleLoadMoreFollowers,
+								},
+								following: {
+									loading: followingLoading,
+									hasMore: hasMoreFollowing,
+									onLoadMore: handleLoadMoreFollowing,
+								},
 							}}
+							onSelectPost={(postId) => handleSelectPost(postId)}
+							onOpenProfile={(userName) => navigate(`/profile/${userName}`)}
 						/>
-					</div>
+					)}
 
 					{/* Post Modal */}
-					{selectedPost && (
+					{activeView === "posts" && selectedPost && (
 						<PostModal
 							key={selectedPost.id}
 							open={!!selectedPost}
-							onOpenChange={(open) => !open && setSelectedPostId(null)}
+							onOpenChange={(open) => !open && handleSelectPost(null)}
 							post={{
 								...selectedPost,
 								author: user,

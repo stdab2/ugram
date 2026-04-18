@@ -152,7 +152,7 @@ export function EditPostPage() {
 							lastName: post.author.lastName,
 							picture: post.author.picture,
 						}}
-						initialImage={getImageUrl(post.imageUrl)}
+						initialImage={getImageUrl(post.thumbnailUrl)}
 						initialDescription={post.description}
 						onPostEdit={handlePostUpdate}
 						submitButtonText="Save changes"
