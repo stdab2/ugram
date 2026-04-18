@@ -1,10 +1,17 @@
 name: Deploy API to Elastic Beanstalk
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 on:
   workflow_dispatch:
   push:
     branches:
       - main
+      - develop
+      - feature/api-dynamic-docs
       - feature/deploy-api-to-beanstalk
       - feature/environment-variables
 
@@ -41,6 +48,7 @@ jobs:
           pnpm run build:api
 
       - name: Prepare deployment package
+        if: ${{ github.ref == 'refs/heads/main' }}
         run: |
           mkdir -p deploy
           cd apps/api
@@ -64,6 +72,7 @@ jobs:
           # Laisser Elastic Beanstalk installer les dependances via npm
 
       - name: Generate deployment package
+        if: ${{ github.ref == 'refs/heads/main' }}
         run: |
           cd deploy
           zip -r ../deploy.zip . -x '*.git*'
@@ -71,10 +80,12 @@ jobs:
           ls -lh deploy.zip
 
       - name: Get timestamp
+        if: ${{ github.ref == 'refs/heads/main' }}
         id: timestamp
         run: echo "timestamp=$(date +'%Y%m%d_%H%M%S')" >> $GITHUB_OUTPUT
 
       - name: Deploy to Elastic Beanstalk
+        if: ${{ github.ref == 'refs/heads/main' }}
         uses: einaregilsson/beanstalk-deploy@v22
         with:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -86,3 +97,30 @@ jobs:
           deployment_package: deploy.zip
           wait_for_deployment: true
           wait_for_environment_recovery: 300
+
+      - name: Generate static API docs
+        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/feature/api-dynamic-docs' }}
+        run: |
+          pnpm --filter api docs:generate
+
+      - name: Upload generated API docs artifact
+        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/feature/api-dynamic-docs' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-docs-${{ github.sha }}
+          path: docs/api
+
+      - name: Configure GitHub Pages
+        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' }}
+        uses: actions/configure-pages@v5
+
+      - name: Upload pages artifact
+        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' }}
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/api
+
+      - name: Deploy docs to GitHub Pages
+        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' }}
+        id: deployment
+        uses: actions/deploy-pages@v4
