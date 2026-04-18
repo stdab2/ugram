@@ -15,6 +15,7 @@ query Notifications($limit: Int, $offset: Int) {
 			id
 			description
 			thumbnailUrl
+			imageStatus
 		}
 	}
 }

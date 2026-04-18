@@ -26,6 +26,7 @@ import {
 	EmptyTitle,
 } from "@/components/ui/Empty";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { PostImage } from "@/components/PostImage";
 import { toast } from "sonner";
 import { useAuth } from "@/AuthContext";
 
@@ -205,10 +206,11 @@ export function PostPage() {
 						<div className="grid grid-cols-1 md:grid-cols-2 flex-1 min-h-0 w-full">
 							{/* Left side - Image */}
 							<div className="bg-black flex items-center justify-center">
-								<img
-									src={getImageUrl(post.thumbnailUrl)}
+								<PostImage
+									thumbnailUrl={post.thumbnailUrl}
+									imageStatus={post.imageStatus}
 									alt={`Post by ${author.userName}`}
-									className="w-full h-full object-contain"
+									className="object-contain"
 								/>
 							</div>
 

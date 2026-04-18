@@ -58,6 +58,7 @@ export function ProfileContentPanel({
 						posts={posts.map((post) => ({
 							id: post.id,
 							thumbnailUrl: post.thumbnailUrl,
+							imageStatus: post.imageStatus,
 							likeCount: post.likeCount,
 							messageCount: post.messageCount,
 						}))}

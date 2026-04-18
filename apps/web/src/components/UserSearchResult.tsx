@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 import { Card } from "@/components/ui/Card";
-import { ImageProcessing } from "@/components/ImageProcessing";
+import { PostImage } from "@/components/PostImage";
 import type { UserQuery, SearchQuery } from "@/generated/graphql";
 import { Link } from "react-router-dom";
 import { getImageUrl } from "@/lib/utils";
@@ -67,15 +67,12 @@ export function UserSearchResult({ user, onPostClick }: UserSearchResultProps) {
 									}}
 									className="w-20 h-20 rounded-md overflow-hidden hover:opacity-80 transition-opacity"
 								>
-									{post.imageStatus === "PENDING" ? (
-										<ImageProcessing compact />
-									) : (
-										<img
-											src={getImageUrl(post.thumbnailUrl || "")}
-											alt=""
-											className="w-full h-full object-cover"
-										/>
-									)}
+									<PostImage
+										thumbnailUrl={post.thumbnailUrl || null}
+										imageStatus={post.imageStatus}
+										alt=""
+										compact
+									/>
 								</button>
 							))}
 						</div>
