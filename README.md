@@ -25,67 +25,32 @@ docker compose up --build
 - GraphQL API: http://localhost:4001/graphql
 - DB: localhost:5432
 
-### Dynamic API Documentation
+### API Documentation
 
-This project now uses a clean two-part documentation approach:
+UGRAM provides two documentation modes:
 
-1. Local interactive docs for developers (Apollo Sandbox).
-2. Static professional docs site for production (SpectaQL + GitHub Pages).
-
-#### Interactive docs in local dev
-
-Local development automatically enables the embedded Apollo Sandbox at:
-
+1. Local interactive docs for development:
 - http://localhost:4001/graphql
 
-#### Interactive docs in production
+2. Public read-only docs for production:
+- https://glo3112-classrooms.github.io/ugram-h2026-team-17/
 
-Production keeps introspection and embedded Sandbox disabled.
-This prevents exposing a live query UI on the production API endpoint.
-
-#### Generate static docs
-
-From the repository root:
+How docs are generated locally:
 
 ```bash
 pnpm docs:api
 ```
 
-This generates a static docs site from the GraphQL SDL in `apps/api/src/schema/*.graphql` and writes it to `docs/api`.
+This command builds a static docs site from `apps/api/src/schema/*.graphql` and writes it to `docs/api/index.html`.
 
-#### See docs in development first
-
-You have two easy ways to preview docs locally:
-
-1. Interactive docs
-
-- Start the API
-- Open http://localhost:4001/graphql
-
-2. Generated docs snapshot
-
-- Run `pnpm docs:api`
-- Open `docs/api/index.html` in your browser
-
-#### GitHub Pages publication (production)
-
-On pushes to `main` or `develop`, GitHub Actions publishes `docs/api` to GitHub Pages.
-
-- `main`: deploys API + publishes docs
-- `develop`: publishes docs only (no production API deploy)
-
-Required repository setup:
-
-- In repo Settings > Pages, keep Source managed by GitHub Actions.
-
-Notes:
+Production behavior:
 
 - The production `/graphql` endpoint does not expose an interactive query UI.
-- Public documentation is served as a static site (read-only) through GitHub Pages.
+- Documentation is published as a static GitHub Pages site from `main` only.
 
 ## Production
 
-- Web application: http://ugram-h2026-team17-web.s3-website.ca-central-1.amazonaws.com/
+- Web application: https://d206wqa79jnx1m.cloudfront.net
 
 ## Local Environment Files
 
