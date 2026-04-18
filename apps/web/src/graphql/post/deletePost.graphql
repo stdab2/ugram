@@ -2,7 +2,7 @@ mutation DeletePost($id: Int!) {
 	deletePost(id: $id) {
 		id
 		description
-		imageUrl
+		thumbnailUrl
 		authorId
 		author {
 			id

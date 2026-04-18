@@ -418,7 +418,6 @@ export function ProfilePage() {
 						onToggleFollow={() => handleFollowToggle(user.id, displayedIsFollowedByCurrentUser)}
 						onChangeView={handleChangeView}
 					/>
-
 					{isViewLoading ? (
 						<ProfileSkeleton />
 					) : (

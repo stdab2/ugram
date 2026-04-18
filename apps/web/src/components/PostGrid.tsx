@@ -1,13 +1,16 @@
 import { PostPreview } from "@/components/PostPreview";
 
+export interface PostGridPost {
+	id: string | number;
+	thumbnailUrl: string | null;
+	imageStatus?: string;
+	likeCount: number;
+	messageCount: number;
+}
+
 interface PostGridProps {
-	posts: Array<{
-		id: string | number;
-		imageUrl: string;
-		likeCount?: number;
-		messageCount?: number;
-	}>;
-	onPostClick: (post: PostGridProps["posts"][0]) => void;
+	posts: PostGridPost[];
+	onPostClick: (post: PostGridPost) => void;
 }
 
 export function PostGrid({ posts, onPostClick }: PostGridProps) {
@@ -16,9 +19,10 @@ export function PostGrid({ posts, onPostClick }: PostGridProps) {
 			{posts.map((post) => (
 				<PostPreview
 					key={post.id}
-					imageUrl={post.imageUrl}
-					likes={post.likeCount || 0}
-					comments={post.messageCount || 0}
+					thumbnailUrl={post.thumbnailUrl}
+					imageStatus={post.imageStatus}
+					likes={post.likeCount}
+					comments={post.messageCount}
 					onClick={() => onPostClick(post)}
 				/>
 			))}

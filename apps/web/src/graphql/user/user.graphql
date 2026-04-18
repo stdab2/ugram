@@ -11,12 +11,13 @@ query User($id: Int!) {
 		createdAt
 		posts {
 			id
-			imageUrl
+			thumbnailUrl
 			description
 			createdAt
 			messageCount
 			likeCount
 			isLikedByCurrentUser
+			imageStatus
 		}
 	}
 }

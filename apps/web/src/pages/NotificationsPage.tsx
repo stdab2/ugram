@@ -289,7 +289,7 @@ export function NotificationsPage() {
 														</div>
 														<div className="flex items-center gap-3">
 															<img
-																src={getImageUrl(notification.post.imageUrl)}
+																src={getImageUrl(notification.post.thumbnailUrl)}
 																alt="Related post"
 																className="h-16 w-16 rounded-xl object-cover"
 															/>

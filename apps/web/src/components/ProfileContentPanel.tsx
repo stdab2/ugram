@@ -57,9 +57,8 @@ export function ProfileContentPanel({
 					<PostGrid
 						posts={posts.map((post) => ({
 							id: post.id,
-							imageUrl: post.imageUrl || "",
+							thumbnailUrl: post.thumbnailUrl,
 							likeCount: post.likeCount,
-							isLikedByCurrentUser: post.isLikedByCurrentUser,
 							messageCount: post.messageCount,
 						}))}
 						onPostClick={(postPreview) => onSelectPost(Number(postPreview.id))}

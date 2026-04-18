@@ -3,7 +3,7 @@ import { SearchBar } from "@/components/SearchBar";
 import { SearchFilters } from "@/components/SearchFilters";
 import { UserSearchResult } from "@/components/UserSearchResult";
 import { HashtagSearchResult } from "@/components/HashtagSearchResult";
-import { PostGrid } from "@/components/PostGrid";
+import { PostGrid, type PostGridPost } from "@/components/PostGrid";
 import { PostModal } from "@/components/PostModal";
 import { SearchSkeleton } from "@/components/SearchSkeleton";
 import {
@@ -212,13 +212,7 @@ export function SearchPage() {
 		);
 	}
 
-	const handlePostClick = (post: {
-		id: string | number;
-		imageUrl: string;
-		likes?: number;
-		comments?: number;
-		isLikedByCurrentUser?: boolean;
-	}) => {
+	const handlePostClick = (post: PostGridPost) => {
 		setSelectedPostId(Number(post.id));
 	};
 

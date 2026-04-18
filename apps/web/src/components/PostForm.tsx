@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/Button";
 import { Textarea } from "@/components/ui/Textarea";
 import { Label } from "@/components/ui/Label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
-import { Upload, X } from "lucide-react";
-import { getImageUrl, cn } from "@/lib/utils";
+import { Upload, X, Camera } from "lucide-react";
+import { getImageUrl, cn, dataURLToFile } from "@/lib/utils";
 import { postFormSchema, editPostFormSchema, type PostFormData } from "@/lib/schemas";
 import { z } from "zod";
+import CameraUIComponent from "./CameraUIComponent";
+import { toast } from "sonner";
 
 interface PostFormProps {
 	user: {
@@ -45,6 +47,7 @@ export function PostForm({
 	const [image, setImage] = useState<File | null>(null);
 	const [isSaving, setIsSaving] = useState(false);
 	const [errors, setErrors] = useState<Partial<Record<keyof PostFormData, string>>>({});
+	const [showCameraUi, setShowCameraUi] = useState(false);
 
 	// Extract hashtags and mentions from description
 	const hashtags = description.match(/#\w+/g) || [];
@@ -62,6 +65,37 @@ export function PostForm({
 			};
 			reader.readAsDataURL(file);
 			setErrors((prev) => ({ ...prev, image: undefined }));
+		}
+	};
+
+	const takeAPicture = async () => {
+		try {
+			if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+				toast.error("Camera is not supported on this browser.");
+				return;
+			}
+
+			const devices = await navigator.mediaDevices.enumerateDevices();
+			const videoInputs = devices.filter((device) => device.kind === "videoinput");
+
+			if (videoInputs.length === 0) {
+				toast.error("No camera device accessible.");
+				return;
+			}
+
+			setShowCameraUi(true);
+		} catch (error) {
+			toast.error("Unable to access camera devices.");
+			console.error(error);
+		}
+	};
+
+	const handlePictureTaken = (photo: string | ImageData) => {
+		if (typeof photo === "string") {
+			const file = dataURLToFile(photo, "camera-photo.jpg");
+			setImagePreview(photo);
+			setImage(file);
+			setShowCameraUi(false);
 		}
 	};
 
@@ -116,9 +150,32 @@ export function PostForm({
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 				{/* Left side - Image upload/preview */}
 				<Card className="p-6">
-					<Label className="text-base font-semibold mb-4 block">Image</Label>
-
-					{imagePreview ? (
+					<div className="flex items-start justify-between">
+						<Label className="text-base font-semibold mb-4 block">Image</Label>
+						<button
+							type="button"
+							onClick={takeAPicture}
+							className="hidden lg:flex flex-col items-center"
+						>
+							<div className="flex flex-col items-center">
+								<Camera className="w-12 h-12 text-muted-foreground mb-2" />
+								<span className="text-sm text-muted-foreground">Take a picture</span>
+							</div>
+						</button>
+					</div>
+					{showCameraUi ? (
+						<div className="relative aspect-square bg-muted rounded-lg overflow-hidden">
+							<CameraUIComponent onCapture={handlePictureTaken} />
+							<button
+								type="button"
+								onClick={() => setShowCameraUi(false)}
+								className="absolute top-2 right-2 p-2 bg-background/80 hover:bg-background rounded-full"
+								aria-label="Close camera"
+							>
+								<X className="w-4 h-4" />
+							</button>
+						</div>
+					) : imagePreview ? (
 						<div className="relative aspect-square bg-muted rounded-lg overflow-hidden">
 							<img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
 							{allowImageChange && (
@@ -141,13 +198,6 @@ export function PostForm({
 							<span className="text-sm text-muted-foreground">Click to upload image</span>
 							<input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
 						</label>
-					)}
-
-					{errors.image && <p className="text-sm text-red-500 mt-2">{errors.image}</p>}
-					{!allowImageChange && (
-						<p className="text-xs text-muted-foreground mt-2">
-							Image cannot be changed when editing
-						</p>
 					)}
 				</Card>
 

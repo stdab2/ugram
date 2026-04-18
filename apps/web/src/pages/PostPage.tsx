@@ -206,7 +206,7 @@ export function PostPage() {
 							{/* Left side - Image */}
 							<div className="bg-black flex items-center justify-center">
 								<img
-									src={getImageUrl(post.imageUrl)}
+									src={getImageUrl(post.thumbnailUrl)}
 									alt={`Post by ${author.userName}`}
 									className="w-full h-full object-contain"
 								/>

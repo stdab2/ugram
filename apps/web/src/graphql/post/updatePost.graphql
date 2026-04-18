@@ -2,7 +2,7 @@ mutation UpdatePost($id: Int!, $description: String!) {
 	updatePost(id: $id, description: $description) {
 		id
 		description
-		imageUrl
+		thumbnailUrl
 		authorId
 		likeCount
 		isLikedByCurrentUser
@@ -10,5 +10,7 @@ mutation UpdatePost($id: Int!, $description: String!) {
 			id
 		}
 		createdAt
+		imageKey
+		imageStatus
 	}
 }
