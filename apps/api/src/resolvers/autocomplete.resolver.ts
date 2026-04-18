@@ -77,7 +77,7 @@ export const autocompleteResolvers = {
 				return { users: [], posts: [], hashtags: [] };
 			}
 
-			const total = Math.min(args.limit ?? DEFAULT_LIMIT, MAX_LIMIT);
+			const total = Math.min(Math.max(args.limit ?? DEFAULT_LIMIT, 0), MAX_LIMIT);
 			const userLimit = Math.ceil(total * USER_RATIO);
 			const hashtagLimit = Math.ceil(total * HASHTAG_RATIO);
 			const postLimit = Math.max(total - userLimit - hashtagLimit, 1);
