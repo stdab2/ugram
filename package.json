@@ -11,6 +11,7 @@
 		"dev:api": "npm -w apps/api run dev",
 		"build:web": "npm -w apps/web run build",
 		"build:api": "npm -w apps/api run build",
+		"docs:api": "pnpm --filter api docs:generate",
 		"storybook": "npm -w apps/web run storybook",
 		"build-storybook": "npm -w apps/web run build-storybook",
 		"lint": "eslint .",

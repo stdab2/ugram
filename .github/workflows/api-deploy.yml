@@ -5,12 +5,13 @@ on:
   push:
     branches:
       - main
-      - feature/deploy-api-to-beanstalk
-      - feature/environment-variables
 
 jobs:
   deploy:
+    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout source code
@@ -86,3 +87,51 @@ jobs:
           deployment_package: deploy.zip
           wait_for_deployment: true
           wait_for_environment_recovery: 300
+
+  publish-docs:
+    if: ${{ github.ref == 'refs/heads/main' }}
+    needs: deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: |
+          pnpm install --frozen-lockfile
+
+      - name: Generate static API docs
+        run: |
+          pnpm --filter api docs:generate
+
+      - name: Upload generated API docs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-docs-${{ github.sha }}
+          path: docs/api
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/api
+
+      - name: Deploy docs to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
