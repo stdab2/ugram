@@ -10,6 +10,32 @@ type HashtagResult {
 	postCount: Int!
 }
 
+type AutocompleteUser {
+	id: Int!
+	userName: String!
+	firstName: String!
+	lastName: String!
+	picture: String
+}
+
+type AutocompletePost {
+	id: Int!
+	description: String!
+	imageUrl: String!
+}
+
+type AutocompleteHashtag {
+	id: Int!
+	name: String!
+	postCount: Int!
+}
+
+type AutocompleteResults {
+	users: [AutocompleteUser!]!
+	posts: [AutocompletePost!]!
+	hashtags: [AutocompleteHashtag!]!
+}
+
 extend type Query {
 	search(
 		query: String!
@@ -20,4 +46,6 @@ extend type Query {
 		hashtagsLimit: Int = 20
 		hashtagsOffset: Int = 0
 	): SearchResults!
+
+	searchAutocomplete(query: String!, limit: Int = 8): AutocompleteResults!
 }

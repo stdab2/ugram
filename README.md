@@ -30,9 +30,11 @@ docker compose up --build
 UGRAM provides two documentation modes:
 
 1. Local interactive docs for development:
+
 - http://localhost:4001/graphql
 
 2. Public read-only docs for production:
+
 - https://glo3112-classrooms.github.io/ugram-h2026-team-17/
 
 How docs are generated locally:
