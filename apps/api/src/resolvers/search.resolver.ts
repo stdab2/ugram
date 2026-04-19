@@ -59,11 +59,9 @@ export const searchResolvers = {
 				return { users: [], posts: [], hashtags: [] };
 			}
 
-			// Déterminer si on cherche un hashtag
 			const isHashtagSearch = searchTerm.startsWith("#");
 			const hashtagName = isHashtagSearch ? searchTerm : `#${searchTerm}`;
 
-			// Recherche d'utilisateurs par username, firstName ou lastName (partiel ou complet)
 			const users = await prisma.userUgram.findMany({
 				where: {
 					OR: [
@@ -132,7 +130,6 @@ export const searchResolvers = {
 				});
 			}
 
-			// Recherche de hashtags avec le nombre de posts
 			const hashtags = await prisma.hashtag.findMany({
 				where: {
 					name: { contains: searchTerm, mode: "insensitive" },
@@ -147,7 +144,6 @@ export const searchResolvers = {
 				orderBy: [{ posts: { _count: "desc" } }, { id: "asc" }],
 			});
 
-			// Transformer les hashtags pour inclure le postCount
 			const hashtagsWithCount = hashtags.map((hashtag) => ({
 				id: hashtag.id,
 				name: hashtag.name,

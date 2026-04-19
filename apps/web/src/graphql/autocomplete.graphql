@@ -1,0 +1,21 @@
+query SearchAutocomplete($query: String!, $limit: Int) {
+	searchAutocomplete(query: $query, limit: $limit) {
+		users {
+			id
+			userName
+			firstName
+			lastName
+			picture
+		}
+		posts {
+			id
+			description
+			imageUrl
+		}
+		hashtags {
+			id
+			name
+			postCount
+		}
+	}
+}
