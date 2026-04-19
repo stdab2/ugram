@@ -14,7 +14,8 @@ query Notifications($limit: Int, $offset: Int) {
 		post {
 			id
 			description
-			imageUrl
+			thumbnailUrl
+			imageStatus
 		}
 	}
 }

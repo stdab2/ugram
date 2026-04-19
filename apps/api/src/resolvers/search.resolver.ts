@@ -1,6 +1,8 @@
-import { PrismaClient } from "../../generated/prisma/client.js";
+import { PrismaClient, Prisma } from "../../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { getDatabaseUrl } from "../database-url.js";
+import { UserContext } from "../types/userContext.types.js";
+import { authenticateUser } from "../../Validators/validateUser.js";
 
 const adapter = new PrismaPg({
 	connectionString: getDatabaseUrl(),
@@ -8,6 +10,24 @@ const adapter = new PrismaPg({
 
 const prisma = new PrismaClient({
 	adapter,
+});
+
+const userWithFollowMetaInclude = (currentUserId?: number): Prisma.UserUgramInclude => ({
+	_count: {
+		select: {
+			followers: true,
+			following: true,
+		},
+	},
+	...(currentUserId
+		? {
+				followers: {
+					where: { followerId: currentUserId },
+					select: { followerId: true },
+					take: 1,
+				},
+			}
+		: {}),
 });
 
 interface SearchArgs {
@@ -22,7 +42,9 @@ interface SearchArgs {
 
 export const searchResolvers = {
 	Query: {
-		search: async (_: unknown, args: SearchArgs) => {
+		search: async (_: unknown, args: SearchArgs, context: UserContext) => {
+			authenticateUser(context.user);
+
 			// Validate and clamp pagination parameters
 			const usersLimit = Math.min(Math.max(args.usersLimit ?? 20, 0), 100);
 			const usersOffset = Math.max(args.usersOffset ?? 0, 0);
@@ -37,8 +59,8 @@ export const searchResolvers = {
 				return { users: [], posts: [], hashtags: [] };
 			}
 
-			// Normalize the search term: if user typed "cat", also match "#cat" in hashtags
-			const hashtagSearchTerm = searchTerm.startsWith("#") ? searchTerm : `#${searchTerm}`;
+			const isHashtagSearch = searchTerm.startsWith("#");
+			const hashtagName = isHashtagSearch ? searchTerm : `#${searchTerm}`;
 
 			const users = await prisma.userUgram.findMany({
 				where: {
@@ -48,31 +70,65 @@ export const searchResolvers = {
 						{ lastName: { contains: searchTerm, mode: "insensitive" } },
 					],
 				},
+				orderBy: [{ followers: { _count: "desc" } }, { id: "asc" }],
 				take: usersLimit,
 				skip: usersOffset,
+				include: userWithFollowMetaInclude(context.user?.id),
 			});
 
-			const posts = await prisma.post.findMany({
-				where: {
-					OR: [
-						{ description: { contains: searchTerm, mode: "insensitive" } },
-						{
-							hashtags: {
-								some: {
-									name: { contains: hashtagSearchTerm, mode: "insensitive" },
-								},
+			// Recherche de posts
+			let posts;
+
+			if (isHashtagSearch) {
+				// Si le terme commence par #, chercher uniquement par hashtag
+				posts = await prisma.post.findMany({
+					where: {
+						hashtags: {
+							some: {
+								name: { contains: hashtagName, mode: "insensitive" },
 							},
 						},
-					],
-				},
-				include: {
-					hashtags: true,
-					mentionedUsers: true,
-					author: true,
-				},
-				take: postsLimit,
-				skip: postsOffset,
-			});
+					},
+					include: {
+						hashtags: true,
+						mentionedUsers: true,
+						author: true,
+						_count: {
+							select: { messages: true },
+						},
+					},
+					orderBy: [{ likes: { _count: "desc" } }, { id: "asc" }],
+					take: postsLimit,
+					skip: postsOffset,
+				});
+			} else {
+				// Sinon, chercher dans la description OU dans les hashtags
+				posts = await prisma.post.findMany({
+					where: {
+						OR: [
+							{ description: { contains: searchTerm, mode: "insensitive" } },
+							{
+								hashtags: {
+									some: {
+										name: { contains: `#${searchTerm}`, mode: "insensitive" },
+									},
+								},
+							},
+						],
+					},
+					include: {
+						hashtags: true,
+						mentionedUsers: true,
+						author: true,
+						_count: {
+							select: { messages: true },
+						},
+					},
+					orderBy: [{ likes: { _count: "desc" } }, { id: "asc" }],
+					take: postsLimit,
+					skip: postsOffset,
+				});
+			}
 
 			const hashtags = await prisma.hashtag.findMany({
 				where: {
@@ -85,11 +141,7 @@ export const searchResolvers = {
 				},
 				take: hashtagsLimit,
 				skip: hashtagsOffset,
-				orderBy: {
-					posts: {
-						_count: "desc",
-					},
-				},
+				orderBy: [{ posts: { _count: "desc" } }, { id: "asc" }],
 			});
 
 			const hashtagsWithCount = hashtags.map((hashtag) => ({

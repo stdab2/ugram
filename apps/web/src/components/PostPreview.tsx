@@ -1,9 +1,11 @@
 import { Heart, MessageCircle } from "lucide-react";
-import { cn, getImageUrl } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { PostImage } from "@/components/PostImage";
 
 interface PostPreviewProps {
-	imageUrl: string;
+	thumbnailUrl: string | null;
+	imageStatus?: string;
 	likes?: number;
 	comments?: number;
 	className?: string;
@@ -11,7 +13,8 @@ interface PostPreviewProps {
 }
 
 export function PostPreview({
-	imageUrl,
+	thumbnailUrl,
+	imageStatus,
 	likes = 0,
 	comments = 0,
 	className,
@@ -30,10 +33,11 @@ export function PostPreview({
 			onMouseLeave={() => setIsHovered(false)}
 			aria-label="View post"
 		>
-			<img
-				src={getImageUrl(imageUrl)}
+			<PostImage
+				thumbnailUrl={thumbnailUrl}
+				imageStatus={imageStatus}
 				alt="Post preview"
-				className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+				className="transition-transform duration-300 group-hover:scale-105"
 			/>
 			{isHovered && (
 				<div className="absolute inset-0 bg-black/40 flex items-center justify-center gap-6 text-white">

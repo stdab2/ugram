@@ -25,9 +25,34 @@ docker compose up --build
 - GraphQL API: http://localhost:4001/graphql
 - DB: localhost:5432
 
+### API Documentation
+
+UGRAM provides two documentation modes:
+
+1. Local interactive docs for development:
+
+- http://localhost:4001/graphql
+
+2. Public read-only docs for production:
+
+- https://glo3112-classrooms.github.io/ugram-h2026-team-17/
+
+How docs are generated locally:
+
+```bash
+pnpm docs:api
+```
+
+This command builds a static docs site from `apps/api/src/schema/*.graphql` and writes it to `docs/api/index.html`.
+
+Production behavior:
+
+- The production `/graphql` endpoint does not expose an interactive query UI.
+- Documentation is published as a static GitHub Pages site from `main` only.
+
 ## Production
 
-- Web application: http://ugram-h2026-team17-web.s3-website.ca-central-1.amazonaws.com/
+- Web application: https://d206wqa79jnx1m.cloudfront.net
 
 ## Local Environment Files
 

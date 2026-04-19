@@ -62,7 +62,7 @@ export async function saveUploadedImage(
 		createReadStream: () => NodeJS.ReadableStream;
 	}>,
 	subfolder: string = ""
-): Promise<string> {
+): Promise<{ imageKey: string }> {
 	const { filename, mimetype, createReadStream } = await upload;
 
 	const allowedExt = new Set([".png", ".jpg", ".jpeg", ".webp", ".gif"]);
@@ -76,7 +76,8 @@ export async function saveUploadedImage(
 		throw new Error(`Unsupported file extension: ${extension}`);
 	}
 
-	const storedName = `${crypto.randomUUID()}${extension}`;
+	const imageKey = crypto.randomUUID();
+	const storedName = `${imageKey}${extension}`;
 	const key = subfolder ? `uploads/${subfolder}/${storedName}` : `uploads/${storedName}`;
 
 	const stream = createReadStream();
@@ -102,7 +103,7 @@ export async function saveUploadedImage(
 		})
 	);
 
-	return key;
+	return { imageKey };
 }
 
 export async function deleteImageFromStorage(

@@ -22,11 +22,14 @@ query Search(
 			firstName
 			lastName
 			picture
+			followerCount
 			posts {
 				id
-				imageUrl
+				thumbnailUrl
 				messageCount
 				likeCount
+				imageStatus
+				imageKey
 			}
 		}
 		posts {
@@ -42,8 +45,10 @@ query Search(
 			likeCount
 			isLikedByCurrentUser
 			description
-			imageUrl
+			thumbnailUrl
 			createdAt
+			imageStatus
+			imageKey
 		}
 		hashtags {
 			id

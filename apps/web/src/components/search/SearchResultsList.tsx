@@ -58,7 +58,7 @@ export function SearchResultsList({
 			{/* Hashtags Section */}
 			{(activeFilter === "all" || activeFilter === "hashtags") && (
 				<SearchResultsSection
-					title="Hashtags"
+					title={isSearching ? "Hashtags" : "Popular Hashtags"}
 					isEmpty={displayHashtags.length === 0}
 					hasMore={hashtagsHasMore}
 					loading={isLoading}
@@ -83,7 +83,7 @@ export function SearchResultsList({
 			{/* Users Section */}
 			{(activeFilter === "all" || activeFilter === "users") && (
 				<SearchResultsSection
-					title="Users"
+					title={isSearching ? "Users" : "Popular Users"}
 					isEmpty={displayUsers.length === 0}
 					hasMore={usersHasMore}
 					loading={isLoading}
@@ -104,7 +104,7 @@ export function SearchResultsList({
 			{/* Posts Section */}
 			{(activeFilter === "all" || activeFilter === "posts") && (
 				<SearchResultsSection
-					title="Posts"
+					title={isSearching ? "Posts" : "Popular Posts"}
 					isEmpty={displayPosts.length === 0}
 					hasMore={postsHasMore}
 					loading={isLoading}

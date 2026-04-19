@@ -6,9 +6,14 @@ query UserByUserName($userName: String!) {
 		lastName
 		picture
 		createdAt
+		followerCount
+		followingCount
+		isFollowedByCurrentUser
 		posts {
 			id
-			imageUrl
+			thumbnailUrl
+			imageKey
+			imageStatus
 			description
 			createdAt
 			messageCount
