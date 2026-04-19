@@ -2,8 +2,8 @@ import { SearchResultsSection } from "@/components/search/SearchResultsSection";
 import { UserSearchResult } from "@/components/UserSearchResult";
 import { HashtagSearchResult } from "@/components/HashtagSearchResult";
 import { SearchPostCard } from "@/components/search/SearchPostCard";
-import { getImageUrl } from "@/lib/utils";
 import type { HashtagType, UserType, PostType } from "@/types";
+import { PostImage } from "@/components/PostImage";
 
 interface SearchResultsListProps {
 	isSearching: boolean;
@@ -133,13 +133,13 @@ export function SearchResultsList({
 								{displayPosts.map((post) => (
 									<div
 										key={post.id}
-										className="cursor-pointer rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
+										className="aspect-square cursor-pointer rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
 										onClick={() => onPostClick(post)}
 									>
-										<img
-											src={getImageUrl(post.thumbnailUrl)}
-											alt={post.description}
-											className="w-full aspect-square object-cover"
+										<PostImage
+											imageUrl={post.thumbnailUrl}
+											imageStatus={post.imageStatus}
+											alt={`Post by ${post.author.userName}`}
 										/>
 									</div>
 								))}

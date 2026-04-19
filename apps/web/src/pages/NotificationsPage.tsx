@@ -291,7 +291,7 @@ export function NotificationsPage() {
 														<div className="flex items-center gap-3">
 															<div className="h-16 w-16 rounded-xl overflow-hidden bg-muted flex items-center justify-center">
 																<PostImage
-																	thumbnailUrl={notification.post.thumbnailUrl}
+																	imageUrl={notification.post.thumbnailUrl}
 																	imageStatus={notification.post.imageStatus}
 																	alt="Related post"
 																	compact

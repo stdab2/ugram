@@ -2,14 +2,16 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 import { Card } from "@/components/ui/Card";
 import { Heart, MessageCircle } from "lucide-react";
 import { getImageUrl } from "@/lib/utils";
+import { PostImage } from "@/components/PostImage";
 
 interface SearchPostCardProps {
 	post: {
 		id: number;
 		description: string;
-		thumbnailUrl?: string | null;
-		imageUrl?: string | null;
+		thumbnailUrl: string | null;
+		imageUrl: string | null;
 		likeCount: number;
+		imageStatus: string;
 		author: {
 			firstName: string;
 			lastName: string;
@@ -31,8 +33,6 @@ function truncateDescription(description: string) {
 }
 
 export function SearchPostCard({ post, onClick }: SearchPostCardProps) {
-	const previewImage = post.thumbnailUrl ?? post.imageUrl;
-
 	return (
 		<Card className="overflow-hidden border border-border/60 bg-card/70 backdrop-blur-sm">
 			<button
@@ -40,10 +40,11 @@ export function SearchPostCard({ post, onClick }: SearchPostCardProps) {
 				onClick={onClick}
 				className="flex w-full items-start gap-3 p-3 text-left transition-colors hover:bg-muted/40"
 			>
-				<img
-					src={getImageUrl(previewImage)}
+				<PostImage
+					imageUrl={post.thumbnailUrl}
+					imageStatus={post.imageStatus}
 					alt={`Post by ${post.author.userName}`}
-					className="h-20 w-20 shrink-0 rounded-md object-cover"
+					compact
 				/>
 				<div className="min-w-0 flex-1 space-y-2">
 					<div className="flex items-center gap-2">

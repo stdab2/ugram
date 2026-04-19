@@ -1,6 +1,4 @@
 import * as Sentry from "@sentry/node";
-import { PrismaClient } from "../../generated/prisma/client.js";
-import { PrismaPg } from "@prisma/adapter-pg";
 import {
 	validateUserId,
 	validateUsersExist,
@@ -18,16 +16,8 @@ import {
 } from "../../Validators/validatePost.js";
 import { authenticateUser } from "../../Validators/validateUser.js";
 import { UserContext } from "../types/userContext.types.js";
-import { getDatabaseUrl } from "../database-url.js";
 import { Prisma } from "../../generated/prisma/client.js";
-
-const adapter = new PrismaPg({
-	connectionString: getDatabaseUrl(),
-});
-
-const prisma = new PrismaClient({
-	adapter,
-});
+import { prisma } from "../lib/prisma.js";
 
 type PostWithCount = Prisma.PostGetPayload<{
 	include: {

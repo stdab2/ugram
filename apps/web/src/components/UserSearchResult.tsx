@@ -68,7 +68,7 @@ export function UserSearchResult({ user, onPostClick }: UserSearchResultProps) {
 									className="w-20 h-20 rounded-md overflow-hidden hover:opacity-80 transition-opacity"
 								>
 									<PostImage
-										thumbnailUrl={post.thumbnailUrl || null}
+										imageUrl={post.thumbnailUrl || null}
 										imageStatus={post.imageStatus}
 										alt=""
 										compact

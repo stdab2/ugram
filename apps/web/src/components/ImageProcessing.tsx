@@ -7,7 +7,7 @@ interface ImageProcessingProps {
 export function ImageProcessing({ compact = false }: ImageProcessingProps) {
 	if (compact) {
 		return (
-			<div className="w-full h-full relative flex items-center justify-center bg-muted">
+			<div className="h-16 w-16 flex-shrink-0 rounded relative flex items-center justify-center bg-muted overflow-hidden">
 				<div className="absolute inset-0 bg-gradient-to-br from-muted via-muted/60 to-muted animate-pulse" />
 				<div className="relative z-10 flex flex-col items-center gap-1">
 					<div className="relative">

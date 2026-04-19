@@ -34,7 +34,7 @@ export function PostPreview({
 			aria-label="View post"
 		>
 			<PostImage
-				thumbnailUrl={thumbnailUrl}
+				imageUrl={thumbnailUrl}
 				imageStatus={imageStatus}
 				alt="Post preview"
 				className="transition-transform duration-300 group-hover:scale-105"
