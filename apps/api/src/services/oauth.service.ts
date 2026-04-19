@@ -87,8 +87,6 @@ export async function validateGoogleToken(googleClient: OAuth2Client, idToken: s
 
 	const payload = ticket.getPayload();
 
-	console.log("Google token payload:", payload);
-
 	if (!payload?.sub || !payload.email || !payload.name) {
 		throw new Error("Invalid Goohle token payload");
 	}

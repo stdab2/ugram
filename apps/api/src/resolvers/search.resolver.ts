@@ -1,16 +1,7 @@
-import { PrismaClient, Prisma } from "../../generated/prisma/client.js";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { getDatabaseUrl } from "../database-url.js";
+import { Prisma } from "../../generated/prisma/client.js";
 import { UserContext } from "../types/userContext.types.js";
 import { authenticateUser } from "../../Validators/validateUser.js";
-
-const adapter = new PrismaPg({
-	connectionString: getDatabaseUrl(),
-});
-
-const prisma = new PrismaClient({
-	adapter,
-});
+import { prisma } from "../lib/prisma.js";
 
 const userWithFollowMetaInclude = (currentUserId?: number): Prisma.UserUgramInclude => ({
 	_count: {
