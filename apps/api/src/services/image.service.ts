@@ -1,7 +1,5 @@
 import path from "node:path";
 import crypto from "node:crypto";
-import fs from "node:fs/promises";
-import { fileURLToPath } from "node:url";
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 
 const s3 = new S3Client({
@@ -17,34 +15,6 @@ const s3 = new S3Client({
 });
 
 const BUCKET = process.env.S3_BUCKET ?? "ugram-media-s3";
-const currentFilePath = fileURLToPath(import.meta.url);
-const localUploadsDir = path.resolve(path.dirname(currentFilePath), "../../uploads");
-
-function shouldUseLocalUploads() {
-	if (process.env.USE_LOCAL_UPLOADS === "true") {
-		return true;
-	}
-
-	if (process.env.USE_LOCAL_UPLOADS === "false") {
-		return false;
-	}
-
-	return (process.env.NODE_ENV ?? "development") === "development";
-}
-
-export function getLocalUploadsDir() {
-	return localUploadsDir;
-}
-
-export function isUsingLocalUploads() {
-	return shouldUseLocalUploads();
-}
-
-function toLocalFilePath(imageUrlOrKey: string): string {
-	const key = toS3Key(imageUrlOrKey);
-	const normalizedKey = key.startsWith("uploads/") ? key.slice("uploads/".length) : key;
-	return path.join(localUploadsDir, normalizedKey);
-}
 
 function toS3Key(imageUrlOrKey: string): string {
 	if (imageUrlOrKey.startsWith("http://") || imageUrlOrKey.startsWith("https://")) {
@@ -87,13 +57,6 @@ export async function saveUploadedImage(
 	}
 	const body = Buffer.concat(chunks);
 
-	if (shouldUseLocalUploads()) {
-		const localFilePath = toLocalFilePath(key);
-		await fs.mkdir(path.dirname(localFilePath), { recursive: true });
-		await fs.writeFile(localFilePath, body);
-		return key;
-	}
-
 	await s3.send(
 		new PutObjectCommand({
 			Bucket: BUCKET,
@@ -110,26 +73,6 @@ export async function deleteImageFromStorage(
 	imageUrlOrKey: string | null | undefined
 ): Promise<void> {
 	if (!imageUrlOrKey) return;
-
-	if (shouldUseLocalUploads()) {
-		const localFilePath = toLocalFilePath(imageUrlOrKey);
-
-		try {
-			await fs.unlink(localFilePath);
-		} catch (error: unknown) {
-			const isFileMissing =
-				error &&
-				typeof error === "object" &&
-				"code" in error &&
-				(error as { code?: string }).code === "ENOENT";
-
-			if (!isFileMissing) {
-				throw error;
-			}
-		}
-
-		return;
-	}
 
 	const key = toS3Key(imageUrlOrKey);
 	if (!key) return;

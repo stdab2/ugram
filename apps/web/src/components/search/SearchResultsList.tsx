@@ -137,7 +137,7 @@ export function SearchResultsList({
 										onClick={() => onPostClick(post)}
 									>
 										<img
-											src={getImageUrl(post.imageUrl)}
+											src={getImageUrl(post.thumbnailUrl)}
 											alt={post.description}
 											className="w-full aspect-square object-cover"
 										/>

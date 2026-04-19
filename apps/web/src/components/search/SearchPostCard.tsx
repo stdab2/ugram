@@ -7,7 +7,8 @@ interface SearchPostCardProps {
 	post: {
 		id: number;
 		description: string;
-		imageUrl: string;
+		thumbnailUrl?: string | null;
+		imageUrl?: string | null;
 		likeCount: number;
 		author: {
 			firstName: string;
@@ -30,6 +31,8 @@ function truncateDescription(description: string) {
 }
 
 export function SearchPostCard({ post, onClick }: SearchPostCardProps) {
+	const previewImage = post.thumbnailUrl ?? post.imageUrl;
+
 	return (
 		<Card className="overflow-hidden border border-border/60 bg-card/70 backdrop-blur-sm">
 			<button
@@ -38,7 +41,7 @@ export function SearchPostCard({ post, onClick }: SearchPostCardProps) {
 				className="flex w-full items-start gap-3 p-3 text-left transition-colors hover:bg-muted/40"
 			>
 				<img
-					src={getImageUrl(post.imageUrl)}
+					src={getImageUrl(previewImage)}
 					alt={`Post by ${post.author.userName}`}
 					className="h-20 w-20 shrink-0 rounded-md object-cover"
 				/>
