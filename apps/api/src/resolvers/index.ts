@@ -2,6 +2,7 @@ import { userResolvers } from "./user.resolver.js";
 import { postResolvers } from "./post.resolver.js";
 import { hashtagResolvers } from "./hashtag.resolver.js";
 import { searchResolvers } from "./search.resolver.js";
+import { autocompleteResolvers } from "./autocomplete.resolver.js";
 import { likesResolvers } from "./like.resolver.js";
 import { notificationResolvers } from "./notification.resolver.js";
 import { followResolvers } from "./follow.resolver.js";
@@ -19,6 +20,7 @@ export const resolvers = {
 		...postResolvers.Query,
 		...hashtagResolvers.Query,
 		...searchResolvers.Query,
+		...autocompleteResolvers.Query,
 		...messageResolvers.Query,
 		...likesResolvers.Query,
 		...notificationResolvers.Query,

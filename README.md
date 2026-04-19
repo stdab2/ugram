@@ -30,9 +30,11 @@ docker compose up --build
 UGRAM provides two documentation modes:
 
 1. Local interactive docs for development:
+
 - http://localhost:4001/graphql
 
 2. Public read-only docs for production:
+
 - https://glo3112-classrooms.github.io/ugram-h2026-team-17/
 
 How docs are generated locally:
@@ -116,6 +118,9 @@ VITE_SENTRY_DSN=
 # Used to track deployments in Sentry. Should be set in CI/CD pipeline.
 # Falls back to "dev" if not set.
 VITE_APP_VERSION=
+
+# Google Analytics 4 measurement ID (format: G-XXXXXXXXXX)
+VITE_GA_MEASUREMENT_ID=
 
 # GraphQL URL
 VITE_GRAPHQL_URL="http://localhost:4001/graphql"
