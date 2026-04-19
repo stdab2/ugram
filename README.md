@@ -315,77 +315,77 @@ Goal: keep the stack **simple, standard, and course-aligned**, while leaving roo
 - **Husky + lint-staged** (optional)
 - **Commitlint** — Conventional Commits enforcement
 
-### Monitoring et observabilité
+### Monitoring and Observability
 
 #### CloudWatch
 
-Nous avons configuré **Amazon CloudWatch** afin de centraliser les journaux serveur et de suivre l’état général de l’application en production.
+We configured **Amazon CloudWatch** to centralize server logs and monitor the overall state of the application in production.
 
-##### Journaux serveur
-Les journaux de l’environnement **Elastic Beanstalk** sont diffusés vers **CloudWatch Logs**.  
-Cela nous permet de consulter directement :
+##### Server Logs
+Logs from the **Elastic Beanstalk** environment are streamed to **CloudWatch Logs**.  
+This allows us to directly inspect:
 
-- les journaux applicatifs (`web.stdout.log`)
-- les journaux d’accès HTTP (`nginx/access.log`)
-- les journaux d’erreurs (`nginx/error.log`, `httpd/error_log`)
+- application logs (`web.stdout.log`)
+- HTTP access logs (`nginx/access.log`)
+- error logs (`nginx/error.log`, `httpd/error_log`)
 
-Cela nous donne une meilleure visibilité sur :
-- les requêtes reçues par le serveur
-- les erreurs applicatives
-- le comportement général du backend en production
+This gives us better visibility into:
+- requests received by the server
+- application errors
+- the backend’s overall behavior in production
 
-> Exemple : nous avons pu confirmer que les requêtes vers `/login`, `/oauth2/google` et `/graphql` étaient bien journalisées dans CloudWatch.
+> Example: we were able to confirm that requests to `/login`, `/oauth2/google`, and `/graphql` were properly logged in CloudWatch.
 
-##### Tableau de bord CloudWatch
-Un tableau de bord `ugram-prod` a aussi été mis en place pour suivre certaines métriques importantes :
+##### CloudWatch Dashboard
+A dashboard named `ugram-prod` was also set up to track several important metrics:
 
-- **Requests** : nombre de requêtes passant par CloudFront
-- **4xxErrorRate** : taux d’erreurs client
-- **5xxErrorRate** : taux d’erreurs serveur
-- **EnvironmentHealth** : état global de l’environnement Elastic Beanstalk
+- **Requests**: number of requests going through CloudFront
+- **4xxErrorRate**: client error rate
+- **5xxErrorRate**: server error rate
+- **EnvironmentHealth**: overall health status of the Elastic Beanstalk environment
 
-Ce tableau de bord nous permet de voir rapidement :
-- si l’application reçoit du trafic
-- si des erreurs HTTP apparaissent
-- si l’environnement backend demeure en bonne santé
+This dashboard allows us to quickly see:
+- whether the application is receiving traffic
+- whether HTTP errors are occurring
+- whether the backend environment remains healthy
 
 https://ulavaldti-my.sharepoint.com/:i:/g/personal/jagro26_ulaval_ca/IQCEjiZSSkd3TZ8nAtPwqQ5zASHx4srwpehpoKFszO8tC0Q?e=hYPeh1
 
 #### WAF (Web Application Firewall)
 
-Nous avons activé la protection **AWS WAF** au niveau de **CloudFront**.
+We enabled **AWS WAF** protection at the **CloudFront** level.
 
-##### Protection mise en place
-- **Rate limiting** activé
-- seuil configuré à **300 requêtes par IP sur 5 minutes**
+##### Implemented Protection
+- **Rate limiting** enabled
+- threshold set to **300 requests per IP over 5 minutes**
 
-Cette protection permet de détecter et limiter plus facilement :
-- les scans automatisés
-- les rafales de requêtes anormales
-- certains comportements suspects ou abusifs
+This protection makes it easier to detect and limit:
+- automated scans
+- bursts of abnormal requests
+- certain suspicious or abusive behaviors
 
-Le WAF ajoute ainsi une première couche de sécurité devant le frontend et les routes exposées via CloudFront.
+The WAF therefore adds an initial layer of security in front of the frontend and the routes exposed through CloudFront.
 
 ---
 
-## Analytiques applicatives
+## Application Analytics
 
 ### Google Analytics
 
-Nous avons intégré **Google Analytics 4 (GA4)** dans l’application afin de produire des analytiques sur le comportement des usagers.
+We integrated **Google Analytics 4 (GA4)** into the application in order to produce analytics on user behavior.
 
-L’objectif est de mieux comprendre :
-- les pages consultées
-- les interactions principales
-- le parcours utilisateur dans l’application
+The goal is to better understand:
+- the pages visited
+- the main interactions
+- the user journey within the application
 
-#### Exemples d’événements suivis
-Selon l’implémentation, les analytiques peuvent inclure :
+#### Examples of Tracked Events
+Depending on the implementation, the analytics may include:
 
-- consultation de page (`page_view`)
-- inscription (`sign_up`)
-- connexion (`login`)
-- création de post(`create_post`)
+- page view (`page_view`)
+- sign up (`sign_up`)
+- login (`login`)
+- post creation (`create_post`)
 
 https://ulavaldti-my.sharepoint.com/:i:/g/personal/jagro26_ulaval_ca/IQAdetnmGBW-Sp_iZ1hnKIiqAbO5JxUW5FsC_nrPgr8beWs?e=n1Uvpl
 https://ulavaldti-my.sharepoint.com/:i:/g/personal/jagro26_ulaval_ca/IQBrKzzt2INuTpCFM9pgSO5cATiImgP9o365OfkvnktDI7M?e=gdSXZB
