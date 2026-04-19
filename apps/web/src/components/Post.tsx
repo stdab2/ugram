@@ -125,7 +125,7 @@ export function Post({
 					aria-label="View post details"
 				>
 					<PostImage
-						thumbnailUrl={post.thumbnailUrl}
+						imageUrl={post.thumbnailUrl}
 						imageStatus={post.imageStatus}
 						alt={`Post by ${post.author.userName}`}
 					/>

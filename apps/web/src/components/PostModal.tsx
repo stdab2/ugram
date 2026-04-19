@@ -22,7 +22,7 @@ import { toast } from "sonner";
 interface PostData {
 	id: number;
 	description: string;
-	thumbnailUrl: string | null;
+	imageUrl: string | null;
 	imageStatus?: string | null;
 	createdAt: unknown;
 	messageCount: number;
@@ -127,7 +127,7 @@ export function PostModal({ open, onOpenChange, post, onPostDeletion }: PostModa
 						{/* Left side - Image */}
 						<div className="bg-black flex items-center justify-center">
 							<PostImage
-								thumbnailUrl={post.thumbnailUrl}
+								imageUrl={post.imageUrl}
 								imageStatus={post.imageStatus}
 								alt={`Post by ${author.userName}`}
 								className="object-contain"

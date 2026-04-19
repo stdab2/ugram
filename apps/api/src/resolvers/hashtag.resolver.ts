@@ -1,14 +1,4 @@
-import { PrismaClient } from "../../generated/prisma/client.js";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { getDatabaseUrl } from "../database-url.js";
-
-const adapter = new PrismaPg({
-	connectionString: getDatabaseUrl(),
-});
-
-const prisma = new PrismaClient({
-	adapter,
-});
+import { prisma } from "../lib/prisma.js";
 
 export const hashtagResolvers = {
 	Query: {

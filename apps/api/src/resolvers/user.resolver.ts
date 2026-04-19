@@ -1,5 +1,5 @@
-import { PrismaClient, UserUgram, Prisma } from "../../generated/prisma/client.js";
-import { PrismaPg } from "@prisma/adapter-pg";
+import { UserUgram, Prisma } from "../../generated/prisma/client.js";
+import { prisma } from "../lib/prisma.js";
 import bcrypt from "bcrypt";
 import { CreateUserInput, UpdateUserInput, QueryUsersInput } from "../types/user.types.js";
 import {
@@ -15,17 +15,8 @@ import {
 } from "../../Validators/validateUser.js";
 import { BadRequestError, handlePrismaError } from "../../Validators/errors.js";
 import { UserContext } from "../types/userContext.types.js";
-import { getDatabaseUrl } from "../database-url.js";
 
 const SALT_ROUNDS = 10;
-
-const adapter = new PrismaPg({
-	connectionString: getDatabaseUrl(),
-});
-
-const prisma = new PrismaClient({
-	adapter,
-});
 
 type UserWithFollowMeta = UserUgram & {
 	_count?: {
