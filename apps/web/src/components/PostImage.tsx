@@ -2,7 +2,7 @@ import { ImageProcessing } from "@/components/ImageProcessing";
 import { cn, getImageUrl } from "@/lib/utils";
 
 interface PostImageProps {
-	thumbnailUrl: string | null;
+	imageUrl: string | null;
 	imageStatus?: string | null;
 	alt: string;
 	compact?: boolean;
@@ -10,7 +10,7 @@ interface PostImageProps {
 }
 
 export function PostImage({
-	thumbnailUrl,
+	imageUrl,
 	imageStatus,
 	alt,
 	compact = false,
@@ -22,7 +22,7 @@ export function PostImage({
 
 	return (
 		<img
-			src={getImageUrl(thumbnailUrl)}
+			src={getImageUrl(imageUrl)}
 			alt={alt}
 			className={cn("w-full h-full object-cover", className)}
 		/>

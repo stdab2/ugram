@@ -25,6 +25,7 @@ query Search(
 			followerCount
 			posts {
 				id
+				imageUrl
 				thumbnailUrl
 				messageCount
 				likeCount
@@ -45,6 +46,7 @@ query Search(
 			likeCount
 			isLikedByCurrentUser
 			description
+			imageUrl
 			thumbnailUrl
 			createdAt
 			imageStatus

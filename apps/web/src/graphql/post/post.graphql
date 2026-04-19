@@ -2,6 +2,7 @@ query Post($id: Int!) {
 	post(id: $id) {
 		id
 		description
+		imageUrl
 		thumbnailUrl
 		messageCount
 		likeCount
