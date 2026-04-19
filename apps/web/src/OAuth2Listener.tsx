@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { getApiOrigin } from "@/lib/utils";
+import { trackEvent } from "@/lib/ga";
 
 export function OAuth2Listener() {
 	useEffect(() => {
@@ -10,7 +11,11 @@ export function OAuth2Listener() {
 			if (event.data.type === "oauth2_success") {
 				const { token } = event.data;
 				localStorage.setItem("token", token);
-				window.location.href = "/";
+				trackEvent("login", { method: "google" });
+				// Give GA a short window to dispatch the event before redirect.
+				window.setTimeout(() => {
+					window.location.href = "/";
+				}, 150);
 			}
 		};
 

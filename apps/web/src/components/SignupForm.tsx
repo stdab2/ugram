@@ -16,6 +16,7 @@ import { userSignupSchema, type UserSignupFormData } from "@/lib/schemas/user.sc
 import { useCreateUserMutation } from "@/generated/graphql";
 import { toast } from "sonner";
 import { getGoogleOAuthUrl } from "@/lib/utils";
+import { trackEvent } from "@/lib/ga";
 
 export function SignupForm({ className, ...props }: React.ComponentProps<"div">) {
 	const navigate = useNavigate();
@@ -55,6 +56,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
 				},
 			});
 
+			trackEvent("sign_up", { method: "password" });
 			toast.success("Account created successfully! Please log in.");
 			navigate("/login");
 		} catch (err) {

@@ -117,6 +117,9 @@ VITE_SENTRY_DSN=
 # Falls back to "dev" if not set.
 VITE_APP_VERSION=
 
+# Google Analytics 4 measurement ID (format: G-XXXXXXXXXX)
+VITE_GA_MEASUREMENT_ID=
+
 # GraphQL URL
 VITE_GRAPHQL_URL="http://localhost:4001/graphql"
 

@@ -8,6 +8,7 @@ import {
 } from "../generated/graphql";
 import { toast } from "sonner";
 import { useAuth } from "@/AuthContext";
+import { trackEvent } from "@/lib/ga";
 
 export function CreatePostPage() {
 	const { userAuth } = useAuth();
@@ -72,6 +73,12 @@ export function CreatePostPage() {
 						mentionedUsers,
 					},
 				},
+			});
+			trackEvent("create_post", {
+				content_type: "image",
+				hashtag_count: hashtags.length,
+				mentions_count: mentionedUsers.length,
+				has_hashtags: hashtags.length > 0,
 			});
 			toast.success("Your post has been created!");
 			navigate("/");
