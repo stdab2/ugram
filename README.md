@@ -387,9 +387,12 @@ Depending on the implementation, the analytics may include:
 - login (`login`)
 - post creation (`create_post`)
 
-[https://ulavaldti-my.sharepoint.com/:i:/g/personal/jagro26_ulaval_ca/IQAdetnmGBW-Sp_iZ1hnKIiqAbO5JxUW5FsC_nrPgr8beWs?e=n1Uvpl](https://ulavaldti-my.sharepoint.com/:i:/g/personal/jagro26_ulaval_ca/IQBHm1Lk8mKvTbEdCxE-s38tATO0Pfvn6h52hYuxIoOM5t8?e=jH0Aio)
-[https://ulavaldti-my.sharepoint.com/:i:/g/personal/jagro26_ulaval_ca/IQBrKzzt2INuTpCFM9pgSO5cATiImgP9o365OfkvnktDI7M?e=gdSXZB](https://ulavaldti-my.sharepoint.com/:i:/g/personal/jagro26_ulaval_ca/IQDMT6XSPFu4T7U5UL2B0MdbAe-CmQnbr8sKsvR4Cqariu8?e=MByYvP)
-[https://ulavaldti-my.sharepoint.com/:i:/g/personal/jagro26_ulaval_ca/IQAHbPZ4tGNBS7lZvN0hJwXCAeU2Bmc0SWH1nfGfMKu-fdI?e=bmhOkq]
+[Analytics screenshot 1](https://ulavaldti-my.sharepoint.com/:i:/g/personal/jagro26_ulaval_ca/IQBHm1Lk8mKvTbEdCxE-s38tATO0Pfvn6h52hYuxIoOM5t8?e=jH0Aio)
+
+[Analytics screenshot 2](https://ulavaldti-my.sharepoint.com/:i:/g/personal/jagro26_ulaval_ca/IQDMT6XSPFu4T7U5UL2B0MdbAe-CmQnbr8sKsvR4Cqariu8?e=MByYvP)
+
+[Analytics screenshot 3](https://ulavaldti-my.sharepoint.com/:i:/g/personal/jagro26_ulaval_ca/IQAHbPZ4tGNBS7lZvN0hJwXCAeU2Bmc0SWH1nfGfMKu-fdI?e=bmhOkq)
+
 ---
 
 ## Git Workflow & Commit Conventions
