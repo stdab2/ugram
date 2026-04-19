@@ -7,15 +7,15 @@ export async function startGoogleOAuth(_req: Request, res: Response) {
 	res.cookie("state", state, {
 		httpOnly: true,
 		secure: process.env.NODE_ENV === "production",
-		sameSite: "lax",
-		maxAge: 30_000,
+		sameSite: "none",
+		maxAge: 5 * 60 * 1000,
 	});
 
 	res.cookie("code_verifier", codeVerifier, {
 		httpOnly: true,
 		secure: process.env.NODE_ENV === "production",
-		sameSite: "lax",
-		maxAge: 30_000,
+		sameSite: "none",
+		maxAge: 5 * 60 * 1000,
 	});
 
 	return res.redirect(authorizationUrl);
