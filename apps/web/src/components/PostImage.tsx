@@ -24,7 +24,11 @@ export function PostImage({
 		<img
 			src={getImageUrl(imageUrl)}
 			alt={alt}
-			className={cn("w-full h-full object-cover", className)}
+			className={cn(
+				"object-cover",
+				compact ? "h-16 w-16 flex-shrink-0 rounded" : "w-full h-full",
+				className
+			)}
 		/>
 	);
 }
