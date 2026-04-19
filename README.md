@@ -315,6 +315,82 @@ Goal: keep the stack **simple, standard, and course-aligned**, while leaving roo
 - **Husky + lint-staged** (optional)
 - **Commitlint** — Conventional Commits enforcement
 
+### Monitoring et observabilité
+
+#### CloudWatch
+
+Nous avons configuré **Amazon CloudWatch** afin de centraliser les journaux serveur et de suivre l’état général de l’application en production.
+
+##### Journaux serveur
+Les journaux de l’environnement **Elastic Beanstalk** sont diffusés vers **CloudWatch Logs**.  
+Cela nous permet de consulter directement :
+
+- les journaux applicatifs (`web.stdout.log`)
+- les journaux d’accès HTTP (`nginx/access.log`)
+- les journaux d’erreurs (`nginx/error.log`, `httpd/error_log`)
+
+Cela nous donne une meilleure visibilité sur :
+- les requêtes reçues par le serveur
+- les erreurs applicatives
+- le comportement général du backend en production
+
+> Exemple : nous avons pu confirmer que les requêtes vers `/login`, `/oauth2/google` et `/graphql` étaient bien journalisées dans CloudWatch.
+
+##### Tableau de bord CloudWatch
+Un tableau de bord `ugram-prod` a aussi été mis en place pour suivre certaines métriques importantes :
+
+- **Requests** : nombre de requêtes passant par CloudFront
+- **4xxErrorRate** : taux d’erreurs client
+- **5xxErrorRate** : taux d’erreurs serveur
+- **EnvironmentHealth** : état global de l’environnement Elastic Beanstalk
+
+Ce tableau de bord nous permet de voir rapidement :
+- si l’application reçoit du trafic
+- si des erreurs HTTP apparaissent
+- si l’environnement backend demeure en bonne santé
+
+https://ulavaldti-my.sharepoint.com/:i:/g/personal/jagro26_ulaval_ca/IQCEjiZSSkd3TZ8nAtPwqQ5zASHx4srwpehpoKFszO8tC0Q?e=hYPeh1
+
+#### WAF (Web Application Firewall)
+
+Nous avons activé la protection **AWS WAF** au niveau de **CloudFront**.
+
+##### Protection mise en place
+- **Rate limiting** activé
+- seuil configuré à **300 requêtes par IP sur 5 minutes**
+
+Cette protection permet de détecter et limiter plus facilement :
+- les scans automatisés
+- les rafales de requêtes anormales
+- certains comportements suspects ou abusifs
+
+Le WAF ajoute ainsi une première couche de sécurité devant le frontend et les routes exposées via CloudFront.
+
+---
+
+## Analytiques applicatives
+
+### Google Analytics
+
+Nous avons intégré **Google Analytics 4 (GA4)** dans l’application afin de produire des analytiques sur le comportement des usagers.
+
+L’objectif est de mieux comprendre :
+- les pages consultées
+- les interactions principales
+- le parcours utilisateur dans l’application
+
+#### Exemples d’événements suivis
+Selon l’implémentation, les analytiques peuvent inclure :
+
+- consultation de page (`page_view`)
+- inscription (`sign_up`)
+- connexion (`login`)
+- création de post(`create_post`)
+
+https://ulavaldti-my.sharepoint.com/:i:/g/personal/jagro26_ulaval_ca/IQAdetnmGBW-Sp_iZ1hnKIiqAbO5JxUW5FsC_nrPgr8beWs?e=n1Uvpl
+https://ulavaldti-my.sharepoint.com/:i:/g/personal/jagro26_ulaval_ca/IQBrKzzt2INuTpCFM9pgSO5cATiImgP9o365OfkvnktDI7M?e=gdSXZB
+https://ulavaldti-my.sharepoint.com/:i:/g/personal/jagro26_ulaval_ca/IQCvc5f2Z1XYS6bshBp_zG_wAaCCgn95gor_tOkjDNXp9Og?e=ewQJYh
+
 ---
 
 ## Git Workflow & Commit Conventions
