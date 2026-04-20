@@ -1,14 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import {
-	Home,
-	Search,
-	PlusSquare,
-	MessageCircle,
-	Bell,
-	Settings,
-	LogOut,
-	User,
-} from "lucide-react";
+import { Home, Search, PlusSquare, Bell, Settings, LogOut, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 import {
 	DropdownMenu,
@@ -26,7 +17,6 @@ const navItems = [
 	{ icon: Home, label: "Home", href: "/" },
 	{ icon: Search, label: "Search", href: "/search" },
 	{ icon: PlusSquare, label: "Create", href: "/create" },
-	{ icon: MessageCircle, label: "Messages", href: "/messages" },
 ];
 
 export function Navigation() {
