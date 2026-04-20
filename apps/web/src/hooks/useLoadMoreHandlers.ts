@@ -2,8 +2,8 @@ import { PAGINATION } from "@/hooks/useSearchState";
 import type {
 	HashtagsQuery,
 	HashtagsQueryHookResult,
-	PostsQuery,
-	PostsQueryHookResult,
+	PopularPostsQuery,
+	PopularPostsQueryHookResult,
 	SearchQuery,
 	SearchQueryHookResult,
 	UsersQuery,
@@ -20,7 +20,7 @@ interface LoadMoreHandlersProps {
 	searchQueryData: SearchQueryHookResult;
 	hashtagsQuery: HashtagsQueryHookResult;
 	usersQuery: UsersQueryHookResult;
-	postsQuery: PostsQueryHookResult;
+	postsQuery: PopularPostsQueryHookResult;
 	hashtags: UseLoadMoreReturn;
 	users: UseLoadMoreReturn;
 	posts: UseLoadMoreReturn;
@@ -147,14 +147,17 @@ export function useLoadMoreHandlers({
 				},
 			});
 		} else {
-			const currentLength = postsQuery.data?.posts.length ?? 0;
+			const currentLength = postsQuery.data?.popularPosts.length ?? 0;
 			postsQuery.fetchMore({
 				variables: { offset: currentLength, limit: LOAD_MORE_POSTS_INCREMENT },
-				updateQuery: (prev: PostsQuery, { fetchMoreResult }: { fetchMoreResult?: PostsQuery }) => {
+				updateQuery: (
+					prev: PopularPostsQuery,
+					{ fetchMoreResult }: { fetchMoreResult?: PopularPostsQuery }
+				) => {
 					if (!fetchMoreResult) return prev;
-					const newItems = fetchMoreResult.posts;
+					const newItems = fetchMoreResult.popularPosts;
 					posts.onFetched(newItems.length, LOAD_MORE_POSTS_INCREMENT);
-					return { __typename: "Query", posts: [...prev.posts, ...newItems] };
+					return { __typename: "Query", popularPosts: [...prev.popularPosts, ...newItems] };
 				},
 			});
 		}
