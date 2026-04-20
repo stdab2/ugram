@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import {
 	useUsersQuery,
-	usePostsQuery,
+	usePopularPostsQuery,
 	useSearchQuery,
 	useHashtagsQuery,
 	useSearchAutocompleteQuery,
@@ -16,7 +16,7 @@ interface SearchResultsState {
 	// Queries
 	hashtagsQuery: ReturnType<typeof useHashtagsQuery>;
 	usersQuery: ReturnType<typeof useUsersQuery>;
-	postsQuery: ReturnType<typeof usePostsQuery>;
+	postsQuery: ReturnType<typeof usePopularPostsQuery>;
 	searchQuery: ReturnType<typeof useSearchQuery>;
 	autocompleteQuery: ReturnType<typeof useSearchAutocompleteQuery>;
 
@@ -60,7 +60,7 @@ export function useSearchResults(
 		skip: isSearching,
 	});
 
-	const postsQuery = usePostsQuery({
+	const postsQuery = usePopularPostsQuery({
 		variables: { limit: INITIAL_POSTS_LIMIT, offset: 0 },
 		skip: isSearching,
 	});
@@ -91,7 +91,7 @@ export function useSearchResults(
 		: (usersQuery.data?.users ?? []);
 	const allPosts = isSearching
 		? (searchQuery.data?.search.posts ?? [])
-		: (postsQuery.data?.posts ?? []);
+		: (postsQuery.data?.popularPosts ?? []);
 	const allHashtags = isSearching
 		? (searchQuery.data?.search.hashtags ?? [])
 		: (hashtagsQuery.data?.hashtags ?? []);

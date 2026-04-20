@@ -10,7 +10,6 @@ import { SearchPage } from "@/pages/SearchPage";
 import { CreatePostPage } from "@/pages/CreatePostPage";
 import { PostPage } from "@/pages/PostPage";
 import { EditPostPage } from "@/pages/EditPostPage";
-import { MessagesPage } from "@/pages/MessagesPage";
 import { SettingsPage } from "@/pages/SettingsPage";
 import { NotificationsPage } from "@/pages/NotificationsPage";
 import { ProtectedRoute } from "./ProtectedRoute";
@@ -58,14 +57,6 @@ export const router = createBrowserRouter([
 				element: (
 					<ProtectedRoute>
 						<EditPostPage />
-					</ProtectedRoute>
-				),
-			},
-			{
-				path: "/messages",
-				element: (
-					<ProtectedRoute>
-						<MessagesPage />
 					</ProtectedRoute>
 				),
 			},
