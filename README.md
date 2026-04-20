@@ -320,6 +320,84 @@ Goal: keep the stack **simple, standard, and course-aligned**, while leaving roo
 - **Husky + lint-staged** (optional)
 - **Commitlint** — Conventional Commits enforcement
 
+### Monitoring and Observability
+
+#### CloudWatch
+
+We configured **Amazon CloudWatch** to centralize server logs and monitor the overall state of the application in production.
+
+##### Server Logs
+Logs from the **Elastic Beanstalk** environment are streamed to **CloudWatch Logs**.  
+This allows us to directly inspect:
+
+- application logs (`web.stdout.log`)
+- HTTP access logs (`nginx/access.log`)
+- error logs (`nginx/error.log`, `httpd/error_log`)
+
+This gives us better visibility into:
+- requests received by the server
+- application errors
+- the backend’s overall behavior in production
+
+> Example: we were able to confirm that requests to `/login`, `/oauth2/google`, and `/graphql` were properly logged in CloudWatch.
+
+##### CloudWatch Dashboard
+A dashboard named `ugram-prod` was also set up to track several important metrics:
+
+- **Requests**: number of requests going through CloudFront
+- **4xxErrorRate**: client error rate
+- **5xxErrorRate**: server error rate
+- **EnvironmentHealth**: overall health status of the Elastic Beanstalk environment
+
+This dashboard allows us to quickly see:
+- whether the application is receiving traffic
+- whether HTTP errors are occurring
+- whether the backend environment remains healthy
+
+https://ulavaldti-my.sharepoint.com/:i:/g/personal/jagro26_ulaval_ca/IQCEjiZSSkd3TZ8nAtPwqQ5zASHx4srwpehpoKFszO8tC0Q?e=hYPeh1
+
+#### WAF (Web Application Firewall)
+
+We enabled **AWS WAF** protection at the **CloudFront** level.
+
+##### Implemented Protection
+- **Rate limiting** enabled
+- threshold set to **300 requests per IP over 5 minutes**
+
+This protection makes it easier to detect and limit:
+- automated scans
+- bursts of abnormal requests
+- certain suspicious or abusive behaviors
+
+The WAF therefore adds an initial layer of security in front of the frontend and the routes exposed through CloudFront.
+
+---
+
+## Application Analytics
+
+### Google Analytics
+
+We integrated **Google Analytics 4 (GA4)** into the application in order to produce analytics on user behavior.
+
+The goal is to better understand:
+- the pages visited
+- the main interactions
+- the user journey within the application
+
+#### Examples of Tracked Events
+Depending on the implementation, the analytics may include:
+
+- page view (`page_view`)
+- sign up (`sign_up`)
+- login (`login`)
+- post creation (`create_post`)
+
+[Analytics screenshot 1](https://ulavaldti-my.sharepoint.com/:i:/g/personal/jagro26_ulaval_ca/IQBHm1Lk8mKvTbEdCxE-s38tATO0Pfvn6h52hYuxIoOM5t8?e=jH0Aio)
+
+[Analytics screenshot 2](https://ulavaldti-my.sharepoint.com/:i:/g/personal/jagro26_ulaval_ca/IQDMT6XSPFu4T7U5UL2B0MdbAe-CmQnbr8sKsvR4Cqariu8?e=MByYvP)
+
+[Analytics screenshot 3](https://ulavaldti-my.sharepoint.com/:i:/g/personal/jagro26_ulaval_ca/IQAHbPZ4tGNBS7lZvN0hJwXCAeU2Bmc0SWH1nfGfMKu-fdI?e=bmhOkq)
+
 ---
 
 ## Git Workflow & Commit Conventions
