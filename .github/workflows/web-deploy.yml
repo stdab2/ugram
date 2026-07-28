@@ -9,6 +9,7 @@ on:
       - ".github/workflows/web-deploy.yml"
     tags:
       - "Release-*"
+  workflow_dispatch:
 
 jobs:
   deploy:
