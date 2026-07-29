@@ -13,7 +13,7 @@ function withRequiredSsl(url: string, env: DatabaseEnv): string {
 		return url;
 	}
 
-	return `${url}${url.includes("?") ? "&" : "?"}sslmode=require`;
+	return `${url}${url.includes("?") ? "&" : "?"}sslmode=no-verify`;
 }
 
 export function getDatabaseUrl(env: DatabaseEnv = process.env): string {
