@@ -8,12 +8,20 @@ const rdsKeys = [
 	"RDS_PASSWORD",
 ] as const;
 
+function withRequiredSsl(url: string, env: DatabaseEnv): string {
+	if (env.NODE_ENV !== "production" || url.includes("sslmode=")) {
+		return url;
+	}
+
+	return `${url}${url.includes("?") ? "&" : "?"}sslmode=require`;
+}
+
 export function getDatabaseUrl(env: DatabaseEnv = process.env): string {
 	const databaseUrl = env.DATABASE_URL?.trim();
 
 	// Elastic Beanstalk doesn't expand ${VAR} placeholders in environment property values.
 	if (databaseUrl && !databaseUrl.includes("${")) {
-		return databaseUrl;
+		return withRequiredSsl(databaseUrl, env);
 	}
 
 	const missingKeys = rdsKeys.filter((key) => !env[key]);
@@ -27,5 +35,5 @@ export function getDatabaseUrl(env: DatabaseEnv = process.env): string {
 	const port = env.RDS_PORT!;
 	const database = env.RDS_DB_NAME!;
 
-	return `postgresql://${user}:${password}@${host}:${port}/${database}`;
+	return withRequiredSsl(`postgresql://${user}:${password}@${host}:${port}/${database}`, env);
 }
