@@ -52,7 +52,7 @@ Production behavior:
 
 ## Production
 
-- Web application: https://d206wqa79jnx1m.cloudfront.net
+- Web application: https://d3acng4vhoo98a.cloudfront.net
 
 ## Local Environment Files
 
@@ -73,10 +73,10 @@ Used by Docker Compose for S3-related configuration and media URL setup:
 AWS_REGION="ca-central-1"
 AWS_ACCESS_KEY_ID="your-aws-access-key-id"
 AWS_SECRET_ACCESS_KEY="your-aws-secret-access-key"
-S3_BUCKET="ugram-media-s3"
+S3_BUCKET="your-s3-media-bucket-name"
 
 # CloudFront media base URL (no trailing slash)
-VITE_MEDIA_BASE_URL="https://d206wqa79jnx1m.cloudfront.net"
+VITE_MEDIA_BASE_URL="https://d3acng4vhoo98a.cloudfront.net"
 ```
 
 ### API: `apps/api/.env`
@@ -230,9 +230,9 @@ Goal: keep the stack **simple, standard, and course-aligned**, while leaving roo
   - **ORM**: TypeScript-based DB access
   - **Migrations**: versioned schema changes (tables, columns, indexes)
 
-### Auth (Deliverable 2)
+### Auth
 
-- **OAuth (Google/Facebook) + JWT**
+- **OAuth2 (Google) + JWT**
 
 ### Logging & validation
 
