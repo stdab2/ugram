@@ -13,6 +13,6 @@ info:
 servers:
   - url: http://localhost:4001/graphql
     description: Local Development
-  - url: https://ugram-h2026-team17-api.ca-central-1.elasticbeanstalk.com/graphql
+  - url: https://ugram-api.ca-central-1.elasticbeanstalk.com/graphql
     description: Production
     production: true
