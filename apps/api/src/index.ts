@@ -25,6 +25,10 @@ async function startServer() {
 	const httpServer = http.createServer(app);
 	const isProduction = process.env.NODE_ENV === "production";
 
+	app.get("/health", (_req, res) => {
+		res.status(200).send("ok");
+	});
+
 	const landingPagePlugin = isProduction
 		? ApolloServerPluginLandingPageProductionDefault({ footer: false })
 		: ApolloServerPluginLandingPageLocalDefault({ embed: true, includeCookies: true });
